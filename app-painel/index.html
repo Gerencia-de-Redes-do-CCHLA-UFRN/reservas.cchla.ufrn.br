@@ -107,14 +107,27 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 🔴 INSIRA SUAS CHAVES DO FIREBASE AQUI
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "firebase/app";
+    import { getAnalytics } from "firebase/analytics";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_PROJETO.firebaseapp.com",
-      projectId: "SEU_PROJETO"
+      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
+      authDomain: "formulario-reservas-cchla.firebaseapp.com",
+      projectId: "formulario-reservas-cchla",
+      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
+      messagingSenderId: "112276491941",
+      appId: "1:112276491941:web:f67cc53ce868764ea6474c",
+      measurementId: "G-4B1J48HDGF"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
     let dadosBrutos = [];       
