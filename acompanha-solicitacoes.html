@@ -5,62 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acompanhamento de Solicitações - CCHLA</title>
   
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
   <style>
-    :root {
-      --azul-marinho: #051638;
-      --azul-royal: #1653A1;
-      --fundo-pagina: #f4f7fb;
-      --borda-suave: #cbd5e1;
-      --texto-escuro: #334155;
-    }
-
+    :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #334155; }
     body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--texto-escuro); margin: 0; padding: 20px; }
-    
     .container { max-width: 900px; margin: 30px auto; padding: 30px; background-color: #ffffff; border-radius: 12px; border: 1px solid var(--borda-suave); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-    
     .header { text-align: center; border-bottom: 3px solid var(--azul-royal); padding-bottom: 20px; margin-bottom: 25px; }
     .header img { max-height: 70px; margin-bottom: 15px; object-fit: contain; }
     .header h2 { margin: 0 0 10px 0; color: var(--azul-marinho); font-size: 24px; font-weight: 700; }
-    .header p { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
-
+    
     .search-section { background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid var(--borda-suave); margin-bottom: 30px; display: flex; gap: 15px; align-items: flex-end; }
     .search-group { flex: 1; }
     .search-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--azul-marinho); }
-    .search-group input { width: 100%; padding: 12px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 16px; box-sizing: border-box; transition: border-color 0.2s; }
-    .search-group input:focus { outline: none; border-color: var(--azul-royal); box-shadow: 0 0 0 3px rgba(22, 83, 161, 0.1); }
+    .search-group input { width: 100%; padding: 12px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+    .btn-buscar { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; height: 45px; }
     
-    .btn-buscar { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease-in-out; white-space: nowrap; height: 45px; }
-    .btn-buscar:hover { background-color: var(--azul-marinho); }
-
     #areaResultados { display: none; }
-    
     .dados-solicitante { display: flex; justify-content: space-between; align-items: center; background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px 20px; border-radius: 6px; margin-bottom: 25px; }
-    .dados-solicitante p { margin: 5px 0; font-size: 15px; }
-    .dados-solicitante strong { color: var(--azul-marinho); }
     .ticket-badge { background-color: var(--azul-marinho); color: white; padding: 8px 15px; border-radius: 20px; font-family: monospace; font-size: 20px; font-weight: bold; letter-spacing: 2px; }
-
     .table-responsive { overflow-x: auto; border: 1px solid var(--borda-suave); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
     th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
-    th { background-color: #f1f5f9; color: var(--azul-marinho); font-weight: 700; white-space: nowrap; }
-    tbody tr:nth-child(even) { background-color: #f8fafc; }
-    
+    th { background-color: #f1f5f9; color: var(--azul-marinho); font-weight: 700; }
     .status-msg { text-align: center; color: #ef4444; font-weight: 600; margin-top: 15px; display: none; }
-
-    .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-imprimir:hover { background-color: #334155; }
+    .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
 
     @media print {
       body { background-color: #ffffff; padding: 0; }
-      .container { box-shadow: none; border: none; padding: 0; margin: 0; max-width: 100%; }
+      .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
       .search-section, .btn-imprimir, .status-msg { display: none !important; }
       .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-      .dados-solicitante { background-color: transparent; border: 1px solid #000; border-left: 4px solid #000; }
-      table { border: 1px solid #000; }
-      th, td { border: 1px solid #000; padding: 8px; }
-      th { background-color: #f0f0f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+      .dados-solicitante { border: 1px solid #000; border-left: 4px solid #000; }
+      table, th, td { border: 1px solid #000; }
     }
   </style>
 </head>
@@ -70,173 +45,111 @@
     <div class="header">
       <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
       <h2>Acompanhamento de Reservas</h2>
-      <p class="no-print">Consulte o status e o histórico das suas solicitações de auditório.</p>
     </div>
 
     <div class="search-section no-print">
       <div class="search-group">
-        <label for="inputBusca">Digite seu Ticket (Ex: ABC1D23) ou Telefone:</label>
-        <input type="text" id="inputBusca" placeholder="Ticket ou Telefone..." onkeypress="verificarEnter(event)">
+        <label>Digite seu Ticket (Ex: ABC1D23) ou Telefone:</label>
+        <input type="text" id="inputBusca" placeholder="Ticket ou Telefone..." onkeypress="if(event.key === 'Enter') window.buscarSolicitacao()">
       </div>
-      <button class="btn-buscar" id="btnBuscar" onclick="buscarSolicitacao()">Consultar</button>
+      <button class="btn-buscar" id="btnBuscar" onclick="window.buscarSolicitacao()">Consultar</button>
     </div>
 
-    <div id="mensagemErro" class="status-msg">Nenhum registro encontrado para este Ticket ou Telefone.</div>
+    <div id="mensagemErro" class="status-msg">Nenhum registro encontrado.</div>
 
     <div id="areaResultados">
       <div class="dados-solicitante">
         <div>
           <p><strong>Solicitante:</strong> <span id="resNome"></span></p>
           <p><strong>Telefone:</strong> <span id="resTelefone"></span></p>
-          <p><strong>Departamento:</strong> <span id="resDepto"></span></p>
         </div>
-        <div>
-          <div class="ticket-badge" id="resTicket"></div>
-        </div>
+        <div><div class="ticket-badge" id="resTicket"></div></div>
       </div>
 
       <div class="table-responsive">
         <table>
-          <thead>
-            <tr>
-              <th>Data da Solicitação</th>
-              <th>Auditório</th>
-              <th>Atividade</th>
-              <th>Data/Hora de Início</th>
-              <th>Data/Hora de Fim</th>
-            </tr>
-          </thead>
-          <tbody id="corpoTabelaResultados">
-            </tbody>
+          <thead><tr><th>Data da Solicitação</th><th>Auditório</th><th>Atividade</th><th>Início</th></tr></thead>
+          <tbody id="corpoTabelaResultados"></tbody>
         </table>
       </div>
-
-      <button class="btn-imprimir no-print" onclick="window.print()">
-        🖨️ Imprimir Comprovante
-      </button>
+      <button class="btn-imprimir no-print" onclick="window.print()">🖨️ Imprimir Comprovante</button>
     </div>
   </div>
 
-  <script>
-    const ARQUIVO_XLSX = 'reservas.xlsx';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    function verificarEnter(event) {
-      if (event.key === 'Enter') {
-        buscarSolicitacao();
-      }
-    }
+    // 🔴 INSIRA SUAS CHAVES DO FIREBASE AQUI
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      projectId: "SEU_PROJETO"
+    };
 
-    function formatarDataGMT3(dataString) {
-      if (!dataString) return '-';
-      
-      try {
-        let textoStr = String(dataString); // Garante que seja tratado como texto
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        if (textoStr.includes('T') && textoStr.length >= 16) {
-          const [data, hora] = textoStr.split('T');
-          const [ano, mes, dia] = data.split('-');
-          return `${dia}/${mes}/${ano} às ${hora.substring(0,5)} (GMT-3)`;
-        }
-        
-        if (textoStr.includes('/')) {
-          let formatada = textoStr.replace(', ', ' às ').replace(/:\d{2}$/, '');
-          return `${formatada} (GMT-3)`;
-        }
-        
-        return textoStr;
-      } catch (e) {
-        return dataString;
-      }
-    }
+    window.buscarSolicitacao = async function() {
+      const termoBusca = document.getElementById('inputBusca').value.trim();
+      if (!termoBusca) return alert("Digite um Ticket ou Telefone.");
 
-    function converterDataPtBrParaTimestamp(dataStr) {
-      if(!dataStr) return 0;
-      let strSegura = String(dataStr);
-      const partes = strSegura.split(', ');
-      if(partes.length !== 2) return 0;
-      
-      const dataPartes = partes[0].split('/');
-      const horaPartes = partes[1].split(':');
-      
-      return new Date(dataPartes[2], dataPartes[1]-1, dataPartes[0], horaPartes[0], horaPartes[1], horaPartes[2] || 0).getTime();
-    }
-
-    async function buscarSolicitacao() {
-      const termoBusca = document.getElementById('inputBusca').value.trim().toLowerCase();
-      const btnBuscar = document.getElementById('btnBuscar');
-      const msgErro = document.getElementById('mensagemErro');
-      const areaResultados = document.getElementById('areaResultados');
-
-      if (!termoBusca) {
-        alert("Por favor, digite um Ticket ou Telefone válido.");
-        return;
-      }
-
-      btnBuscar.innerText = "Buscando...";
-      btnBuscar.disabled = true;
-      msgErro.style.display = 'none';
-      areaResultados.style.display = 'none';
+      document.getElementById('btnBuscar').innerText = "Buscando...";
+      document.getElementById('mensagemErro').style.display = 'none';
+      document.getElementById('areaResultados').style.display = 'none';
 
       try {
-        const res = await fetch(`${ARQUIVO_XLSX}?v=${new Date().getTime()}`);
-        if (!res.ok) throw new Error("Arquivo Excel não encontrado no servidor.");
+        const reservasRef = collection(db, "reservas");
         
-        const arrayBuffer = await res.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const aba = workbook.Sheets[workbook.SheetNames[0]];
-        
-        // CRÍTICO: raw: false força o SheetJS a extrair as datas e telefones como TEXTO formatado
-        const todosDados = XLSX.utils.sheet_to_json(aba, { raw: false, defval: "" });
+        // No Firestore, não podemos fazer um 'OR' direto em dois campos diferentes sem query múltipla complexa,
+        // então buscamos as duas possibilidades e juntamos em memória.
+        const qTicket = query(reservasRef, where("Ticket", "==", termoBusca.toUpperCase()));
+        const qTel = query(reservasRef, where("Telefone", "==", termoBusca));
 
-        // Filtro com conversão segura (String) para evitar erros do JavaScript
-        let meusRegistros = todosDados.filter(linha => {
-          const ticket = String(linha['Ticket'] || '').trim().toLowerCase();
-          const telefone = String(linha['Telefone'] || '').trim().toLowerCase();
-          return ticket === termoBusca || telefone === termoBusca;
+        const [snapT, snapTel] = await Promise.all([getDocs(qTicket), getDocs(qTel)]);
+        
+        let resultados = [];
+        snapT.forEach(doc => resultados.push(doc.data()));
+        snapTel.forEach(doc => {
+            // Evita duplicatas se o telefone for igual ao ticket de alguma forma estranha
+            if (!resultados.some(r => r.Ticket === doc.data().Ticket && r.Início === doc.data().Início)) {
+                resultados.push(doc.data());
+            }
         });
 
-        if (meusRegistros.length === 0) {
-          msgErro.innerText = "Nenhum registro encontrado para este Ticket ou Telefone.";
-          msgErro.style.display = 'block';
+        if (resultados.length === 0) {
+          document.getElementById('mensagemErro').style.display = 'block';
           return;
         }
 
-        meusRegistros.sort((a, b) => {
-          return converterDataPtBrParaTimestamp(b['Data da Solicitação']) - converterDataPtBrParaTimestamp(a['Data da Solicitação']);
+        // Ordena
+        resultados.sort((a, b) => {
+          let tA = a.timestamp_criacao ? (a.timestamp_criacao.seconds || 0) : 0;
+          let tB = b.timestamp_criacao ? (b.timestamp_criacao.seconds || 0) : 0;
+          return tB - tA; 
         });
 
-        const registroRecente = meusRegistros[0];
-        document.getElementById('resNome').innerText = registroRecente['Solicitante'] || '-';
-        document.getElementById('resTelefone').innerText = registroRecente['Telefone'] || '-';
-        document.getElementById('resDepto').innerText = registroRecente['Departamento'] || '-';
-        document.getElementById('resTicket').innerText = registroRecente['Ticket'] || '-';
+        const rRecente = resultados[0];
+        document.getElementById('resNome').innerText = rRecente.Solicitante || '-';
+        document.getElementById('resTelefone').innerText = rRecente.Telefone || '-';
+        document.getElementById('resTicket').innerText = rRecente.Ticket || '-';
 
-        const corpoTabela = document.getElementById('corpoTabelaResultados');
-        corpoTabela.innerHTML = '';
-
-        meusRegistros.forEach(reserva => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${formatarDataGMT3(reserva['Data da Solicitação'])}</td>
-            <td><strong>${reserva['Auditório'] || '-'}</strong></td>
-            <td>${reserva['Atividade'] || '-'}</td>
-            <td>${formatarDataGMT3(reserva['Início'])}</td>
-            <td>${formatarDataGMT3(reserva['Fim'])}</td>
-          `;
-          corpoTabela.appendChild(tr);
+        const corpo = document.getElementById('corpoTabelaResultados');
+        corpo.innerHTML = '';
+        resultados.forEach(r => {
+          let inicioFmt = r['Início'] ? r['Início'].replace('T', ' às ') : '-';
+          corpo.innerHTML += `<tr><td>${r.Data_Solicitacao || '-'}</td><td><strong>${r.Auditório || '-'}</strong></td><td>${r.Atividade || '-'}</td><td>${inicioFmt}</td></tr>`;
         });
 
-        areaResultados.style.display = 'block';
-
-      } catch (erro) {
-        console.error("Erro detalhado na busca:", erro); // Isso aparecerá no F12
-        msgErro.innerText = "Erro ao acessar o banco de dados. Verifique a conexão com o arquivo XLSX.";
-        msgErro.style.display = 'block';
+        document.getElementById('areaResultados').style.display = 'block';
+      } catch (e) {
+        console.error(e);
+        document.getElementById('mensagemErro').innerText = "Erro ao acessar o banco. Verifique as regras do Firebase.";
+        document.getElementById('mensagemErro').style.display = 'block';
       } finally {
-        btnBuscar.innerText = "Consultar";
-        btnBuscar.disabled = false;
+        document.getElementById('btnBuscar').innerText = "Consultar";
       }
-    }
+    };
   </script>
 </body>
 </html>

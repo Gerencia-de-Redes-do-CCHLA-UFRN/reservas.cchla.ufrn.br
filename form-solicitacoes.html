@@ -5,63 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solicitação de Reserva de Auditórios - CCHLA</title>
   
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
   <style>
-    :root {
-      --azul-marinho: #051638;
-      --azul-royal: #1653A1;
-      --fundo-pagina: #f4f7fb;
-      --borda-suave: #cbd5e1;
-      --texto-escuro: #334155;
-    }
-
+    :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #334155; }
     body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--texto-escuro); margin: 0; padding: 20px; }
-    
     .container { max-width: 700px; margin: 30px auto; padding: 30px; background-color: #ffffff; border-radius: 12px; border: 1px solid var(--borda-suave); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-    
     .header { text-align: center; border-bottom: 3px solid var(--azul-royal); padding-bottom: 20px; margin-bottom: 25px; }
     .header img { max-height: 70px; margin-bottom: 15px; object-fit: contain; }
     .header h2 { margin: 0 0 10px 0; color: var(--azul-marinho); font-size: 24px; font-weight: 700; }
     .header p { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
-
     label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
     input, select { width: 100%; padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s; }
     input:focus, select:focus { outline: none; border-color: var(--azul-royal); box-shadow: 0 0 0 3px rgba(22, 83, 161, 0.1); }
-    
     .obs-text { display: block; font-size: 12px; color: #64748b; margin-top: 5px; font-style: italic; }
-
     .btn-submit { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background-color 0.2s ease-in-out; }
     .btn-submit:hover { background-color: var(--azul-marinho); }
     .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; }
-
-    /* Estilos da Tela de Sucesso */
+    
+    /* Telas Auxiliares */
     #telaSucesso { display: none; text-align: center; }
     .sucesso-icone { font-size: 50px; color: #10b981; margin-bottom: 10px; }
-    
-    .ticket-box {
-      background-color: #f8fafc;
-      border: 2px dashed var(--azul-royal);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
-      display: inline-block;
-      width: 100%;
-      box-sizing: border-box;
-    }
+    .ticket-box { background-color: #f8fafc; border: 2px dashed var(--azul-royal); border-radius: 12px; padding: 20px; margin: 20px 0; display: inline-block; width: 100%; box-sizing: border-box; }
     .ticket-label { font-size: 14px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
     .ticket-numero { font-size: 38px; color: var(--azul-marinho); font-weight: 900; margin: 10px 0; font-family: monospace; letter-spacing: 4px; }
     .ticket-dados { font-size: 16px; color: var(--texto-escuro); margin: 5px 0; }
     .ticket-dados strong { color: var(--azul-marinho); }
-
-    /* Tabela de Histórico */
+    
+    /* Tabela Histórico */
     .historico-titulo { text-align: left; font-size: 18px; color: var(--azul-marinho); border-bottom: 2px solid var(--borda-suave); padding-bottom: 10px; margin-top: 30px; }
     .table-responsive { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--borda-suave); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
     th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
     th { background-color: #f1f5f9; color: var(--azul-marinho); font-weight: 700; white-space: nowrap; }
     tbody tr:nth-child(even) { background-color: #f8fafc; }
-    
     .btn-voltar { background-color: #e2e8f0; color: var(--texto-escuro); padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; }
     .btn-voltar:hover { background-color: #cbd5e1; }
   </style>
@@ -139,11 +114,11 @@
     
     <div class="sucesso-icone">✓</div>
     <h2 style="color: var(--azul-marinho); margin-top: 0;">Solicitação Enviada!</h2>
-    <p style="color: #64748b;">Sua reserva foi registrada com sucesso.</p>
+    <p style="color: #64748b;">Sua reserva foi registrada com sucesso na nuvem.</p>
 
     <div class="ticket-box">
       <div class="ticket-label">Seu Ticket de Acompanhamento</div>
-      <div class="ticket-numero" id="ticketDisplay">ABC1D23</div>
+      <div class="ticket-numero" id="ticketDisplay">---</div>
       <div class="ticket-dados"><strong>Responsável:</strong> <span id="nomeDisplay"></span></div>
       <div class="ticket-dados"><strong>Telefone:</strong> <span id="telefoneDisplay"></span></div>
     </div>
@@ -159,18 +134,30 @@
             <th>Início</th>
           </tr>
         </thead>
-        <tbody id="historicoTabela">
-          </tbody>
+        <tbody id="historicoTabela"></tbody>
       </table>
     </div>
 
     <button class="btn-voltar" onclick="novaSolicitacao()">Fazer Nova Solicitação</button>
   </div>
 
-  <script>
-    const ARQUIVO_XLSX = 'reservas.xlsx';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Gerador de Ticket formato placa Mercosul (ex: ABC1D23)
+    // 🔴 INSIRA SUAS CHAVES DO FIREBASE AQUI
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      projectId: "SEU_PROJETO",
+      storageBucket: "SEU_PROJETO.appspot.com",
+      messagingSenderId: "ID",
+      appId: "APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     function gerarTicketMercosul() {
       const L = () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
       const N = () => "0123456789"[Math.floor(Math.random() * 10)];
@@ -179,80 +166,51 @@
 
     document.getElementById('formReserva').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const btn = document.getElementById('btnSubmit');
-      btn.innerText = 'Processando XLSX...';
+      btn.innerText = 'Comunicando com Firebase...';
       btn.disabled = true;
 
       try {
         const formData = new FormData(this);
         const telefoneAtual = formData.get('telefone_contato');
-        const dataEnvio = new Date().toLocaleString('pt-BR');
         
-        let workbook;
-        let dadosAntigos = [];
-        let abaNome = "Reservas";
-
-        // 1. Tenta buscar o arquivo XLSX atual
-        try {
-          const res = await fetch(`${ARQUIVO_XLSX}?v=${new Date().getTime()}`);
-          if (!res.ok) throw new Error('Arquivo não existe');
-          const arrayBuffer = await res.arrayBuffer();
-          workbook = XLSX.read(arrayBuffer, { type: 'array' });
-          abaNome = workbook.SheetNames[0];
-          dadosAntigos = XLSX.utils.sheet_to_json(workbook.Sheets[abaNome]);
-        } catch (e) {
-          workbook = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([]), abaNome);
-        }
-
-        // 2. Procura se o telefone já tem um Ticket associado
         let meuTicket = null;
-        for (let i = 0; i < dadosAntigos.length; i++) {
-          if (dadosAntigos[i]['Telefone'] === telefoneAtual && dadosAntigos[i]['Ticket']) {
-            meuTicket = dadosAntigos[i]['Ticket'];
-            break; 
-          }
-        }
+        let historico = [];
 
-        // Gera novo se for a primeira vez
-        if (!meuTicket) {
-          meuTicket = gerarTicketMercosul();
-        }
+        // 1. Busca no Firestore se o telefone já existe
+        const reservasRef = collection(db, "reservas");
+        const q = query(reservasRef, where("Telefone", "==", telefoneAtual));
+        const querySnapshot = await getDocs(q);
 
-        // 3. Monta a nova reserva com o TICKET como chave principal
-        const novaReserva = {};
-        novaReserva['Ticket'] = meuTicket;
-        novaReserva['Auditório'] = formData.get('auditorio_selecionado');
-        novaReserva['Solicitante'] = formData.get('responsavel_e_matricula');
-        novaReserva['Telefone'] = telefoneAtual;
-        novaReserva['Departamento'] = formData.get('departamento_centro');
-        novaReserva['Atividade'] = formData.get('atividade_realizada');
-        novaReserva['Início'] = formData.get('data_hora_inicio');
-        novaReserva['Fim'] = formData.get('data_hora_fim');
-        novaReserva['E-mail'] = formData.get('_replyto');
-        novaReserva['Data da Solicitação'] = dataEnvio;
-
-        dadosAntigos.push(novaReserva);
-
-        // 4. Empacota o XLSX atualizado
-        const novaAba = XLSX.utils.json_to_sheet(dadosAntigos);
-        workbook.Sheets[abaNome] = novaAba;
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-        // 5. Envia o arquivo de volta via método PUT 
-        // IMPORTANTE: Requer WebDAV ativo no Apache/Nginx do seu ambiente local
-        const respostaGravacao = await fetch(ARQUIVO_XLSX, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
-          body: excelBuffer
+        querySnapshot.forEach((doc) => {
+          const dados = doc.data();
+          if(dados.Ticket && !meuTicket) meuTicket = dados.Ticket; // Herda o ticket
+          historico.push(dados);
         });
 
-        if (!respostaGravacao.ok) {
-          throw new Error(`Erro 405: O servidor bloqueou a gravação do arquivo. Habilite o WebDAV no Apache para aceitar requisições PUT em arquivos estáticos.`);
-        }
+        if (!meuTicket) meuTicket = gerarTicketMercosul();
 
-        // 6. Configura e exibe a Tela de Sucesso
+        // 2. Monta o novo documento
+        const novaReserva = {
+          Ticket: meuTicket,
+          Auditório: formData.get('auditorio_selecionado'),
+          Solicitante: formData.get('responsavel_e_matricula'),
+          Telefone: telefoneAtual,
+          Departamento: formData.get('departamento_centro'),
+          Atividade: formData.get('atividade_realizada'),
+          Início: formData.get('data_hora_inicio'),
+          Fim: formData.get('data_hora_fim'),
+          Email: formData.get('_replyto'),
+          Data_Solicitacao: new Date().toLocaleString('pt-BR'),
+          timestamp_criacao: serverTimestamp() // Firestore nativo para ordenar
+        };
+
+        // 3. Grava no Firestore
+        await addDoc(collection(db, "reservas"), novaReserva);
+        
+        historico.push(novaReserva); // Adiciona ao histórico da tela atual
+
+        // 4. Interface Sucesso
         document.getElementById('telaFormulario').style.display = 'none';
         document.getElementById('telaSucesso').style.display = 'block';
 
@@ -260,43 +218,33 @@
         document.getElementById('nomeDisplay').innerText = formData.get('responsavel_e_matricula');
         document.getElementById('telefoneDisplay').innerText = telefoneAtual;
 
-        renderizarHistorico(dadosAntigos, meuTicket);
+        renderizarHistorico(historico);
 
       } catch (erro) {
         console.error(erro);
-        alert(erro.message);
+        alert("Erro ao salvar no banco: " + erro.message);
       } finally {
         btn.innerText = 'Enviar Solicitação de Reserva';
         btn.disabled = false;
       }
     });
 
-    // Converte a data brasileira para ordenar o histórico
-    function converterDataPtBr(dataStr) {
-      if(!dataStr) return 0;
-      const partes = dataStr.split(', ');
-      if(partes.length !== 2) return 0;
-      const dataPartes = partes[0].split('/');
-      const horaPartes = partes[1].split(':');
-      return new Date(dataPartes[2], dataPartes[1]-1, dataPartes[0], horaPartes[0], horaPartes[1], horaPartes[2]).getTime();
-    }
-
-    function renderizarHistorico(todosDados, ticketUsuario) {
+    function renderizarHistorico(historicoArray) {
       const tabela = document.getElementById('historicoTabela');
       tabela.innerHTML = '';
 
-      let meuHistorico = todosDados.filter(linha => linha['Ticket'] === ticketUsuario);
-
-      meuHistorico.sort((a, b) => {
-        return converterDataPtBr(b['Data da Solicitação']) - converterDataPtBr(a['Data da Solicitação']);
+      // Ordenação decrescente (Tratamento para não falhar com o serverTimestamp pendente)
+      historicoArray.sort((a, b) => {
+        let tA = a.timestamp_criacao ? (a.timestamp_criacao.seconds || Date.now()) : Date.now();
+        let tB = b.timestamp_criacao ? (b.timestamp_criacao.seconds || Date.now()) : Date.now();
+        return tB - tA; 
       });
 
-      meuHistorico.forEach(reserva => {
+      historicoArray.forEach(reserva => {
         const tr = document.createElement('tr');
         let inicioFmt = reserva['Início'] ? reserva['Início'].replace('T', ' às ') : '-';
-        
         tr.innerHTML = `
-          <td>${reserva['Data da Solicitação'] || '-'}</td>
+          <td>${reserva['Data_Solicitacao'] || '-'}</td>
           <td><strong>${reserva['Auditório'] || '-'}</strong></td>
           <td>${reserva['Atividade'] || '-'}</td>
           <td>${inicioFmt}</td>
@@ -305,7 +253,8 @@
       });
     }
 
-    function novaSolicitacao() {
+    // Expondo função global para o botão HTML chamar
+    window.novaSolicitacao = function() {
       document.getElementById('formReserva').reset();
       document.getElementById('telaSucesso').style.display = 'none';
       document.getElementById('telaFormulario').style.display = 'block';

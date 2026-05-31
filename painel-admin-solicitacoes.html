@@ -3,20 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Consulta - Reservas CCHLA</title>
+  <title>Painel Administrativo - Reservas</title>
   
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
   <style>
-    :root {
-      --azul-marinho: #051638; 
-      --azul-royal: #1653A1;   
-      --fundo-pagina: #f4f7fb;
-      --borda-suave: #cbd5e1;
-      --texto-escuro: #1e293b;
-      --texto-claro: #64748b;
-    }
-
+    :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #1e293b; --texto-claro: #64748b; }
     body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; color: var(--texto-escuro); }
     .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
     
@@ -26,47 +16,34 @@
     .branding h1 { color: var(--azul-marinho); margin: 0; font-size: 26px; font-weight: 700; }
     .status-indicador { font-size: 13px; color: #10b981; font-weight: 600; background-color: #d1fae5; padding: 6px 12px; border-radius: 20px; }
     
-    /* Filtros */
     .filtros-painel { background-color: #f8fafc; border: 1px solid var(--borda-suave); border-left: 5px solid var(--azul-royal); border-radius: 8px; padding: 20px; margin-bottom: 35px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
     .filtro-grupo { display: flex; flex-direction: column; gap: 6px; }
     .filtro-grupo label { font-size: 13px; font-weight: 600; color: var(--azul-marinho); }
-    .filtro-grupo input, .filtro-grupo select { padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; color: var(--texto-escuro); transition: border-color 0.2s; }
-    .filtro-grupo input:focus, .filtro-grupo select:focus { outline: none; border-color: var(--azul-royal); box-shadow: 0 0 0 3px rgba(22, 83, 161, 0.1); }
-    .btn-limpar { background-color: #e2e8f0; color: var(--texto-escuro); border: 1px solid var(--borda-suave); padding: 10px 15px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; height: 40px; }
-    .btn-limpar:hover { background-color: #cbd5e1; color: var(--azul-marinho); }
+    .filtro-grupo input, .filtro-grupo select { padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; color: var(--texto-escuro); }
+    .btn-limpar { background-color: #e2e8f0; border: 1px solid var(--borda-suave); padding: 10px 15px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; height: 40px; }
     
-    /* Barra Superior dos Dados */
-    .header-lista { background-color: var(--azul-marinho); color: #ffffff; padding: 15px 20px; margin: 0 0 20px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .header-lista { background-color: var(--azul-marinho); color: #ffffff; padding: 15px 20px; margin: 0 0 20px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
     .titulo-tabela { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 15px; }
-    .contador-registros { font-size: 13px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; font-weight: normal; }
-    
-    .seletor-paginacao { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
-    .seletor-paginacao select { padding: 6px 12px; border-radius: 4px; border: none; font-size: 13px; color: var(--azul-marinho); font-weight: bold; cursor: pointer; }
+    .contador-registros { font-size: 13px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; }
+    .seletor-paginacao { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .seletor-paginacao select { padding: 6px 12px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; color: var(--azul-marinho); }
 
-    /* Grid de Cards */
     .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
-    .reserva-card { background: #ffffff; border: 1px solid var(--borda-suave); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
-    .reserva-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: var(--azul-royal); }
-
+    .reserva-card { background: #ffffff; border: 1px solid var(--borda-suave); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
     .card-header { background-color: #f1f5f9; border-bottom: 1px solid var(--borda-suave); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
-    .card-ticket { font-family: monospace; font-size: 16px; font-weight: 800; color: var(--azul-royal); letter-spacing: 1px; }
+    .card-ticket { font-family: monospace; font-size: 16px; font-weight: 800; color: var(--azul-royal); }
     .card-auditorio { background-color: var(--azul-marinho); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-
     .card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
     .info-bloco { display: flex; flex-direction: column; }
-    .info-label { font-size: 11px; text-transform: uppercase; color: var(--texto-claro); font-weight: 700; margin-bottom: 3px; letter-spacing: 0.5px; }
-    .info-valor { font-size: 14px; color: var(--texto-escuro); font-weight: 500; }
-    .info-valor.destaque { font-size: 15px; font-weight: 700; color: var(--azul-marinho); }
-    .card-datas { display: flex; justify-content: space-between; background-color: #f8fafc; padding: 12px; border-radius: 6px; border: 1px dashed var(--borda-suave); margin-top: 5px; }
-    
+    .info-label { font-size: 11px; text-transform: uppercase; color: var(--texto-claro); font-weight: 700; margin-bottom: 3px; }
+    .info-valor { font-size: 14px; font-weight: 500; }
+    .card-datas { display: flex; justify-content: space-between; background-color: #f8fafc; padding: 12px; border-radius: 6px; border: 1px dashed var(--borda-suave); }
     .card-footer { background-color: #f8fafc; padding: 12px 18px; border-top: 1px solid var(--borda-suave); font-size: 12px; color: var(--texto-claro); display: flex; justify-content: space-between; }
-    .status-msg { text-align: center; color: var(--texto-claro); font-style: italic; padding: 30px; grid-column: 1 / -1; }
-
-    /* Estilos da Paginação */
-    .paginacao-container { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 35px; flex-wrap: wrap; }
-    .btn-page { background: #ffffff; border: 1px solid var(--borda-suave); color: var(--texto-escuro); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
-    .btn-page:hover:not(:disabled) { background: #e2e8f0; border-color: #cbd5e1; }
-    .btn-page.active { background: var(--azul-royal); color: #ffffff; border-color: var(--azul-royal); cursor: default; }
+    
+    .status-msg { text-align: center; color: var(--texto-claro); padding: 30px; grid-column: 1 / -1; }
+    .paginacao-container { display: flex; justify-content: center; gap: 5px; margin-top: 35px; }
+    .btn-page { background: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .btn-page.active { background: var(--azul-royal); color: #ffffff; cursor: default; }
     .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
   </style>
 </head>
@@ -75,21 +52,21 @@
   <div class="container">
     <div class="header">
       <div class="branding">
-        <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
+        <img src="cchla-logo.jpg" alt="Logo CCHLA">
         <h1>Painel de Reservas</h1>
       </div>
-      <span class="status-indicador" id="statusSincronizacao">Iniciando...</span>
+      <span class="status-indicador" id="statusSincronizacao">Buscando na Nuvem...</span>
     </div>
     
     <div class="filtros-painel">
       <div class="filtro-grupo">
-        <label for="buscaGeral">Busca Geral</label>
+        <label>Busca Geral</label>
         <input type="text" id="buscaGeral" placeholder="Qualquer termo..." onkeyup="resetarEFiltar()">
       </div>
       <div class="filtro-grupo">
-        <label for="filtroAuditorio">Auditório</label>
+        <label>Auditório</label>
         <select id="filtroAuditorio" onchange="resetarEFiltar()">
-          <option value="">Todos os locais</option>
+          <option value="">Todos</option>
           <option value="Auditorio A">Auditório 'A'</option>
           <option value="Auditorio B">Auditório 'B'</option>
           <option value="Auditorio C">Auditório 'C'</option>
@@ -98,298 +75,184 @@
         </select>
       </div>
       <div class="filtro-grupo">
-        <label for="filtroSolicitante">Solicitante</label>
-        <input type="text" id="filtroSolicitante" placeholder="Nome ou matrícula" onkeyup="resetarEFiltar()">
+        <label>Solicitante</label>
+        <input type="text" id="filtroSolicitante" placeholder="Nome/Matrícula" onkeyup="resetarEFiltar()">
       </div>
       <div class="filtro-grupo">
-        <label for="filtroDataAtividade">Data da Atividade</label>
+        <label>Data Atividade</label>
         <input type="date" id="filtroDataAtividade" onchange="resetarEFiltar()">
       </div>
-      <div class="filtro-grupo">
-        <label for="filtroDataSolicitacao">Data Solicitação</label>
-        <input type="date" id="filtroDataSolicitacao" onchange="resetarEFiltar()">
-      </div>
-      <button class="btn-limpar" onclick="limparFiltros()">Limpar Campos</button>
+      <button class="btn-limpar" onclick="limparFiltros()">Limpar Filtros</button>
     </div>
 
     <div class="header-lista">
-      <div class="titulo-tabela">
-        Lista de Reservas
-        <span class="contador-registros" id="contadorRegistros">0 encontrados</span>
-      </div>
+      <div class="titulo-tabela">Lista de Reservas <span class="contador-registros" id="contadorRegistros">0 encontrados</span></div>
       <div class="seletor-paginacao">
-        <label for="selectItensPagina">Resultados por página:</label>
+        <label>Por página:</label>
         <select id="selectItensPagina" onchange="mudarItensPorPagina()">
-          <option value="10" selected>10 (Últimos)</option> 
+          <option value="10" selected>10</option> 
           <option value="20">20</option>
           <option value="100">100</option>
           <option value="500">500</option>
-          <option value="todos">Todos os resultados</option>
+          <option value="todos">Todos</option>
         </select>
       </div>
     </div>
     
-    <div id="gridCards" class="grid-cards">
-      <div class="status-msg">Carregando arquivo reservas.xlsx...</div>
-    </div>
-
+    <div id="gridCards" class="grid-cards"><div class="status-msg">Conectando ao Firestore...</div></div>
     <div id="paginacao" class="paginacao-container"></div>
   </div>
 
-  <script>
-    const ARQUIVO_XLSX = 'reservas.xlsx';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // 🔴 INSIRA SUAS CHAVES DO FIREBASE AQUI
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      projectId: "SEU_PROJETO"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     let dadosBrutos = [];       
     let dadosFiltrados = [];    
     let paginaAtual = 1;        
-    let itensPorPagina = 10;    // Configuração inicial estrita em 10 itens
+    let itensPorPagina = 10;    
 
-    async function carregarXLSX(manterPagina = false) {
+    async function carregarFirestore(manterPagina = false) {
       try {
-        if (typeof XLSX === 'undefined') throw new Error("A biblioteca SheetJS não carregou.");
-
-        const resposta = await fetch(`${ARQUIVO_XLSX}?v=${new Date().getTime()}`);
-        if (!resposta.ok) throw new Error(`Arquivo Excel não encontrado no servidor.`);
+        // Busca da coleção inteira e ordena do mais recente pro antigo direto no banco
+        const q = query(collection(db, "reservas"), orderBy("timestamp_criacao", "desc"));
+        const querySnapshot = await getDocs(q);
         
-        const arrayBuffer = await resposta.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const aba = workbook.Sheets[workbook.SheetNames[0]];
-        const dados = XLSX.utils.sheet_to_json(aba, { raw: false, defval: "" });
+        dadosBrutos = [];
+        querySnapshot.forEach((doc) => {
+          dadosBrutos.push(doc.data());
+        });
+
+        const agora = new Date();
+        document.getElementById('statusSincronizacao').innerText = `Atualizado às ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
         
-        if (Array.isArray(dados)) {
-          // Ordena decrescente por registro (Data da Solicitação)
-          dadosBrutos = dados.sort((a, b) => {
-            return converterDataPtBrParaTimestamp(b['Data da Solicitação']) - converterDataPtBrParaTimestamp(a['Data da Solicitação']);
-          });
-        }
-
-        atualizarStatus();
-        aplicarFiltros(manterPagina);
-
+        window.aplicarFiltros(manterPagina);
       } catch (erro) {
-        console.error("Erro no carregamento:", erro);
-        document.getElementById('gridCards').innerHTML = `<div class="status-msg" style="color: #ef4444; font-weight: bold;">Falha: ${erro.message}</div>`;
+        console.error(erro);
+        document.getElementById('gridCards').innerHTML = `<div class="status-msg" style="color:red;">Erro de Leitura Firebase. Regras configuradas?</div>`;
       }
     }
 
     function formatarDataGMT3(dataString) {
       if (!dataString) return '-';
-      try {
-        let textoStr = String(dataString);
-        if (textoStr.includes('T') && textoStr.length >= 16) {
-          const [data, hora] = textoStr.split('T');
-          const [ano, mes, dia] = data.split('-');
-          return `${dia}/${mes}/${ano} às ${hora.substring(0,5)}`;
-        }
-        if (textoStr.includes('/')) return textoStr.replace(', ', ' às ').replace(/:\d{2}$/, '');
-        return textoStr;
-      } catch (e) { return dataString; }
+      let t = String(dataString);
+      if (t.includes('T')) return t.split('T')[0].split('-').reverse().join('/') + ' às ' + t.split('T')[1].substring(0,5);
+      return t;
     }
 
-    function converterDataPtBrParaTimestamp(dataStr) {
-      if(!dataStr) return 0;
-      try {
-        let strSegura = String(dataStr);
-        const partes = strSegura.split(', ');
-        if(partes.length !== 2) return 0;
-        const dataPartes = partes[0].split('/');
-        const horaPartes = partes[1].split(':');
-        return new Date(dataPartes[2], dataPartes[1]-1, dataPartes[0], horaPartes[0], horaPartes[1], horaPartes[2] || 0).getTime();
-      } catch(e) { return 0; }
-    }
-
-    function limparFiltros() {
+    // Expondo as funções para os eventos HTML
+    window.limparFiltros = function() {
       document.getElementById("buscaGeral").value = "";
       document.getElementById("filtroAuditorio").value = "";
       document.getElementById("filtroSolicitante").value = "";
       document.getElementById("filtroDataAtividade").value = "";
-      document.getElementById("filtroDataSolicitacao").value = "";
-      resetarEFiltar();
-    }
+      window.aplicarFiltros(false);
+    };
 
-    function resetarEFiltar() {
-      aplicarFiltros(false); 
-    }
+    window.resetarEFiltar = function() { window.aplicarFiltros(false); };
 
-    function aplicarFiltros(manterPaginaAtual) {
+    window.aplicarFiltros = function(manterPagina) {
       const fGeral = document.getElementById("buscaGeral").value.toLowerCase();
       const fAuditorio = document.getElementById("filtroAuditorio").value.toLowerCase();
       const fSolicitante = document.getElementById("filtroSolicitante").value.toLowerCase();
-      const inputDataAtividade = document.getElementById("filtroDataAtividade").value; 
-      const inputDataSolicitacao = document.getElementById("filtroDataSolicitacao").value; 
-      
-      let dataSolFiltroBr = "";
-      if(inputDataSolicitacao) {
-        const partes = inputDataSolicitacao.split('-');
-        dataSolFiltroBr = `${partes[2]}/${partes[1]}/${partes[0]}`;
-      }
+      const inputDataAtiv = document.getElementById("filtroDataAtividade").value; 
 
-      dadosFiltrados = dadosBrutos.filter(dados => {
-        const txtGeral = Object.values(dados).join(' ').toLowerCase();
-        const txtAuditorio = String(dados['Auditório'] || '').toLowerCase();
-        const txtSolicitante = String(dados['Solicitante'] || '').toLowerCase();
-        const txtDataAtividade = String(dados['Início'] || '');
-        const txtDataSolicitacao = String(dados['Data da Solicitação'] || '');
+      dadosFiltrados = dadosBrutos.filter(d => {
+        const txtGeral = Object.values(d).join(' ').toLowerCase();
+        const aud = String(d.Auditório || '').toLowerCase();
+        const sol = String(d.Solicitante || '').toLowerCase();
+        const ativ = String(d.Início || '');
 
-        let passaGeral = fGeral === "" || txtGeral.includes(fGeral);
-        let passaAuditorio = fAuditorio === "" || txtAuditorio.includes(fAuditorio);
-        let passaSolicitante = fSolicitante === "" || txtSolicitante.includes(fSolicitante);
-        let passaDataAtiv = inputDataAtividade === "" || txtDataAtividade.includes(inputDataAtividade);
-        let passaDataSol = dataSolFiltroBr === "" || txtDataSolicitacao.includes(dataSolFiltroBr);
-
-        return (passaGeral && passaAuditorio && passaSolicitante && passaDataAtiv && passaDataSol);
+        return (fGeral === "" || txtGeral.includes(fGeral)) &&
+               (fAuditorio === "" || aud.includes(fAuditorio)) &&
+               (fSolicitante === "" || sol.includes(fSolicitante)) &&
+               (inputDataAtiv === "" || ativ.includes(inputDataAtiv));
       });
 
-      if (!manterPaginaAtual) paginaAtual = 1;
-
+      if (!manterPagina) paginaAtual = 1;
       document.getElementById('contadorRegistros').innerText = `${dadosFiltrados.length} encontrado(s)`;
       renderizarPaginaVisual();
-    }
+    };
 
-    function mudarItensPorPagina() {
-      const seletorVal = document.getElementById('selectItensPagina').value;
-      if (seletorVal === 'todos') {
-        itensPorPagina = 'todos';
-      } else {
-        itensPorPagina = parseInt(seletorVal);
-      }
+    window.mudarItensPorPagina = function() {
+      const v = document.getElementById('selectItensPagina').value;
+      itensPorPagina = v === 'todos' ? 'todos' : parseInt(v);
       paginaAtual = 1;
       renderizarPaginaVisual();
-    }
+    };
 
-    function irParaPagina(numPagina) {
+    window.irParaPagina = function(p) {
       if (itensPorPagina === 'todos') return;
-      const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
-      if (numPagina >= 1 && numPagina <= totalPaginas) {
-        paginaAtual = numPagina;
-        renderizarPaginaVisual();
-      }
-    }
+      paginaAtual = p;
+      renderizarPaginaVisual();
+    };
 
     function renderizarPaginaVisual() {
       const grid = document.getElementById('gridCards');
       grid.innerHTML = '';
 
       if (dadosFiltrados.length === 0) {
-        grid.innerHTML = '<div class="status-msg">Nenhum resultado corresponde à sua busca.</div>';
-        desenharBotoesPaginacao();
+        grid.innerHTML = '<div class="status-msg">Nenhum resultado corresponde à busca.</div>';
+        desenharPaginacao();
         return;
       }
 
-      let dadosDaPaginaAtual = [];
-      
-      // Lógica que chaveia entre fatiamento numérico ou renderização total ("todos")
-      if (itensPorPagina === 'todos') {
-        dadosDaPaginaAtual = dadosFiltrados;
-      } else {
-        const indexInicio = (paginaAtual - 1) * itensPorPagina;
-        const indexFim = indexInicio + itensPorPagina;
-        dadosDaPaginaAtual = dadosFiltrados.slice(indexInicio, indexFim);
-      }
+      let dadosDaPag = itensPorPagina === 'todos' ? dadosFiltrados : dadosFiltrados.slice((paginaAtual - 1) * itensPorPagina, paginaAtual * itensPorPagina);
 
-      dadosDaPaginaAtual.forEach(dados => {
+      dadosDaPag.forEach(d => {
         const card = document.createElement('div');
         card.className = 'reserva-card';
-
-        const tTicket = dados['Ticket'] || 'S/ TICKET';
-        const tAuditorio = dados['Auditório'] || '-';
-        const tSolicitante = dados['Solicitante'] || '-';
-        const tTelefone = dados['Telefone'] || '-';
-        const tDepto = dados['Departamento'] || '-';
-        const tAtividade = dados['Atividade'] || '-';
-        const tInicio = formatarDataGMT3(dados['Início']);
-        const tFim = formatarDataGMT3(dados['Fim']);
-        const tDataSol = formatarDataGMT3(dados['Data da Solicitação']);
-
         card.innerHTML = `
-          <div class="card-header">
-            <span class="card-ticket">🎟️ ${tTicket}</span>
-            <span class="card-auditorio">${tAuditorio}</span>
-          </div>
+          <div class="card-header"><span class="card-ticket">🎟️ ${d.Ticket || '-'}</span><span class="card-auditorio">${d.Auditório || '-'}</span></div>
           <div class="card-body">
-            <div class="info-bloco">
-              <span class="info-label">Atividade</span>
-              <span class="info-valor destaque">${tAtividade}</span>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <div class="info-bloco">
-                <span class="info-label">Solicitante</span>
-                <span class="info-valor">${tSolicitante}</span>
-              </div>
-              <div class="info-bloco">
-                <span class="info-label">Departamento</span>
-                <span class="info-valor">${tDepto}</span>
-              </div>
+            <div class="info-bloco"><span class="info-label">Atividade</span><span class="info-valor" style="font-weight:700; color:var(--azul-marinho);">${d.Atividade || '-'}</span></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="info-bloco"><span class="info-label">Solicitante</span><span class="info-valor">${d.Solicitante || '-'}</span></div>
+              <div class="info-bloco"><span class="info-label">Depto</span><span class="info-valor">${d.Departamento || '-'}</span></div>
             </div>
             <div class="card-datas">
-              <div class="info-bloco">
-                <span class="info-label" style="color: #10b981;">▶ Início</span>
-                <span class="info-valor" style="font-size: 13px;">${tInicio}</span>
-              </div>
-              <div class="info-bloco" style="text-align: right;">
-                <span class="info-label" style="color: #ef4444;">⏹ Fim</span>
-                <span class="info-valor" style="font-size: 13px;">${tFim}</span>
-              </div>
+              <div class="info-bloco"><span class="info-label" style="color:#10b981;">▶ Início</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Início)}</span></div>
+              <div class="info-bloco" style="text-align:right;"><span class="info-label" style="color:#ef4444;">⏹ Fim</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Fim)}</span></div>
             </div>
           </div>
-          <div class="card-footer">
-            <span>📞 ${tTelefone}</span>
-            <span>Enviado em: ${tDataSol}</span>
-          </div>
+          <div class="card-footer"><span>📞 ${d.Telefone || '-'}</span><span>Enviado: ${d.Data_Solicitacao || '-'}</span></div>
         `;
         grid.appendChild(card);
       });
-
-      desenharBotoesPaginacao();
+      desenharPaginacao();
     }
 
-    function desenharBotoesPaginacao() {
-      const containerPaginacao = document.getElementById('paginacao');
-      containerPaginacao.innerHTML = '';
-      
-      // Se a opção "Todos" estiver ativa, oculta os botões de controle das páginas
+    function desenharPaginacao() {
+      const c = document.getElementById('paginacao');
+      c.innerHTML = '';
       if (itensPorPagina === 'todos') return; 
+      const total = Math.ceil(dadosFiltrados.length / itensPorPagina);
+      if (total <= 1) return; 
 
-      const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
-      if (totalPaginas <= 1) return; 
+      const bP = document.createElement('button'); bP.className = 'btn-page'; bP.innerText = '«'; bP.disabled = (paginaAtual === 1);
+      bP.onclick = () => window.irParaPagina(paginaAtual - 1); c.appendChild(bP);
 
-      const btnPrev = document.createElement('button');
-      btnPrev.className = 'btn-page';
-      btnPrev.innerText = '« Anterior';
-      btnPrev.disabled = (paginaAtual === 1);
-      btnPrev.onclick = () => irParaPagina(paginaAtual - 1);
-      containerPaginacao.appendChild(btnPrev);
-
-      let pageStart = Math.max(1, paginaAtual - 2);
-      let pageEnd = Math.min(totalPaginas, paginaAtual + 2);
-
-      for (let p = pageStart; p <= pageEnd; p++) {
-        const btnNum = document.createElement('button');
-        btnNum.className = 'btn-page';
-        if (p === paginaAtual) btnNum.classList.add('active');
-        btnNum.innerText = p;
-        btnNum.onclick = () => irParaPagina(p);
-        containerPaginacao.appendChild(btnNum);
+      for (let p = Math.max(1, paginaAtual - 2); p <= Math.min(total, paginaAtual + 2); p++) {
+        const b = document.createElement('button'); b.className = 'btn-page'; b.innerText = p; if(p === paginaAtual) b.classList.add('active');
+        b.onclick = () => window.irParaPagina(p); c.appendChild(b);
       }
 
-      const btnNext = document.createElement('button');
-      btnNext.className = 'btn-page';
-      btnNext.innerText = 'Próxima »';
-      btnNext.disabled = (paginaAtual === totalPaginas);
-      btnNext.onclick = () => irParaPagina(paginaAtual + 1);
-      containerPaginacao.appendChild(btnNext);
+      const bN = document.createElement('button'); bN.className = 'btn-page'; bN.innerText = '»'; bN.disabled = (paginaAtual === total);
+      bN.onclick = () => window.irParaPagina(paginaAtual + 1); c.appendChild(bN);
     }
 
-    function atualizarStatus() {
-      const status = document.getElementById('statusSincronizacao');
-      const agora = new Date();
-      status.innerText = `Atualizado às ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    window.onload = function() {
-      carregarXLSX(false); 
-      setInterval(() => carregarXLSX(true), 30000); 
-    };
+    carregarFirestore();
+    setInterval(() => carregarFirestore(true), 30000); // Live update sem quebrar a página da pessoa
   </script>
 </body>
 </html>
