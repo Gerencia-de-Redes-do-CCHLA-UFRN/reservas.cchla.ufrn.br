@@ -142,21 +142,28 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "firebase/app";
+      import { getAnalytics } from "firebase/analytics";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
 
-    // 🔴 INSIRA SUAS CHAVES DO FIREBASE AQUI
-    const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_PROJETO.firebaseapp.com",
-      projectId: "SEU_PROJETO",
-      storageBucket: "SEU_PROJETO.appspot.com",
-      messagingSenderId: "ID",
-      appId: "APP_ID"
-    };
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyChpGsnFgCBh-2TToJic2u1tt4zwaWJtQA",
+        authDomain: "formulario-reservas-cchla.firebaseapp.com",
+        projectId: "formulario-reservas-cchla",
+        storageBucket: "formulario-reservas-cchla.firebasestorage.app",
+        messagingSenderId: "112276491941",
+        appId: "1:112276491941:web:b1904f1c51724c79a6474c",
+        measurementId: "G-EZC15TVNCF"
+      };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
 
     function gerarTicketMercosul() {
       const L = () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
