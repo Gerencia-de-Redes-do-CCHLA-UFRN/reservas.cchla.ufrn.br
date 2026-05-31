@@ -80,11 +80,15 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 🔴 INSIRA SUAS CHAVES DO FIREBASE AQUI
+    // Configuração atualizada do Firebase
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_PROJETO.firebaseapp.com",
-      projectId: "SEU_PROJETO"
+      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
+      authDomain: "formulario-reservas-cchla.firebaseapp.com",
+      projectId: "formulario-reservas-cchla",
+      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
+      messagingSenderId: "112276491941",
+      appId: "1:112276491941:web:ec9d6c66ededaa37a6474c",
+      measurementId: "G-8JVTMVDYTJ"
     };
 
     const app = initializeApp(firebaseConfig);
