@@ -16,11 +16,16 @@
     .branding h1 { color: var(--azul-marinho); margin: 0; font-size: 26px; font-weight: 700; }
     .status-indicador { font-size: 13px; color: #10b981; font-weight: 600; background-color: #d1fae5; padding: 6px 12px; border-radius: 20px; }
     
-    .filtros-painel { background-color: #f8fafc; border: 1px solid var(--borda-suave); border-left: 5px solid var(--azul-royal); border-radius: 8px; padding: 20px; margin-bottom: 35px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
+    .filtros-painel { background-color: #f8fafc; border: 1px solid var(--borda-suave); border-left: 5px solid var(--azul-royal); border-radius: 8px; padding: 20px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
     .filtro-grupo { display: flex; flex-direction: column; gap: 6px; }
     .filtro-grupo label { font-size: 13px; font-weight: 600; color: var(--azul-marinho); }
     .filtro-grupo input, .filtro-grupo select { padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; color: var(--texto-escuro); }
     .btn-limpar { background-color: #e2e8f0; border: 1px solid var(--borda-suave); padding: 10px 15px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; height: 40px; }
+    
+    /* Nova Barra de Ferramentas de Exportação */
+    .barra-ferramentas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 35px; padding: 15px; background: #fff; border: 1px dashed var(--borda-suave); border-radius: 8px; }
+    .btn-export { display: flex; align-items: center; gap: 8px; background-color: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; color: var(--texto-escuro); }
+    .btn-export:hover { background-color: #f1f5f9; border-color: var(--azul-royal); color: var(--azul-royal); }
     
     .header-lista { background-color: var(--azul-marinho); color: #ffffff; padding: 15px 20px; margin: 0 0 20px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
     .titulo-tabela { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 15px; }
@@ -29,7 +34,8 @@
     .seletor-paginacao select { padding: 6px 12px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; color: var(--azul-marinho); }
 
     .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
-    .reserva-card { background: #ffffff; border: 1px solid var(--borda-suave); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .reserva-card { background: #ffffff; border: 1px solid var(--borda-suave); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: border-color 0.2s; }
+    .reserva-card:hover { border-color: var(--azul-royal); }
     .card-header { background-color: #f1f5f9; border-bottom: 1px solid var(--borda-suave); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
     .card-ticket { font-family: monospace; font-size: 16px; font-weight: 800; color: var(--azul-royal); }
     .card-auditorio { background-color: var(--azul-marinho); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
@@ -38,13 +44,26 @@
     .info-label { font-size: 11px; text-transform: uppercase; color: var(--texto-claro); font-weight: 700; margin-bottom: 3px; }
     .info-valor { font-size: 14px; font-weight: 500; }
     .card-datas { display: flex; justify-content: space-between; background-color: #f8fafc; padding: 12px; border-radius: 6px; border: 1px dashed var(--borda-suave); }
-    .card-footer { background-color: #f8fafc; padding: 12px 18px; border-top: 1px solid var(--borda-suave); font-size: 12px; color: var(--texto-claro); display: flex; justify-content: space-between; }
+    .card-footer { background-color: #f8fafc; padding: 12px 18px; border-top: 1px solid var(--borda-suave); font-size: 12px; color: var(--texto-claro); display: flex; justify-content: space-between; align-items: center; }
     
+    /* Botão Copiar Dados no Card */
+    .btn-copiar { background-color: #e2e8f0; color: var(--texto-escuro); border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-copiar:hover { background-color: var(--azul-royal); color: white; }
+
     .status-msg { text-align: center; color: var(--texto-claro); padding: 30px; grid-column: 1 / -1; }
     .paginacao-container { display: flex; justify-content: center; gap: 5px; margin-top: 35px; }
     .btn-page { background: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
     .btn-page.active { background: var(--azul-royal); color: #ffffff; cursor: default; }
     .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Estilos Específicos para Impressão */
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; max-width: 100%; padding: 0; }
+      .filtros-painel, .barra-ferramentas, .seletor-paginacao, .paginacao-container, .btn-copiar { display: none !important; }
+      .reserva-card { break-inside: avoid; border: 1px solid #000; box-shadow: none; }
+      .header-lista { background-color: transparent; color: black; border-bottom: 2px solid black; }
+    }
   </style>
 </head>
 <body>
@@ -52,7 +71,6 @@
   <div class="container">
     <div class="header">
       <div class="branding">
-        <img src="cchla-logo.jpg" alt="Logo CCHLA">
         <h1>Painel de Reservas</h1>
       </div>
       <span class="status-indicador" id="statusSincronizacao">Buscando na Nuvem...</span>
@@ -85,6 +103,15 @@
       <button class="btn-limpar" onclick="limparFiltros()">Limpar Filtros</button>
     </div>
 
+    <div class="barra-ferramentas">
+      <span style="font-size: 14px; font-weight: 600; padding: 8px 10px 8px 0; color: var(--azul-marinho);">Exportar Seleção:</span>
+      <button class="btn-export" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="btn-export" onclick="exportarCSV()">📊 Excel (CSV)</button>
+      <button class="btn-export" onclick="exportarJSON()">📄 JSON</button>
+      <button class="btn-export" onclick="exportarXML()">📑 XML</button>
+      <button class="btn-export" onclick="exportarICS()">📅 Calendário (ICS)</button>
+    </div>
+
     <div class="header-lista">
       <div class="titulo-tabela">Lista de Reservas <span class="contador-registros" id="contadorRegistros">0 encontrados</span></div>
       <div class="seletor-paginacao">
@@ -104,11 +131,9 @@
   </div>
 
   <script type="module">
-    // 1. Importações EXCLUSIVAS via CDN (compatíveis com HTML puro)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 2. Configuração do Firebase para o app-painel
     const firebaseConfig = {
       apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
       authDomain: "formulario-reservas-cchla.firebaseapp.com",
@@ -119,19 +144,19 @@
       measurementId: "G-4B1J48HDGF"
     };
 
-    // 3. Inicializa o Firebase e o Banco de Dados
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Variáveis de controle
     let dadosBrutos = [];       
     let dadosFiltrados = [];    
     let paginaAtual = 1;        
     let itensPorPagina = 10;    
 
+    // Chaves padrão para ordenação nos relatórios exportados
+    const chavesExportacao = ['Ticket', 'Auditório', 'Atividade', 'Solicitante', 'Departamento', 'Telefone', 'Email', 'Início', 'Fim', 'Data_Solicitacao'];
+
     async function carregarFirestore(manterPagina = false) {
       try {
-        // Busca da coleção inteira e ordena do mais recente pro antigo direto no banco
         const q = query(collection(db, "reservas"), orderBy("timestamp_criacao", "desc"));
         const querySnapshot = await getDocs(q);
         
@@ -232,8 +257,32 @@
               <div class="info-bloco" style="text-align:right;"><span class="info-label" style="color:#ef4444;">⏹ Fim</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Fim)}</span></div>
             </div>
           </div>
-          <div class="card-footer"><span>📞 ${d.Telefone || '-'}</span><span>Enviado: ${d.Data_Solicitacao || '-'}</span></div>
+          <div class="card-footer">
+            <span>📞 ${d.Telefone || '-'}</span>
+          </div>
         `;
+        
+        // Criando o botão de copiar com evento acoplado
+        const btnCopiar = document.createElement('button');
+        btnCopiar.className = 'btn-copiar';
+        btnCopiar.innerHTML = '📋 Copiar Dados';
+        btnCopiar.onclick = () => {
+          const textoFormatado = `Ticket: ${d.Ticket || '-'}\nAuditório: ${d.Auditório || '-'}\nAtividade: ${d.Atividade || '-'}\nData Início: ${formatarDataGMT3(d.Início)}\nData Fim: ${formatarDataGMT3(d.Fim)}\nSolicitante: ${d.Solicitante || '-'}\nDepto/Centro: ${d.Departamento || '-'}\nTelefone: ${d.Telefone || '-'}\nE-mail: ${d.Email || '-'}`;
+          
+          navigator.clipboard.writeText(textoFormatado).then(() => {
+            const originalText = btnCopiar.innerHTML;
+            btnCopiar.innerHTML = '✅ Copiado!';
+            btnCopiar.style.backgroundColor = '#10b981';
+            btnCopiar.style.color = '#fff';
+            setTimeout(() => {
+              btnCopiar.innerHTML = originalText;
+              btnCopiar.style.backgroundColor = '';
+              btnCopiar.style.color = '';
+            }, 2000);
+          });
+        };
+
+        card.querySelector('.card-footer').appendChild(btnCopiar);
         grid.appendChild(card);
       });
       desenharPaginacao();
@@ -258,8 +307,85 @@
       bN.onclick = () => window.irParaPagina(paginaAtual + 1); c.appendChild(bN);
     }
 
+    // ==========================================
+    // FUNÇÕES DE EXPORTAÇÃO DE ARQUIVOS
+    // ==========================================
+    
+    function baixarArquivo(conteudo, nomeArquivo, mimeType) {
+      const blob = new Blob([conteudo], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeArquivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    window.exportarCSV = function() {
+      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
+      let csv = chavesExportacao.join(';') + '\n';
+      dadosFiltrados.forEach(d => {
+        let linha = chavesExportacao.map(col => `"${String(d[col] || '').replace(/"/g, '""')}"`);
+        csv += linha.join(';') + '\n';
+      });
+      // \uFEFF é necessário para o Excel entender acentuação (UTF-8 BOM)
+      baixarArquivo('\uFEFF' + csv, 'reservas_cchla.csv', 'text/csv;charset=utf-8;');
+    };
+
+    window.exportarJSON = function() {
+      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
+      const dadosLimpos = dadosFiltrados.map(d => {
+        let obj = {};
+        chavesExportacao.forEach(k => obj[k] = d[k] || '');
+        return obj;
+      });
+      baixarArquivo(JSON.stringify(dadosLimpos, null, 2), 'reservas_cchla.json', 'application/json');
+    };
+
+    window.exportarXML = function() {
+      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<reservas>\n';
+      dadosFiltrados.forEach(d => {
+        xml += '  <reserva>\n';
+        chavesExportacao.forEach(k => {
+          let tag = k.replace(/ /g, '_').replace(/[^\w-]/g, ''); // Limpa caracteres inválidos na tag
+          let valor = String(d[k] || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          xml += `    <${tag}>${valor}</${tag}>\n`;
+        });
+        xml += '  </reserva>\n';
+      });
+      xml += '</reservas>';
+      baixarArquivo(xml, 'reservas_cchla.xml', 'application/xml');
+    };
+
+    window.exportarICS = function() {
+      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Painel_CCHLA//Reservas//PT\n";
+      
+      dadosFiltrados.forEach(d => {
+        // Converte "2024-05-30T14:00" para "20240530T140000" exigido pelo iCalendar
+        let dtInicio = (d.Início || "").replace(/[-:]/g, "") + "00";
+        let dtFim = (d.Fim || "").replace(/[-:]/g, "") + "00";
+        
+        if(dtInicio.length >= 15 && dtFim.length >= 15) {
+          ics += "BEGIN:VEVENT\n";
+          ics += `SUMMARY:${d.Atividade} - ${d.Auditório}\n`;
+          ics += `DTSTART;TZID=America/Fortaleza:${dtInicio}\n`; 
+          ics += `DTEND;TZID=America/Fortaleza:${dtFim}\n`;
+          ics += `LOCATION:${d.Auditório}\n`;
+          ics += `DESCRIPTION:Solicitante: ${d.Solicitante}\\nDepto: ${d.Departamento}\\nTelefone: ${d.Telefone}\\nTicket: ${d.Ticket}\n`;
+          ics += "END:VEVENT\n";
+        }
+      });
+      
+      ics += "END:VCALENDAR";
+      baixarArquivo(ics, 'reservas_cchla.ics', 'text/calendar');
+    };
+
     carregarFirestore();
-    setInterval(() => carregarFirestore(true), 30000); // Live update sem quebrar a página da pessoa
+    setInterval(() => carregarFirestore(true), 30000); 
   </script>
 </body>
 </html>
