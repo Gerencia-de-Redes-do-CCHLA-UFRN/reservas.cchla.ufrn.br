@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "formulario-reservas-cchla"
-  }
+  },
+  "targets": {
+    "formulario-reservas-cchla": {
+      "hosting": {
+        "formulario_reservas": [
+          "formulario-reservas-cchla"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
