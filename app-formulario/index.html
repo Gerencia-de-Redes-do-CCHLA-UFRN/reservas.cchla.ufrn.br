@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitação de Reserva de Auditórios - CCHLA</title>
+  
+  <style>
+    :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #334155; }
+    body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--texto-escuro); margin: 0; padding: 20px; }
+    .container { max-width: 700px; margin: 30px auto; padding: 30px; background-color: #ffffff; border-radius: 12px; border: 1px solid var(--borda-suave); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .header { text-align: center; border-bottom: 3px solid var(--azul-royal); padding-bottom: 20px; margin-bottom: 25px; }
+    .header img { max-height: 70px; margin-bottom: 15px; object-fit: contain; }
+    .header h2 { margin: 0 0 10px 0; color: var(--azul-marinho); font-size: 24px; font-weight: 700; }
+    .header p { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s; }
+    input:focus, select:focus { outline: none; border-color: var(--azul-royal); box-shadow: 0 0 0 3px rgba(22, 83, 161, 0.1); }
+    .obs-text { display: block; font-size: 12px; color: #64748b; margin-top: 5px; font-style: italic; }
+    .btn-submit { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background-color 0.2s ease-in-out; }
+    .btn-submit:hover { background-color: var(--azul-marinho); }
+    .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; }
+    
+    /* Telas Auxiliares */
+    #telaSucesso { display: none; text-align: center; }
+    .sucesso-icone { font-size: 50px; color: #10b981; margin-bottom: 10px; }
+    .ticket-box { background-color: #f8fafc; border: 2px dashed var(--azul-royal); border-radius: 12px; padding: 20px; margin: 20px 0; display: inline-block; width: 100%; box-sizing: border-box; }
+    .ticket-label { font-size: 14px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+    .ticket-numero { font-size: 38px; color: var(--azul-marinho); font-weight: 900; margin: 10px 0; font-family: monospace; letter-spacing: 4px; }
+    .ticket-dados { font-size: 16px; color: var(--texto-escuro); margin: 5px 0; }
+    .ticket-dados strong { color: var(--azul-marinho); }
+    
+    /* Tabela Histórico */
+    .historico-titulo { text-align: left; font-size: 18px; color: var(--azul-marinho); border-bottom: 2px solid var(--borda-suave); padding-bottom: 10px; margin-top: 30px; }
+    .table-responsive { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--borda-suave); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+    th { background-color: #f1f5f9; color: var(--azul-marinho); font-weight: 700; white-space: nowrap; }
+    tbody tr:nth-child(even) { background-color: #f8fafc; }
+    .btn-voltar { background-color: #e2e8f0; color: var(--texto-escuro); padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; }
+    .btn-voltar:hover { background-color: #cbd5e1; }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="telaFormulario">
+    <div class="header">
+      <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
+      <h2>Solicitação de Reserva de Auditórios</h2>
+      <p>Preencha os dados abaixo. As reservas devem ser feitas exclusivamente em dias úteis, salvo autorização prévia da direção.</p>
+    </div>
+
+    <form id="formReserva">
+      <div style="margin-bottom: 20px;">
+        <label for="auditorio">1) Escolha o(s) local(is) da(s) atividade(s):</label>
+        <select id="auditorio" name="auditorio_selecionado" required>
+          <option value="" disabled selected>Selecione um auditório...</option>
+          <option value="Auditorio A">Auditório 'A'</option>
+          <option value="Auditorio B">Auditório 'B'</option>
+          <option value="Auditorio C">Auditório 'C'</option>
+          <option value="Auditorio D">Auditório 'D'</option>
+          <option value="Auditorio E">Auditório 'E'</option>
+        </select>
+        <span class="obs-text">* OBS.: Caso necessite de microfone e caixa de som acústica, solicitar na Assessoria.</span>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="responsavel">2) Responsável pela reserva e matrícula:</label>
+        <input type="text" id="responsavel" name="responsavel_e_matricula" required placeholder="Nome completo e número da matrícula">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="telefone">3) Telefone para contato:</label>
+        <input type="tel" id="telefone" name="telefone_contato" required placeholder="(84) 99999-9999">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="departamento">4) Departamento / Centro:</label>
+        <input type="text" id="departamento" name="departamento_centro" required placeholder="Ex: Departamento de Letras / CCHLA">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="atividade">5) Atividade a ser realizada:</label>
+        <input type="text" id="atividade" name="atividade_realizada" required placeholder="Ex: Reunião, defesa, apresentação, etc.">
+      </div>
+
+      <div style="margin-bottom: 25px; background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <span style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 14px; color: var(--azul-marinho);">6) Período da Reserva (Início e Fim):</span>
+        <div style="display: flex; gap: 15px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: #64748b;">Início:</label>
+            <input type="datetime-local" name="data_hora_inicio" required>
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: #64748b;">Fim:</label>
+            <input type="datetime-local" name="data_hora_fim" required>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <label>Seu E-mail institucional:</label>
+        <input type="email" name="_replyto" required placeholder="seuemail@ufrn.br">
+      </div>
+
+      <button type="submit" id="btnSubmit" class="btn-submit">Enviar Solicitação de Reserva</button>
+    </form>
+  </div>
+
+  <div class="container" id="telaSucesso">
+    <div class="header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+      <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
+    </div>
+    
+    <div class="sucesso-icone">✓</div>
+    <h2 style="color: var(--azul-marinho); margin-top: 0;">Solicitação Enviada!</h2>
+    <p style="color: #64748b;">Sua reserva foi registrada com sucesso na nuvem.</p>
+
+    <div class="ticket-box">
+      <div class="ticket-label">Seu Ticket de Acompanhamento</div>
+      <div class="ticket-numero" id="ticketDisplay">---</div>
+      <div class="ticket-dados"><strong>Responsável:</strong> <span id="nomeDisplay"></span></div>
+      <div class="ticket-dados"><strong>Telefone:</strong> <span id="telefoneDisplay"></span></div>
+    </div>
+
+    <h3 class="historico-titulo">Histórico de Solicitações deste Ticket</h3>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Data Solicitação</th>
+            <th>Auditório</th>
+            <th>Atividade</th>
+            <th>Início</th>
+          </tr>
+        </thead>
+        <tbody id="historicoTabela"></tbody>
+      </table>
+    </div>
+
+    <button class="btn-voltar" onclick="novaSolicitacao()">Fazer Nova Solicitação</button>
+  </div>
+  
+  <script type="module">
+    // 1. Importações usando os links diretos (CDN) compatíveis com HTML puro
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // 2. Suas chaves (mantidas intactas)
+    const firebaseConfig = {
+    apiKey: "AIzaSyChpGsnFgCBh-2TToJic2u1tt4zwaWJtQA",
+    authDomain: "formulario-reservas-cchla.firebaseapp.com",
+    projectId: "formulario-reservas-cchla",
+    storageBucket: "formulario-reservas-cchla.firebasestorage.app",
+    messagingSenderId: "112276491941",
+    appId: "1:112276491941:web:dfc41772f1a2989ba6474c",
+    measurementId: "G-EPW7FC8CCT"
+    };
+
+    // 3. Inicialização correta ativando o Firestore (db)
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // <- REMOVIDO O COMENTÁRIO AQUI
+
+    function gerarTicketMercosul() {
+      const L = () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+      const N = () => "0123456789"[Math.floor(Math.random() * 10)];
+      return `${L()}${L()}${L()}${N()}${L()}${N()}${N()}`;
+    }
+
+    document.getElementById('formReserva').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      btn.innerText = 'Comunicando com Firebase...';
+      btn.disabled = true;
+
+      try {
+        const formData = new FormData(this);
+        const telefoneAtual = formData.get('telefone_contato');
+        
+        let meuTicket = null;
+        let historico = [];
+
+        const reservasRef = collection(db, "reservas");
+        const q = query(reservasRef, where("Telefone", "==", telefoneAtual));
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach((doc) => {
+          const dados = doc.data();
+          if(dados.Ticket && !meuTicket) meuTicket = dados.Ticket; 
+          historico.push(dados);
+        });
+
+        if (!meuTicket) meuTicket = gerarTicketMercosul();
+
+        const novaReserva = {
+          Ticket: meuTicket,
+          Auditório: formData.get('auditorio_selecionado'),
+          Solicitante: formData.get('responsavel_e_matricula'),
+          Telefone: telefoneAtual,
+          Departamento: formData.get('departamento_centro'),
+          Atividade: formData.get('atividade_realizada'),
+          Início: formData.get('data_hora_inicio'),
+          Fim: formData.get('data_hora_fim'),
+          Email: formData.get('_replyto'),
+          Data_Solicitacao: new Date().toLocaleString('pt-BR'),
+          timestamp_criacao: serverTimestamp() 
+        };
+
+        await addDoc(collection(db, "reservas"), novaReserva);
+        
+        historico.push(novaReserva); 
+
+        document.getElementById('telaFormulario').style.display = 'none';
+        document.getElementById('telaSucesso').style.display = 'block';
+
+        document.getElementById('ticketDisplay').innerText = meuTicket;
+        document.getElementById('nomeDisplay').innerText = formData.get('responsavel_e_matricula');
+        document.getElementById('telefoneDisplay').innerText = telefoneAtual;
+
+        renderizarHistorico(historico);
+
+      } catch (erro) {
+        console.error(erro);
+        alert("Erro ao salvar no banco: " + erro.message);
+      } finally {
+        btn.innerText = 'Enviar Solicitação de Reserva';
+        btn.disabled = false;
+      }
+    });
+
+    function renderizarHistorico(historicoArray) {
+      const tabela = document.getElementById('historicoTabela');
+      tabela.innerHTML = '';
+
+      historicoArray.sort((a, b) => {
+        let tA = a.timestamp_criacao ? (a.timestamp_criacao.seconds || Date.now()) : Date.now();
+        let tB = b.timestamp_criacao ? (b.timestamp_criacao.seconds || Date.now()) : Date.now();
+        return tB - tA; 
+      });
+
+      historicoArray.forEach(reserva => {
+        const tr = document.createElement('tr');
+        let inicioFmt = reserva['Início'] ? reserva['Início'].replace('T', ' às ') : '-';
+        tr.innerHTML = `
+          <td>${reserva['Data_Solicitacao'] || '-'}</td>
+          <td><strong>${reserva['Auditório'] || '-'}</strong></td>
+          <td>${reserva['Atividade'] || '-'}</td>
+          <td>${inicioFmt}</td>
+        `;
+        tabela.appendChild(tr);
+      });
+    }
+
+    window.novaSolicitacao = function() {
+      document.getElementById('formReserva').reset();
+      document.getElementById('telaSucesso').style.display = 'none';
+      document.getElementById('telaFormulario').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
