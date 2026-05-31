@@ -104,17 +104,11 @@
   </div>
 
   <script type="module">
+    // 1. Importações EXCLUSIVAS via CDN (compatíveis com HTML puro)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "firebase/app";
-    import { getAnalytics } from "firebase/analytics";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    // 2. Configuração do Firebase para o app-painel
     const firebaseConfig = {
       apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
       authDomain: "formulario-reservas-cchla.firebaseapp.com",
@@ -125,11 +119,11 @@
       measurementId: "G-4B1J48HDGF"
     };
 
-    // Initialize Firebase
+    // 3. Inicializa o Firebase e o Banco de Dados
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
+    // Variáveis de controle
     let dadosBrutos = [];       
     let dadosFiltrados = [];    
     let paginaAtual = 1;        
@@ -152,7 +146,7 @@
         window.aplicarFiltros(manterPagina);
       } catch (erro) {
         console.error(erro);
-        document.getElementById('gridCards').innerHTML = `<div class="status-msg" style="color:red;">Erro de Leitura Firebase. Regras configuradas?</div>`;
+        document.getElementById('gridCards').innerHTML = `<div class="status-msg" style="color:red;">Erro de Leitura Firebase. Verifique as regras de segurança do Firestore.</div>`;
       }
     }
 
