@@ -187,13 +187,13 @@
         carregarFirestore();
       } else {
         // Invasor detectado. Redireciona para o login
-        window.location.replace('login.html');
+        window.location.replace('https://painel-reservas-cchla.web.app');
       }
     });
 
     window.sairDoPainel = function() {
       signOut(auth).then(() => {
-        window.location.replace('login.html');
+        window.location.replace('https://painel-reservas-cchla.web.app');
       });
     };
 
