@@ -88,14 +88,22 @@
 
       <div style="margin-bottom: 25px; background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
         <span style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 14px; color: var(--azul-marinho);">6) Período da Reserva (Início e Fim):</span>
-        <div style="display: flex; gap: 15px;">
-          <div style="flex: 1;">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 250px;">
             <label style="font-size: 12px; color: #64748b;">Início:</label>
-            <input type="datetime-local" id="data_hora_inicio" name="data_hora_inicio" step="1800" required>
+            <div style="display: flex; gap: 8px;">
+              <input type="date" name="data_inicio" required style="flex: 2;">
+              <select name="hora_inicio" id="select_hora_inicio" required style="flex: 1;">
+                </select>
+            </div>
           </div>
-          <div style="flex: 1;">
+          <div style="flex: 1; min-width: 250px;">
             <label style="font-size: 12px; color: #64748b;">Fim:</label>
-            <input type="datetime-local" id="data_hora_fim" name="data_hora_fim" step="1800" required>
+            <div style="display: flex; gap: 8px;">
+              <input type="date" name="data_fim" required style="flex: 2;">
+              <select name="hora_fim" id="select_hora_fim" required style="flex: 1;">
+                </select>
+            </div>
           </div>
         </div>
       </div>
@@ -171,29 +179,26 @@
       return `${L()}${L()}${L()}${N()}${L()}${N()}${N()}`;
     }
 
-    // LÓGICA DE VALIDAÇÃO DE HORÁRIO (06:00 às 23:00) E MINUTOS (00 ou 30)
-    function validarHorarioReserva(e) {
-      if (e.target.value) {
-        const timePart = e.target.value.split('T')[1]; // Separa apenas a parte da hora (HH:MM)
-        const hora = parseInt(timePart.split(':')[0]);
-        const minuto = parseInt(timePart.split(':')[1]);
-
-        // Bloqueia horários antes das 06h, após as 23h, ou 23:30
-        if (hora < 6 || hora > 23 || (hora === 23 && minuto > 0)) {
-          alert("Por favor, selecione um horário entre 06:00 e 23:00.");
-          e.target.value = ""; // Limpa o campo
-          return;
-        }
-
-        // Bloqueia minutos diferentes de 00 e 30 caso o usuário tente digitar manualmente
-        if (minuto !== 0 && minuto !== 30) {
-          alert("Por favor, selecione horários em intervalos de 30 minutos (Ex: 08:00, 08:30).");
-          e.target.value = ""; // Limpa o campo
+    // GERADOR DE HORÁRIOS CROSS-BROWSER (06:00 às 23:00 / 30 min)
+    function popularHorarios() {
+      const selectsHora = [document.getElementById('select_hora_inicio'), document.getElementById('select_hora_fim')];
+      const optionsHTML = ['<option value="" disabled selected>Hora</option>'];
+      
+      for (let h = 6; h <= 23; h++) {
+        let horaFormatada = h.toString().padStart(2, '0');
+        optionsHTML.push(`<option value="${horaFormatada}:00">${horaFormatada}:00</option>`);
+        if(h !== 23) { // Impede de criar a opção 23:30, parando exatamente às 23:00
+          optionsHTML.push(`<option value="${horaFormatada}:30">${horaFormatada}:30</option>`);
         }
       }
+
+      selectsHora.forEach(select => {
+        if (select) select.innerHTML = optionsHTML.join('');
+      });
     }
-    document.getElementById("data_hora_inicio").addEventListener("change", validarHorarioReserva);
-    document.getElementById("data_hora_fim").addEventListener("change", validarHorarioReserva);
+    
+    // Executa a geração de horários assim que a página abre
+    popularHorarios();
 
     document.getElementById('formReserva').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -212,6 +217,18 @@
       try {
         const formData = new FormData(this);
         const telefoneAtual = formData.get('telefone_contato');
+        
+        // Reconstruindo as datas para o padrão YYYY-MM-DDTHH:MM para o BD
+        const dataHoraInicioCompleta = formData.get('data_inicio') + 'T' + formData.get('hora_inicio');
+        const dataHoraFimCompleta = formData.get('data_fim') + 'T' + formData.get('hora_fim');
+
+        // Validação extra de segurança
+        if (dataHoraFimCompleta <= dataHoraInicioCompleta) {
+          alert("A data/hora de término deve ser posterior à data/hora de início.");
+          btn.innerText = 'Enviar Solicitação de Reserva';
+          btn.disabled = false;
+          return;
+        }
         
         let meuTicket = null;
         let historico = [];
@@ -235,8 +252,8 @@
           Telefone: telefoneAtual,
           Departamento: formData.get('departamento_centro'),
           Atividade: formData.get('atividade_realizada'),
-          Início: formData.get('data_hora_inicio'),
-          Fim: formData.get('data_hora_fim'),
+          Início: dataHoraInicioCompleta, // Salva na estrutura exata de antes
+          Fim: dataHoraFimCompleta,       // Salva na estrutura exata de antes
           Email: formData.get('_replyto'),
           Data_Solicitacao: new Date().toLocaleString('pt-BR'),
           timestamp_criacao: serverTimestamp() 
@@ -266,7 +283,6 @@
       } finally {
         btn.innerText = 'Enviar Solicitação de Reserva';
         btn.disabled = false;
-        // Reseta o reCAPTCHA para o usuário poder enviar outro se quiser
         grecaptcha.reset();
       }
     });
