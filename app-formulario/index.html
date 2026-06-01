@@ -63,7 +63,7 @@
           <option value="Auditorio D">Auditório 'D' (60 lugares - Projetor, PC, Webcam, Caixa de Som para computador)</option>
           <option value="Auditorio E">Auditório 'E' (30 lugares - Projetor, PC, TV, Webcam, Caixa de Som para computador)</option>
         </select>
-        <span class="obs-text">* OBS.: Caso necessite de microfone e caixa de som acústica, solicitar na Assessoria.</span>
+        <span class="obs-text"><h2>* OBS.: Caso necessite de microfone e caixa de som acústica, solicitar na Assessoria.</span>
       </div>
 
       <div style="margin-bottom: 20px;">
@@ -91,11 +91,11 @@
         <div style="display: flex; gap: 15px;">
           <div style="flex: 1;">
             <label style="font-size: 12px; color: #64748b;">Início:</label>
-            <input type="datetime-local" name="data_hora_inicio" required>
+            <input type="datetime-local" id="data_hora_inicio" name="data_hora_inicio" required>
           </div>
           <div style="flex: 1;">
             <label style="font-size: 12px; color: #64748b;">Fim:</label>
-            <input type="datetime-local" name="data_hora_fim" required>
+            <input type="datetime-local" id="data_hora_fim" name="data_hora_fim" required>
           </div>
         </div>
       </div>
@@ -127,6 +127,7 @@
       <div class="ticket-numero" id="ticketDisplay">---</div>
       <div class="ticket-dados"><strong>Responsável:</strong> <span id="nomeDisplay"></span></div>
       <div class="ticket-dados"><strong>Telefone:</strong> <span id="telefoneDisplay"></span></div>
+      <div class="ticket-dados"><strong>Local:</strong> <span id="localDisplay"></span></div>
     </div>
 
     <h3 class="historico-titulo">Histórico de Solicitações deste Ticket</h3>
@@ -169,6 +170,19 @@
       const N = () => "0123456789"[Math.floor(Math.random() * 10)];
       return `${L()}${L()}${L()}${N()}${L()}${N()}${N()}`;
     }
+
+    // LÓGICA DE VALIDAÇÃO DE HORÁRIO (06:00 às 23:00)
+    function validarHorarioReserva(e) {
+      if (e.target.value) {
+        const hora = parseInt(e.target.value.split('T')[1].split(':')[0]);
+        if (hora < 6 || hora > 23) {
+          alert("Por favor, selecione um horário entre 06:00 e 23:00.");
+          e.target.value = ""; // Limpa o campo para forçar seleção correta
+        }
+      }
+    }
+    document.getElementById("data_hora_inicio").addEventListener("change", validarHorarioReserva);
+    document.getElementById("data_hora_fim").addEventListener("change", validarHorarioReserva);
 
     document.getElementById('formReserva').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -221,12 +235,17 @@
         
         historico.push(novaReserva); 
 
+        // Captura a descrição completa do Auditório para exibir na tela de sucesso
+        const selectAuditorio = document.getElementById('auditorio');
+        const descricaoAuditorio = selectAuditorio.options[selectAuditorio.selectedIndex].text;
+
         document.getElementById('telaFormulario').style.display = 'none';
         document.getElementById('telaSucesso').style.display = 'block';
 
         document.getElementById('ticketDisplay').innerText = meuTicket;
         document.getElementById('nomeDisplay').innerText = formData.get('responsavel_e_matricula');
         document.getElementById('telefoneDisplay').innerText = telefoneAtual;
+        document.getElementById('localDisplay').innerText = descricaoAuditorio;
 
         renderizarHistorico(historico);
 

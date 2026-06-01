@@ -5,14 +5,14 @@
   "targets": {
     "formulario-reservas-cchla": {
       "hosting": {
-        "formulario_reservas": [
-          "formulario-reservas-cchla"
-        ],
         "painel": [
           "painel-reservas-cchla"
         ],
         "acompanhamento": [
           "acompanhamento-reservas-cchla"
+        ],
+        "formulario_reservas": [
+          "formulario-reservas-cchla"
         ]
       }
     }
