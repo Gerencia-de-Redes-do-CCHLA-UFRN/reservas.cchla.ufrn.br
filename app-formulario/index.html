@@ -41,6 +41,20 @@
     tbody tr:nth-child(even) { background-color: #f8fafc; }
     .btn-voltar { background-color: #e2e8f0; color: var(--texto-escuro); padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; }
     .btn-voltar:hover { background-color: #cbd5e1; }
+  /* Estilo do Botão Imprimir */
+    .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; margin-right: 10px; }
+    .btn-imprimir:hover { background-color: #334155; }
+
+  /* Regras de Limpeza para a Impressora */
+    @media print {
+      body { background-color: #ffffff; padding: 0; }
+      .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
+      .btn-voltar, .btn-imprimir, .sucesso-icone, .no-print { display: none !important; }
+      .ticket-box { border: 2px solid #000; background-color: transparent; }
+      .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+      table, th, td { border: 1px solid #000; }
+      th { background-color: #f0f0f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+    }
   </style>
 </head>
 <body>
@@ -128,7 +142,7 @@
     
     <div class="sucesso-icone">✓</div>
     <h2 style="color: var(--azul-marinho); margin-top: 0;">Solicitação Enviada!</h2>
-    <p style="color: #64748b;">Sua reserva foi registrada com sucesso na nuvem.</p>
+    <p style="color: #64748b;">Sua reserva foi registrada com sucesso. Aguarde <b>Confirmação</b> da Secretaria do CCHLA</p>
 
     <div class="ticket-box">
       <div class="ticket-label">Seu Ticket de Acompanhamento</div>
@@ -153,7 +167,9 @@
       </table>
     </div>
 
-    <button class="btn-voltar" onclick="novaSolicitacao()">Fazer Nova Solicitação</button>
+    <button class="btn-imprimir no-print" onclick="window.print()">🖨️ Imprimir Comprovante</button>
+    <button class="btn-voltar no-print" onclick="novaSolicitacao()">Fazer Nova Solicitação</button>
+  
   </div>
   
   <script type="module">
