@@ -54,7 +54,7 @@
 
     <form id="formReserva">
       <div style="margin-bottom: 20px;">
-        <label for="auditorio">1) Escolha o(s) local(is) da(s) atividade(s):</label>
+        <label for="auditorio">1) Escolha o local da atividade  :</label>
         <select id="auditorio" name="auditorio_selecionado" required>
           <option value="" disabled selected>Selecione um auditório...</option>
           <option value="Auditorio A">Auditório 'A' (20 lugares - Projetor, PC, TV, Webcam, Caixa de Som para computador)</option>
@@ -63,7 +63,7 @@
           <option value="Auditorio D">Auditório 'D' (60 lugares - Projetor, PC, Webcam, Caixa de Som para computador)</option>
           <option value="Auditorio E">Auditório 'E' (30 lugares - Projetor, PC, TV, Webcam, Caixa de Som para computador)</option>
         </select>
-        <span class="obs-text"><h2>* OBS.: Caso necessite de microfone e caixa de som acústica, solicitar na Assessoria.</span>
+        <span class="obs-text"><h2>* OBS.: Caso necessite de microfone e caixa de som acústica, solicitar na Assessoria.</h2></span>
       </div>
 
       <div style="margin-bottom: 20px;">
@@ -91,11 +91,11 @@
         <div style="display: flex; gap: 15px;">
           <div style="flex: 1;">
             <label style="font-size: 12px; color: #64748b;">Início:</label>
-            <input type="datetime-local" id="data_hora_inicio" name="data_hora_inicio" required>
+            <input type="datetime-local" id="data_hora_inicio" name="data_hora_inicio" step="1800" required>
           </div>
           <div style="flex: 1;">
             <label style="font-size: 12px; color: #64748b;">Fim:</label>
-            <input type="datetime-local" id="data_hora_fim" name="data_hora_fim" required>
+            <input type="datetime-local" id="data_hora_fim" name="data_hora_fim" step="1800" required>
           </div>
         </div>
       </div>
@@ -171,13 +171,24 @@
       return `${L()}${L()}${L()}${N()}${L()}${N()}${N()}`;
     }
 
-    // LÓGICA DE VALIDAÇÃO DE HORÁRIO (06:00 às 23:00)
+    // LÓGICA DE VALIDAÇÃO DE HORÁRIO (06:00 às 23:00) E MINUTOS (00 ou 30)
     function validarHorarioReserva(e) {
       if (e.target.value) {
-        const hora = parseInt(e.target.value.split('T')[1].split(':')[0]);
-        if (hora < 6 || hora > 23) {
+        const timePart = e.target.value.split('T')[1]; // Separa apenas a parte da hora (HH:MM)
+        const hora = parseInt(timePart.split(':')[0]);
+        const minuto = parseInt(timePart.split(':')[1]);
+
+        // Bloqueia horários antes das 06h, após as 23h, ou 23:30
+        if (hora < 6 || hora > 23 || (hora === 23 && minuto > 0)) {
           alert("Por favor, selecione um horário entre 06:00 e 23:00.");
-          e.target.value = ""; // Limpa o campo para forçar seleção correta
+          e.target.value = ""; // Limpa o campo
+          return;
+        }
+
+        // Bloqueia minutos diferentes de 00 e 30 caso o usuário tente digitar manualmente
+        if (minuto !== 0 && minuto !== 30) {
+          alert("Por favor, selecione horários em intervalos de 30 minutos (Ex: 08:00, 08:30).");
+          e.target.value = ""; // Limpa o campo
         }
       }
     }
@@ -191,7 +202,7 @@
       const recaptchaResponse = grecaptcha.getResponse();
       if (recaptchaResponse.length === 0) {
         alert("Por favor, marque a caixa 'Não sou um robô' antes de enviar.");
-        return; // Interrompe a execução aqui se o captcha não foi feito
+        return; 
       }
 
       const btn = document.getElementById('btnSubmit');
