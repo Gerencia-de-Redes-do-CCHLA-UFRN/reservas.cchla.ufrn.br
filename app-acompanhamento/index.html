@@ -13,14 +13,18 @@
     .header img { max-height: 70px; margin-bottom: 15px; object-fit: contain; }
     .header h2 { margin: 0 0 10px 0; color: var(--azul-marinho); font-size: 24px; font-weight: 700; }
     
-    .search-section { background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid var(--borda-suave); margin-bottom: 30px; display: flex; gap: 15px; align-items: flex-end; }
-    .search-group { flex: 1; }
+    .search-section { background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid var(--borda-suave); margin-bottom: 30px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+    .search-group { flex: 1; min-width: 250px; }
     .search-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--azul-marinho); }
     .search-group input { width: 100%; padding: 12px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
-    .btn-buscar { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; height: 45px; }
     
+    .btn-buscar { background-color: var(--azul-royal); color: #ffffff; padding: 0 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; height: 45px; display: flex; align-items: center; justify-content: center; }
+    
+    .btn-nova { background-color: #10b981; color: #ffffff; padding: 0 20px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; height: 45px; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; white-space: nowrap; }
+    .btn-nova:hover { background-color: #059669; }
+
     #areaResultados { display: none; }
-    .dados-solicitante { display: flex; justify-content: space-between; align-items: center; background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px 20px; border-radius: 6px; margin-bottom: 25px; }
+    .dados-solicitante { display: flex; justify-content: space-between; align-items: center; background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px 20px; border-radius: 6px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
     .ticket-badge { background-color: var(--azul-marinho); color: white; padding: 8px 15px; border-radius: 20px; font-family: monospace; font-size: 20px; font-weight: bold; letter-spacing: 2px; }
     .table-responsive { overflow-x: auto; border: 1px solid var(--borda-suave); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
@@ -29,7 +33,6 @@
     .status-msg { text-align: center; color: #ef4444; font-weight: 600; margin-top: 15px; display: none; }
     .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
 
-    /* Cores dos Status */
     .badge-status { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; white-space: nowrap; }
     .status-pendente { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; }
     .status-aprovada { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
@@ -42,7 +45,6 @@
       .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
       .dados-solicitante { border: 1px solid #000; border-left: 4px solid #000; }
       table, th, td { border: 1px solid #000; }
-      /* Força a impressão das cores de fundo das etiquetas */
       .badge-status { -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 1px solid #000; }
     }
   </style>
@@ -57,10 +59,12 @@
 
     <div class="search-section no-print">
       <div class="search-group">
-        <label>Digite seu Ticket (Ex: ABC1D23) ou Telefone:</label>
+        <label>Digite seu Ticket (Ex: ABC1D23) ou Telefone (Ex: 84987654321):</label>
         <input type="text" id="inputBusca" placeholder="Ticket ou Telefone..." onkeypress="if(event.key === 'Enter') window.buscarSolicitacao()">
       </div>
       <button class="btn-buscar" id="btnBuscar" onclick="window.buscarSolicitacao()">Consultar</button>
+      
+      <a href="https://formulario-reservas-cchla.web.app" target="_self" class="btn-nova">Nova Solicitação de Reserva</a>
     </div>
 
     <div id="mensagemErro" class="status-msg">Nenhum registro encontrado.</div>
@@ -94,7 +98,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
@@ -109,9 +113,71 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // --- FUNÇÕES DE FORMATAÇÃO ---
+    function formatarDataBR(dataValor) {
+      if (!dataValor) return '-';
+      try {
+        if (typeof dataValor === 'string' && dataValor.includes('-') && !dataValor.includes('T')) {
+          const [ano, mes, dia] = dataValor.split('-');
+          return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`;
+        }
+        const data = dataValor.seconds ? new Date(dataValor.seconds * 1000) : new Date(dataValor);
+        return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(data);
+      } catch (e) {
+        return dataValor;
+      }
+    }
+
+    function formatarHoraInicio(inicioValor) {
+      if (!inicioValor) return '-';
+      try {
+        if (typeof inicioValor === 'string') {
+          const stringLimpa = inicioValor.replace('T', ' ');
+          const partes = stringLimpa.split(' ');
+          if (partes.length >= 2) {
+            const [ano, mes, dia] = partes[0].split('-');
+            const horaMinuto = partes[1].substring(0, 5);
+            return `${dia}/${mes}/${ano} às ${horaMinuto}`;
+          }
+        }
+        const data = inicioValor.seconds ? new Date(inicioValor.seconds * 1000) : new Date(inicioValor);
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        }).format(data).replace(', ', ' às ');
+      } catch (e) {
+        return inicioValor;
+      }
+    }
+
+    // --- ALGORITMO DE NORMALIZAÇÃO DE TELEFONE (À PROVA DE BALAS) ---
+    function telefonesSaoCompativeis(t1, t2) {
+      if (!t1 || !t2) return false;
+      if (t1.length < 8 || t2.length < 8) return false;
+      
+      // Extrai os 8 dígitos principais (a raiz do número)
+      const core1 = t1.slice(-8);
+      const core2 = t2.slice(-8);
+      if (core1 !== core2) return false;
+
+      // Extrai o prefixo (Tudo o que vem antes dos 8 dígitos finais)
+      let p1 = t1.slice(0, -8);
+      let p2 = t2.slice(0, -8);
+
+      // Se o prefixo termina com '9' (o nono dígito do Brasil), remove para comparar só o DDD
+      if (p1.endsWith('9')) p1 = p1.slice(0, -1);
+      if (p2.endsWith('9')) p2 = p2.slice(0, -1);
+
+      // Se um não tiver DDD preenchido, perdoa a validação e considera compatível
+      if (p1 === '' || p2 === '') return true;
+      
+      // Se ambos tiverem DDD preenchido, eles precisam ser iguais
+      return p1 === p2;
+    }
+
     window.buscarSolicitacao = async function() {
-      const termoBusca = document.getElementById('inputBusca').value.trim();
-      if (!termoBusca) return alert("Digite um Ticket ou Telefone.");
+      const termoBuscaRaw = document.getElementById('inputBusca').value.trim();
+      if (!termoBuscaRaw) return alert("Digite um Ticket ou Telefone.");
 
       document.getElementById('btnBuscar').innerText = "Buscando...";
       document.getElementById('mensagemErro').style.display = 'none';
@@ -119,19 +185,37 @@
 
       try {
         const reservasRef = collection(db, "reservas");
-        
-        const qTicket = query(reservasRef, where("Ticket", "==", termoBusca.toUpperCase()));
-        const qTel = query(reservasRef, where("Telefone", "==", termoBusca));
-
-        const [snapT, snapTel] = await Promise.all([getDocs(qTicket), getDocs(qTel)]);
-        
         let resultados = [];
-        snapT.forEach(doc => resultados.push(doc.data()));
-        snapTel.forEach(doc => {
-            if (!resultados.some(r => r.Ticket === doc.data().Ticket && r.Início === doc.data().Início)) {
-                resultados.push(doc.data());
+
+        // Verifica se a busca é um TICKET (Ex: ABC1D23)
+        const termoUpper = termoBuscaRaw.toUpperCase();
+        const isTicket = /[A-Z]/.test(termoUpper) && termoUpper.length === 7;
+        
+        // Extrai apenas os números para a busca de TELEFONE
+        const termoNumerico = termoBuscaRaw.replace(/\D/g, '');
+
+        if (isTicket) {
+          // Busca rápida direta pelo Ticket
+          const qTicket = query(reservasRef, where("Ticket", "==", termoUpper));
+          const snapT = await getDocs(qTicket);
+          snapT.forEach(doc => resultados.push(doc.data()));
+        } 
+        else if (termoNumerico.length >= 8) {
+          // Busca Híbrida: Traz o banco e filtra o Telefone formatado no Cliente
+          const snapAll = await getDocs(reservasRef);
+          snapAll.forEach(doc => {
+            const dados = doc.data();
+            if (dados.Telefone) {
+              const telBD = dados.Telefone.replace(/\D/g, '');
+              if (telefonesSaoCompativeis(termoNumerico, telBD)) {
+                // Impede duplicações acidentais caso o banco retorne a mesma reserva
+                if (!resultados.some(r => r.Ticket === dados.Ticket && r.Início === dados.Início)) {
+                    resultados.push(dados);
+                }
+              }
             }
-        });
+          });
+        }
 
         if (resultados.length === 0) {
           document.getElementById('mensagemErro').style.display = 'block';
@@ -149,13 +233,13 @@
         document.getElementById('resTelefone').innerText = rRecente.Telefone || '-';
         document.getElementById('resTicket').innerText = rRecente.Ticket || '-';
 
-        const corpo = document.getElementById('corpoTabelaResultados');
-        corpo.innerHTML = '';
+        const cuerpo = document.getElementById('corpoTabelaResultados');
+        cuerpo.innerHTML = '';
         
         resultados.forEach(r => {
-          let inicioFmt = r['Início'] ? r['Início'].replace('T', ' às ') : '-';
+          let dataSolicitacaoFmt = formatarDataBR(r.Data_Solicitacao);
+          let inicioFmt = formatarHoraInicio(r['Início']);
           
-          // Lógica de definição visual do Status
           let statusBD = r.Status || 'Pendente';
           let classeStatus = 'status-pendente';
           let textoStatus = 'Pendente';
@@ -165,12 +249,12 @@
             textoStatus = 'Aprovada';
           } else if (statusBD === 'Reprovado' || statusBD === 'Reprovada' || statusBD === 'Não atendida') {
             classeStatus = 'status-nao-atendida';
-            textoStatus = 'Não Atendida'; // Converte o termo interno para o termo mais amigável pedido
+            textoStatus = 'Não Atendida';
           }
 
-          corpo.innerHTML += `
+          cuerpo.innerHTML += `
             <tr>
-              <td>${r.Data_Solicitacao || '-'}</td>
+              <td>${dataSolicitacaoFmt}</td>
               <td><span class="badge-status ${classeStatus}">${textoStatus}</span></td>
               <td><strong>${r.Auditório || '-'}</strong></td>
               <td>${r.Atividade || '-'}</td>
