@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendário de Reservas - CCHLA</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+  <style>
+    :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #334155; }
+    body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--texto-escuro); margin: 0; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; }
+    
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid var(--borda-suave); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); flex-grow: 1; box-sizing: border-box; display: flex; flex-direction: column; }
+    
+    /* Cabeçalho Ajustado para Linha Única */
+    .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--azul-royal); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: nowrap; gap: 15px; }
+    .header-logo-title { display: flex; align-items: center; gap: 15px; }
+    .header-logo-title img { max-height: 55px; object-fit: contain; }
+    .header-logo-title h2 { margin: 0; color: var(--azul-marinho); font-size: 21px; font-weight: 700; }
+    
+    /* Menu Dropdown de Solicitações - Engenharia de Posição Corrigida */
+    .dropdown-container { position: relative; display: inline-block; padding-bottom: 8px; margin-bottom: -8px; /* Cria uma ponte invisível para o mouse não perder o foco */ }
+    .btn-solicitacoes { background-color: var(--azul-royal); color: white; padding: 8px 15px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 6px -1px rgba(0,0,0,0.15); transition: background-color 0.2s; white-space: nowrap; }
+    .btn-solicitacoes:hover { background-color: var(--azul-marinho); }
+    
+    /* O menu agora responde tanto ao hover da ponte quanto à classe ativa do clique */
+    .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; margin-top: 2px; background-color: #ffffff; min-width: 320px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--borda-suave); z-index: 10000; overflow: hidden; }
+    .dropdown-container:hover .dropdown-menu,
+    .dropdown-menu.show { display: flex; flex-direction: column; }
+    
+    .dropdown-item { padding: 12px 16px; color: var(--texto-escuro); text-decoration: none; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s; }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background-color: #f8fafc; color: var(--azul-royal); }
+
+    /* Barra de Navegação Superior Customizada */
+    .barra-navegacao-custom { display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; border: 1px solid var(--borda-suave); padding: 15px; border-radius: 8px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    
+    .nav-esquerda { flex: 1; display: flex; justify-content: flex-start; }
+    .nav-centro { flex: 2; display: flex; align-items: center; justify-content: center; gap: 15px; }
+    .nav-direita { flex: 1; display: flex; justify-content: flex-end; }
+    
+    .nav-centro span { font-size: 16px; font-weight: 700; color: var(--azul-marinho); white-space: nowrap; cursor: pointer; transition: color 0.2s; }
+    .nav-centro span:hover { color: var(--azul-royal); text-decoration: underline; }
+    
+    .btn-nav-custom { background-color: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; color: var(--texto-escuro); cursor: pointer; transition: 0.2s; }
+    .btn-nav-custom:hover { background-color: #f1f5f9; border-color: var(--azul-royal); color: var(--azul-royal); }
+    
+    .select-meses-custom { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--borda-suave); font-size: 14px; color: var(--texto-escuro); font-weight: 600; background-color: #ffffff; cursor: pointer; min-width: 180px; }
+    .select-meses-custom:focus { outline: none; border-color: var(--azul-royal); }
+
+    .btn-group-views { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #2c3e50; }
+    .btn-view { background-color: #2c3e50; color: #fff; border: none; padding: 8px 15px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; border-right: 1px solid #1a252f; }
+    .btn-view:last-child { border-right: none; }
+    .btn-view:hover { background-color: #1a252f; }
+    .btn-view.active { background-color: #1a252f; box-shadow: inset 0 3px 5px rgba(0,0,0,0.125); }
+
+    /* Estilos do Calendário */
+    #calendar { max-width: 100%; background: #fff; padding: 0 10px 10px 10px; border-radius: 8px; flex-grow: 1; margin-top: 10px; }
+    .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 12px; border: none !important; color: #000000 !important; font-weight: 600; }
+
+    /* Tooltip Flutuante (Mouseover) */
+    #tooltipDetalhes { display: none; position: absolute; background: #ffffff; padding: 15px; border-radius: 8px; width: 280px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); border: 1px solid var(--borda-suave); z-index: 9999; pointer-events: none; transition: top 0.05s ease, left 0.05s ease; }
+    .tooltip-titulo { color: var(--azul-marinho); margin: 0 0 8px 0; border-bottom: 1px solid var(--borda-suave); padding-bottom: 6px; font-size: 15px; font-weight: 700; }
+    .tooltip-dado { margin-bottom: 6px; font-size: 12px; line-height: 1.4; }
+    .tooltip-dado strong { color: var(--azul-marinho); }
+
+    /* Modal de Detalhes (Clique) */
+    #modalDetalhes { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative; }
+    .fechar-modal { position: absolute; top: 15px; right: 15px; background: #e2e8f0; border: none; font-size: 16px; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+    .fechar-modal:hover { background: #cbd5e1; }
+    .modal-titulo { color: var(--azul-marinho); margin: 0 0 15px 0; border-bottom: 1px solid var(--borda-suave); padding-bottom: 10px; font-size: 18px; font-weight: 700; }
+    .modal-dado { margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
+    .modal-dado strong { color: var(--azul-marinho); }
+
+    .footer { text-align: center; padding: 25px 20px 10px 20px; color: #64748b; font-size: 13px; margin-top: 20px; border-top: 1px solid var(--borda-suave); }
+
+    @media (max-width: 768px) {
+      .header { flex-wrap: wrap; justify-content: center; text-align: center; gap: 20px; }
+      .header-logo-title { flex-direction: column; }
+      .nav-esquerda, .nav-centro, .nav-direita { justify-content: center; flex: 100%; }
+      .btn-group-views { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <div class="header">
+      <div class="header-logo-title">
+        <img src="cchla-logo.jpg" alt="Logo CCHLA">
+        <h2>Calendário de Ocupação dos Auditórios</h2>
+      </div>
+      
+      <div class="dropdown-container" id="meuDropdownContainer">
+        <button class="btn-solicitacoes" id="btnToggleDropdown">
+          Solicitações de Reservas ▼
+        </button>
+        <div class="dropdown-menu" id="menuDropdownOpcoes">
+          <a href="https://formulario-reservas-cchla.web.app" target="_blank" class="dropdown-item">Solicite uma Reserva de Auditório</a>
+          <a href="https://acompanhamento-reservas-cchla.web.app" target="_blank" class="dropdown-item">Acompanhe a sua Solicitação</a>
+          <a href="https://painel-reservas-cchla.web.app" target="_blank" class="dropdown-item">Gestão das Solicitações - Secretaria do CCHLA</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="barra-navegacao-custom">
+      <div class="nav-esquerda">
+        <select id="selectMesesDropdown" class="select-meses-custom">
+          </select>
+      </div>
+      
+      <div class="nav-centro">
+        <button id="btnMesAnterior" class="btn-nav-custom">← Anterior</button>
+        <span id="txtIdentificadorCalendario" title="Clique aqui para retornar ao dia de Hoje">Carregando período...</span>
+        <button id="btnMesSeguinte" class="btn-nav-custom">Seguinte →</button>
+      </div>
+
+      <div class="nav-direita">
+        <div class="btn-group-views">
+          <button id="btnViewMes" class="btn-view active">Mês</button>
+          <button id="btnViewSemana" class="btn-view">Semana</button>
+          <button id="btnViewDia" class="btn-view">Dia</button>
+          <button id="btnViewLista" class="btn-view">Lista</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="calendar"></div>
+  </div>
+
+  <div class="footer">
+    Gerência de Redes do CCHLA/UFRN - (84) 3342 2243 | Copyright © 2026 - UFRN
+  </div>
+
+  <div id="tooltipDetalhes">
+    <h3 class="tooltip-titulo" id="t-atividade">Atividade</h3>
+    <div class="tooltip-dado"><strong>Auditório:</strong> <span id="t-auditorio"></span></div>
+    <div class="tooltip-dado"><strong>Início:</strong> <span id="t-inicio"></span></div>
+    <div class="tooltip-dado"><strong>Fim:</strong> <span id="t-fim"></span></div>
+    <div class="tooltip-dado"><strong>Solicitante:</strong> <span id="t-solicitante"></span></div>
+    <div class="tooltip-dado"><strong>Departamento:</strong> <span id="t-depto"></span></div>
+    <div class="tooltip-dado"><strong>Ticket:</strong> <span id="t-ticket"></span></div>
+  </div>
+
+  <div id="modalDetalhes">
+    <div class="modal-content">
+      <button class="fechar-modal" onclick="fecharModal()">✕</button>
+      <h3 class="modal-titulo" id="m-atividade">Atividade</h3>
+      <div class="modal-dado"><strong>Auditório:</strong> <span id="m-auditorio"></span></div>
+      <div class="modal-dado"><strong>Início:</strong> <span id="m-inicio"></span></div>
+      <div class="modal-dado"><strong>Fim:</strong> <span id="m-fim"></span></div>
+      <div class="modal-dado"><strong>Solicitante:</strong> <span id="m-solicitante"></span></div>
+      <div class="modal-dado"><strong>Departamento:</strong> <span id="m-depto"></span></div>
+      <div class="modal-dado"><strong>Ticket:</strong> <span id="m-ticket"></span></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
+      authDomain: "formulario-reservas-cchla.firebaseapp.com",
+      projectId: "formulario-reservas-cchla",
+      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
+      messagingSenderId: "112276491941",
+      appId: "1:112276491941:web:ac2760c6d65a50bfa6474c",
+      measurementId: "G-9E2QF7JHSX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let calendarInstance = null;
+
+    function formatarData(dataISO) {
+      if(!dataISO) return '-';
+      let data = new Date(dataISO);
+      return data.toLocaleDateString('pt-BR') + ' às ' + data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function popularDropdownMeses() {
+      const select = document.getElementById('selectMesesDropdown');
+      const hoje = new Date();
+      
+      for (let i = -6; i <= 6; i++) {
+        let d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+        let opt = document.createElement('option');
+        
+        opt.value = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-01`;
+        
+        let nomeMes = d.toLocaleString('pt-BR', { month: 'long' });
+        opt.innerText = `${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1).toLowerCase()} ${d.getFullYear()}`;
+        
+        if (i === 0) opt.selected = true;
+        select.appendChild(opt);
+      }
+
+      select.addEventListener('change', function() {
+        if(calendarInstance) calendarInstance.gotoDate(this.value);
+      });
+    }
+
+    async function carregarEventos() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "reservas"));
+        const eventos = [];
+
+        querySnapshot.forEach((doc) => {
+          const d = doc.data();
+          let statusBD = d.Status || 'Pendente';
+          
+          if (statusBD === 'Aprovado' || statusBD === 'Aprovada') {
+            if(d.Início && d.Fim) {
+              eventos.push({
+                title: `${d.Auditório} - ${d.Atividade}`, 
+                start: d.Início,
+                end: d.Fim,
+                backgroundColor: '#10b981',
+                extendedProps: {
+                  auditorio: d.Auditório,
+                  atividade: d.Atividade,
+                  solicitante: d.Solicitante,
+                  departamento: d.Departamento,
+                  ticket: d.Ticket
+                }
+              });
+            }
+          }
+        });
+
+        inicializarCalendario(eventos);
+
+      } catch (error) {
+        console.error("Erro ao carregar reservas:", error);
+        alert("Erro ao conectar com o banco de dados.");
+      }
+    }
+
+    function inicializarCalendario(eventosMapeados) {
+      const calendarEl = document.getElementById('calendar');
+      const tooltip = document.getElementById('tooltipDetalhes');
+      
+      calendarInstance = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        headerToolbar: false,
+        events: eventosMapeados,
+        
+        eventClick: function(info) {
+          const p = info.event.extendedProps;
+          tooltip.style.display = 'none';
+
+          document.getElementById('m-atividade').innerText = p.atividade || '-';
+          document.getElementById('m-auditorio').innerText = p.auditorio || '-';
+          document.getElementById('m-inicio').innerText = formatarData(info.event.startStr);
+          document.getElementById('m-fim').innerText = formatarData(info.event.endStr);
+          document.getElementById('m-solicitante').innerText = p.solicitante || '-';
+          document.getElementById('m-depto').innerText = p.departamento || '-';
+          document.getElementById('m-ticket').innerText = p.ticket || '-';
+
+          document.getElementById('modalDetalhes').style.display = 'flex';
+        },
+        
+        eventMouseEnter: function(info) {
+          const p = info.event.extendedProps;
+          
+          document.getElementById('t-atividade').innerText = p.atividade || '-';
+          document.getElementById('t-auditorio').innerText = p.auditorio || '-';
+          document.getElementById('t-inicio').innerText = formatarData(info.event.startStr);
+          document.getElementById('t-fim').innerText = formatarData(info.event.endStr);
+          document.getElementById('t-solicitante').innerText = p.solicitante || '-';
+          document.getElementById('t-depto').innerText = p.departamento || '-';
+          document.getElementById('t-ticket').innerText = p.ticket || '-';
+
+          tooltip.style.display = 'block';
+
+          info.el.onmousemove = function(e) {
+            let tooltipHeight = tooltip.offsetHeight;
+            let tooltipWidth = tooltip.offsetWidth;
+
+            let top = e.pageY - tooltipHeight - 15;
+            let left = e.pageX - (tooltipWidth / 2);
+
+            if (top < window.scrollY + 10) top = e.pageY + 20; 
+            if (left < 10) left = 10;
+            if (left + tooltipWidth > window.innerWidth - 10) left = window.innerWidth - tooltipWidth - 10;
+
+            tooltip.style.top = top + 'px';
+            tooltip.style.left = left + 'px';
+          }
+        },
+        
+        eventMouseLeave: function(info) {
+          tooltip.style.display = 'none';
+          info.el.onmousemove = null;
+        },
+
+        datesSet: function(info) {
+          const dataFoco = info.view.currentStart;
+          const ano = dataFoco.getFullYear();
+          const mes = dataFoco.getMonth();
+
+          const dPrev = new Date(ano, mes - 1, 1);
+          const dNext = new Date(ano, mes + 1, 1);
+
+          let stringMesAtual = dataFoco.toLocaleString('pt-BR', { month: 'long' });
+          stringMesAtual = stringMesAtual.charAt(0).toUpperCase() + stringMesAtual.slice(1).toLowerCase();
+
+          let stringMesPrev = dPrev.toLocaleString('pt-BR', { month: 'long' });
+          stringMesPrev = stringMesPrev.charAt(0).toUpperCase() + stringMesPrev.slice(1).toLowerCase();
+
+          let stringMesNext = dNext.toLocaleString('pt-BR', { month: 'long' });
+          stringMesNext = stringMesNext.charAt(0).toUpperCase() + stringMesNext.slice(1).toLowerCase();
+
+          const hoje = new Date();
+          const diaHoje = String(hoje.getDate()).padStart(2, '0');
+          let mesNomeHoje = hoje.toLocaleString('pt-BR', { month: 'long' });
+          mesNomeHoje = mesNomeHoje.charAt(0).toUpperCase() + mesNomeHoje.slice(1).toLowerCase();
+          const anoHoje = hoje.getFullYear();
+          
+          if (mes === hoje.getMonth() && ano === anoHoje) {
+            document.getElementById('txtIdentificadorCalendario').innerText = `${diaHoje} de ${mesNomeHoje} ${anoHoje}`;
+          } else {
+            document.getElementById('txtIdentificadorCalendario').innerText = `${stringMesAtual} ${ano}`;
+          }
+
+          document.getElementById('btnMesAnterior').innerText = `← ${stringMesPrev}`;
+          document.getElementById('btnMesSeguinte').innerText = `${stringMesNext} →`;
+
+          const formatoBusca = `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`;
+          document.getElementById('selectMesesDropdown').value = formatoBusca;
+        }
+      });
+
+      calendarInstance.render();
+
+      document.getElementById('txtIdentificadorCalendario').onclick = () => calendarInstance.today();
+      document.getElementById('btnMesAnterior').onclick = () => calendarInstance.prev();
+      document.getElementById('btnMesSeguinte').onclick = () => calendarInstance.next();
+
+      function alterarVisualizacao(nomeView, idBotao) {
+        calendarInstance.changeView(nomeView);
+        document.querySelectorAll('.btn-view').forEach(b => b.classList.remove('active'));
+        document.getElementById(idBotao).classList.add('active');
+      }
+
+      document.getElementById('btnViewMes').onclick = () => alterarVisualizacao('dayGridMonth', 'btnViewMes');
+      document.getElementById('btnViewSemana').onclick = () => alterarVisualizacao('timeGridWeek', 'btnViewSemana');
+      document.getElementById('btnViewDia').onclick = () => alterarVisualizacao('timeGridDay', 'btnViewDia');
+      document.getElementById('btnViewLista').onclick = () => alterarVisualizacao('listWeek', 'btnViewLista');
+    }
+
+    // INTERATIVIDADE DO MENU DROPDOWN (Mecanismo Toggle + Fechamento Inteligente)
+    const btnToggle = document.getElementById('btnToggleDropdown');
+    const menuOpcoes = document.getElementById('menuDropdownOpcoes');
+
+    btnToggle.addEventListener('click', function(e) {
+      e.stopPropagation(); // Impede o clique de se propagar para a janela externa
+      menuOpcoes.classList.toggle('show');
+    });
+
+    // Se o usuário clicar em qualquer ponto cego da tela, recolhe o menu travado
+    window.addEventListener('click', function(e) {
+      if (!document.getElementById('meuDropdownContainer').contains(e.target)) {
+        menuOpcoes.classList.remove('show');
+      }
+    });
+
+    popularDropdownMeses();
+    carregarEventos();
+
+    window.fecharModal = () => document.getElementById('modalDetalhes').style.display = 'none';
+    window.onclick = (e) => {
+      const modal = document.getElementById('modalDetalhes');
+      if (e.target === modal) modal.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
