@@ -1,7 +1,7 @@
 {
   "hosting": [
     {
-      "target": "formulario_reservas",
+      "target": "formulario-reservas",
       "public": "app-formulario",
       "ignore": [
         "firebase.json",
@@ -26,6 +26,11 @@
         "**/.*",
         "**/node_modules/**"
       ]
+    },
+    {
+      "target": "calendario",
+      "public": "app-calendario",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
     }
   ]
 }
