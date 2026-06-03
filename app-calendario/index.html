@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendário de Reservas - CCHLA</title>
 
-  <script src="fullcalendar.min.js"></script>
+  <!-- Bibliotecas do FullCalendar (Via CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
   <style>
     :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #334155; }
@@ -13,42 +14,34 @@
     
     .container { max-width: 1200px; margin: 0 auto; width: 100%; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid var(--borda-suave); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); flex-grow: 1; box-sizing: border-box; display: flex; flex-direction: column; }
     
-    /* Cabeçalho Ajustado para Linha Única */
+    /* Cabeçalho */
     .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--azul-royal); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: nowrap; gap: 15px; }
     .header-logo-title { display: flex; align-items: center; gap: 15px; }
     .header-logo-title img { max-height: 55px; object-fit: contain; }
     .header-logo-title h2 { margin: 0; color: var(--azul-marinho); font-size: 21px; font-weight: 700; }
     
-    /* Menu Dropdown de Solicitações - Engenharia de Posição Corrigida */
-    .dropdown-container { position: relative; display: inline-block; padding-bottom: 8px; margin-bottom: -8px; /* Cria uma ponte invisível para o mouse não perder o foco */ }
+    /* Menu Dropdown de Solicitações */
+    .dropdown-container { position: relative; display: inline-block; padding-bottom: 8px; margin-bottom: -8px; }
     .btn-solicitacoes { background-color: var(--azul-royal); color: white; padding: 8px 15px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 6px -1px rgba(0,0,0,0.15); transition: background-color 0.2s; white-space: nowrap; }
     .btn-solicitacoes:hover { background-color: var(--azul-marinho); }
-    
-    /* O menu agora responde tanto ao hover da ponte quanto à classe ativa do clique */
     .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; margin-top: 2px; background-color: #ffffff; min-width: 320px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--borda-suave); z-index: 10000; overflow: hidden; }
     .dropdown-container:hover .dropdown-menu,
     .dropdown-menu.show { display: flex; flex-direction: column; }
-    
     .dropdown-item { padding: 12px 16px; color: var(--texto-escuro); text-decoration: none; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s; }
     .dropdown-item:last-child { border-bottom: none; }
     .dropdown-item:hover { background-color: #f8fafc; color: var(--azul-royal); }
 
-    /* Barra de Navegação Superior Customizada */
+    /* Barra de Navegação Superior */
     .barra-navegacao-custom { display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; border: 1px solid var(--borda-suave); padding: 15px; border-radius: 8px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-    
     .nav-esquerda { flex: 1; display: flex; justify-content: flex-start; }
     .nav-centro { flex: 2; display: flex; align-items: center; justify-content: center; gap: 15px; }
     .nav-direita { flex: 1; display: flex; justify-content: flex-end; }
-    
     .nav-centro span { font-size: 16px; font-weight: 700; color: var(--azul-marinho); white-space: nowrap; cursor: pointer; transition: color 0.2s; }
     .nav-centro span:hover { color: var(--azul-royal); text-decoration: underline; }
-    
     .btn-nav-custom { background-color: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; color: var(--texto-escuro); cursor: pointer; transition: 0.2s; }
     .btn-nav-custom:hover { background-color: #f1f5f9; border-color: var(--azul-royal); color: var(--azul-royal); }
-    
     .select-meses-custom { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--borda-suave); font-size: 14px; color: var(--texto-escuro); font-weight: 600; background-color: #ffffff; cursor: pointer; min-width: 180px; }
     .select-meses-custom:focus { outline: none; border-color: var(--azul-royal); }
-
     .btn-group-views { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #2c3e50; }
     .btn-view { background-color: #2c3e50; color: #fff; border: none; padding: 8px 15px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; border-right: 1px solid #1a252f; }
     .btn-view:last-child { border-right: none; }
@@ -57,15 +50,22 @@
 
     /* Estilos do Calendário */
     #calendar { max-width: 100%; background: #fff; padding: 0 10px 10px 10px; border-radius: 8px; flex-grow: 1; margin-top: 10px; }
-    .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 12px; border: none !important; color: #000000 !important; font-weight: 600; }
+    .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 12px; border: none !important; font-weight: 600; }
 
-    /* Tooltip Flutuante (Mouseover) */
+    /* LEGENDA E FILTROS INFERIORES - CORES ATUALIZADAS */
+    .calendario-legenda { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; padding: 15px; background: #e2e8f0; border-radius: 8px; border: 1px solid var(--borda-suave); }
+    .legenda-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; color: var(--texto-escuro); border: 2px solid transparent; }
+    .legenda-item:hover { background-color: #cbd5e1; transform: translateY(-1px); }
+    .legenda-item.ativo { background-color: #ffffff; border-color: var(--texto-escuro); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .legenda-cor { width: 16px; height: 16px; display: inline-block; }
+
+    /* Tooltip Flutuante */
     #tooltipDetalhes { display: none; position: absolute; background: #ffffff; padding: 15px; border-radius: 8px; width: 280px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); border: 1px solid var(--borda-suave); z-index: 9999; pointer-events: none; transition: top 0.05s ease, left 0.05s ease; }
     .tooltip-titulo { color: var(--azul-marinho); margin: 0 0 8px 0; border-bottom: 1px solid var(--borda-suave); padding-bottom: 6px; font-size: 15px; font-weight: 700; }
     .tooltip-dado { margin-bottom: 6px; font-size: 12px; line-height: 1.4; }
     .tooltip-dado strong { color: var(--azul-marinho); }
 
-    /* Modal de Detalhes (Clique) */
+    /* Modal de Detalhes */
     #modalDetalhes { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
     .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative; }
     .fechar-modal { position: absolute; top: 15px; right: 15px; background: #e2e8f0; border: none; font-size: 16px; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-weight: bold; }
@@ -88,6 +88,7 @@
 
   <div class="container">
     
+    <!-- Cabeçalho -->
     <div class="header">
       <div class="header-logo-title">
         <img src="cchla-logo.jpg" alt="Logo CCHLA">
@@ -106,10 +107,12 @@
       </div>
     </div>
 
-    <div class="barra-navegacao-custom">
+    <!-- Barra de Controle Superior -->
+    <div class="barra-navegacao-custom no-print">
       <div class="nav-esquerda">
         <select id="selectMesesDropdown" class="select-meses-custom">
-          </select>
+          <!-- Alimentado via Javascript -->
+        </select>
       </div>
       
       <div class="nav-centro">
@@ -128,13 +131,41 @@
       </div>
     </div>
 
+    <!-- O Calendário -->
     <div id="calendar"></div>
+
+    <!-- Legenda de Cores e Filtro Inferior -->
+    <div class="calendario-legenda no-print">
+      <div class="legenda-item" id="leg-A" onclick="filtrarCalendario('Auditorio A', 'A')">
+        <span class="legenda-cor" style="background:#ff0000;"></span>Auditório 'A'
+      </div>
+      <div class="legenda-item" id="leg-B" onclick="filtrarCalendario('Auditorio B', 'B')">
+        <span class="legenda-cor" style="background:#000080;"></span>Auditório 'B'
+      </div>
+      <div class="legenda-item" id="leg-C" onclick="filtrarCalendario('Auditorio C', 'C')">
+        <span class="legenda-cor" style="background:#ffff00; border: 1px solid #ccc;"></span>Auditório 'C'
+      </div>
+      <div class="legenda-item" id="leg-D" onclick="filtrarCalendario('Auditorio D', 'D')">
+        <span class="legenda-cor" style="background:#008000;"></span>Auditório 'D'
+      </div>
+      <div class="legenda-item" id="leg-E" onclick="filtrarCalendario('Auditorio E', 'E')">
+        <span class="legenda-cor" style="background:#4682B4;"></span>Auditório 'E'
+      </div>
+      <div class="legenda-item" id="leg-Feriado" onclick="filtrarCalendario('FERIADO', 'Feriado')">
+        <span class="legenda-cor" style="background:#FF8C00;"></span>FERIADO
+      </div>
+      <div class="legenda-item ativo" id="leg-TODOS" onclick="filtrarCalendario('TODOS', 'TODOS')">
+        <span class="legenda-cor" style="background:#cbd5e1;"></span>Todas Categorias ...
+      </div>
+    </div>
+
   </div>
 
   <div class="footer">
     Gerência de Redes do CCHLA/UFRN - (84) 3342 2243 | Copyright © 2026 - UFRN
   </div>
 
+  <!-- Caixinha Flutuante (Hover) -->
   <div id="tooltipDetalhes">
     <h3 class="tooltip-titulo" id="t-atividade">Atividade</h3>
     <div class="tooltip-dado"><strong>Auditório:</strong> <span id="t-auditorio"></span></div>
@@ -145,6 +176,7 @@
     <div class="tooltip-dado"><strong>Ticket:</strong> <span id="t-ticket"></span></div>
   </div>
 
+  <!-- Janela Modal (Clique) -->
   <div id="modalDetalhes">
     <div class="modal-content">
       <button class="fechar-modal" onclick="fecharModal()">✕</button>
@@ -176,11 +208,28 @@
     const db = getFirestore(app);
 
     let calendarInstance = null;
+    let todosEventosGlobais = []; 
 
     function formatarData(dataISO) {
       if(!dataISO) return '-';
       let data = new Date(dataISO);
       return data.toLocaleDateString('pt-BR') + ' às ' + data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // Identificador de Cores Baseado na Imagem
+    function getCorAuditorio(nomeAuditorio) {
+      if(!nomeAuditorio) return { bg: "#cbd5e1", text: "#000" };
+      
+      let n = nomeAuditorio.toUpperCase();
+      
+      if(n === "AUDITORIO A" || n === "AUDITÓRIO A") return { bg: "#ff0000", text: "#fff" };
+      if(n === "AUDITORIO B" || n === "AUDITÓRIO B") return { bg: "#000080", text: "#fff" };
+      if(n === "AUDITORIO C" || n === "AUDITÓRIO C") return { bg: "#ffff00", text: "#000" };
+      if(n === "AUDITORIO D" || n === "AUDITÓRIO D") return { bg: "#008000", text: "#fff" };
+      if(n === "AUDITORIO E" || n === "AUDITÓRIO E") return { bg: "#4682B4", text: "#fff" };
+      if(n.includes("FERIADO")) return { bg: "#FF8C00", text: "#fff" };
+      
+      return { bg: "#cbd5e1", text: "#000" };
     }
 
     function popularDropdownMeses() {
@@ -214,13 +263,20 @@
           const d = doc.data();
           let statusBD = d.Status || 'Pendente';
           
+          // O Calendário só exibe o que está Aprovado
           if (statusBD === 'Aprovado' || statusBD === 'Aprovada') {
             if(d.Início && d.Fim) {
+              
+              // Define a cor
+              let cores = getCorAuditorio(d.Auditório);
+              
               eventos.push({
                 title: `${d.Auditório} - ${d.Atividade}`, 
                 start: d.Início,
                 end: d.Fim,
-                backgroundColor: '#10b981',
+                backgroundColor: cores.bg,
+                textColor: cores.text,
+                borderColor: cores.bg,
                 extendedProps: {
                   auditorio: d.Auditório,
                   atividade: d.Atividade,
@@ -233,7 +289,9 @@
           }
         });
 
-        inicializarCalendario(eventos);
+        // Salva tudo na memória e inicia o calendário
+        todosEventosGlobais = eventos;
+        inicializarCalendario(todosEventosGlobais);
 
       } catch (error) {
         console.error("Erro ao carregar reservas:", error);
@@ -355,25 +413,59 @@
       document.getElementById('btnViewLista').onclick = () => alterarVisualizacao('listWeek', 'btnViewLista');
     }
 
-    // INTERATIVIDADE DO MENU DROPDOWN (Mecanismo Toggle + Fechamento Inteligente)
+    // ==========================================
+    // SISTEMA DE FILTRO POR CLIQUE NA LEGENDA
+    // ==========================================
+    window.filtrarCalendario = function(categoriaBusca, idBotaoLegenda) {
+      
+      // 1. Efeito visual: Liga a borda de qual legenda foi clicada
+      document.querySelectorAll('.legenda-item').forEach(el => el.classList.remove('ativo'));
+      document.getElementById('leg-' + idBotaoLegenda).classList.add('ativo');
+
+      let eventosFiltrados = [];
+
+      // 2. Lógica de Filtro
+      if (categoriaBusca === 'TODOS') {
+        eventosFiltrados = todosEventosGlobais; // Retorna tudo
+      } else if (categoriaBusca === 'FERIADO') {
+        eventosFiltrados = todosEventosGlobais.filter(e => {
+          let aud = (e.extendedProps.auditorio || "").toUpperCase();
+          return aud.includes('FERIADO');
+        });
+      } else {
+        // Exige que o nome gravado no banco seja igual ao que o usuário escolheu
+        eventosFiltrados = todosEventosGlobais.filter(e => {
+          let aud = e.extendedProps.auditorio || "";
+          // Compara ignorando acentos (Auditorio A == Auditório A)
+          return aud.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() === categoriaBusca.toUpperCase();
+        });
+      }
+
+      // 3. Atualiza o calendário limpando a tela e jogando só o que passou no filtro
+      if (calendarInstance) {
+        calendarInstance.removeAllEventSources();
+        calendarInstance.addEventSource(eventosFiltrados);
+      }
+    };
+
+    // Script do Menu Suspenso (Dropdown)
     const btnToggle = document.getElementById('btnToggleDropdown');
     const menuOpcoes = document.getElementById('menuDropdownOpcoes');
-
     btnToggle.addEventListener('click', function(e) {
-      e.stopPropagation(); // Impede o clique de se propagar para a janela externa
+      e.stopPropagation();
       menuOpcoes.classList.toggle('show');
     });
-
-    // Se o usuário clicar em qualquer ponto cego da tela, recolhe o menu travado
     window.addEventListener('click', function(e) {
       if (!document.getElementById('meuDropdownContainer').contains(e.target)) {
         menuOpcoes.classList.remove('show');
       }
     });
 
+    // Inicia os processos na abertura da tela
     popularDropdownMeses();
     carregarEventos();
 
+    // Controle Modal de Clique
     window.fecharModal = () => document.getElementById('modalDetalhes').style.display = 'none';
     window.onclick = (e) => {
       const modal = document.getElementById('modalDetalhes');
