@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Eventos Coletivos e Manutenções - Painel CCHLA</title>
+  
+  <style>
+    :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #1e293b; --texto-claro: #64748b; }
+    body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; color: var(--texto-escuro); }
+    .container { max-width: 1000px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--azul-royal); padding-bottom: 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .branding { display: flex; align-items: center; gap: 20px; }
+    .branding img { height: 60px; object-fit: contain; }
+    .branding h1 { color: var(--azul-marinho); margin: 0; font-size: 24px; font-weight: 700; }
+    
+    .status-indicador { font-size: 13px; color: #10b981; font-weight: 600; background-color: #d1fae5; padding: 6px 12px; border-radius: 20px; }
+    .btn-voltar { background: var(--azul-marinho); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; text-decoration: none; }
+    .btn-voltar:hover { background: var(--azul-royal); }
+    .btn-sair { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+    .btn-sair:hover { background: #dc2626; }
+
+    /* Área do Formulário */
+    .form-section { background-color: #f8fafc; border: 1px solid var(--borda-suave); border-left: 5px solid #f97316; border-radius: 8px; padding: 25px; margin-bottom: 35px; }
+    .form-section h3 { margin-top: 0; color: #f97316; font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .form-row { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+    .form-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; font-weight: 700; color: var(--azul-marinho); }
+    .form-group input, .form-group select { padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #f97316; }
+    
+    .d-flex { display: flex; gap: 10px; }
+    .btn-cadastrar { background-color: #f97316; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px; }
+    .btn-cadastrar:hover { background-color: #ea580c; }
+    .btn-cadastrar:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-cancelar { background-color: #64748b; color: white; border: none; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px; display: none; }
+    .btn-cancelar:hover { background-color: #475569; }
+
+    /* Filtros da Lista */
+    .filtros-lista { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-end; }
+    .filtro-box { flex: 1; min-width: 200px; }
+    .filtro-box label { display: block; font-size: 12px; font-weight: 700; color: var(--texto-claro); margin-bottom: 5px; }
+    .filtro-box input { width: 100%; padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; box-sizing: border-box; }
+
+    /* Tabela de Registros */
+    .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--borda-suave); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+    th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+    th { background-color: #f1f5f9; color: var(--azul-marinho); font-weight: 700; white-space: nowrap; }
+    tbody tr:hover { background-color: #f8fafc; }
+    
+    .acoes-flex { display: flex; gap: 8px; justify-content: center; }
+    .btn-editar { background-color: #eab308; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+    .btn-editar:hover { background-color: #ca8a04; }
+    .btn-remover { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+    .btn-remover:hover { background-color: #dc2626; }
+    
+    .status-msg { text-align: center; color: var(--texto-claro); padding: 20px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="appContainer" style="display: none;">
+    <div class="header">
+      <div class="branding">
+        <img src="cchla-logo.jpg" alt="Logo CCHLA" onerror="this.style.display='none'">
+        <h1>Calendário Administrativo</h1>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <span class="status-indicador">Usuário Autenticado</span>
+        <button onclick="window.history.back()" class="btn-voltar">⬅ Voltar ao Painel</button>
+        <button class="btn-sair" onclick="sairDoSistema()">Sair</button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 id="tituloFormulario">📅 Inserir Registro no Calendário Público</h3>
+      <form id="formFeriado">
+        <input type="hidden" id="idEditando" value="">
+        
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label>Tipo de Lançamento</label>
+            <select id="tipoBloqueio" required onchange="ajustarFormularioPorTipo()">
+              <option value="" disabled selected>Selecione...</option>
+              <option value="Feriado">Feriado</option>
+              <option value="Ponto Facultativo">Ponto Facultativo</option>
+              <option value="Manutenção">Manutenção</option>
+            </select>
+          </div>
+          
+          <div class="form-group" id="grupoAuditorio" style="flex: 1; display: none;">
+            <label>Auditório a ser Reparado</label>
+            <select id="auditorioManutencao">
+              <option value="" disabled selected>Selecione o auditório...</option>
+              <option value="Auditório A">Auditório A</option>
+              <option value="Auditório B">Auditório B</option>
+              <option value="Auditório C">Auditório C</option>
+              <option value="Auditório D">Auditório D</option>
+              <option value="Auditório E">Auditório E</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 2;">
+            <label id="labelMotivo">Motivo / Título Específico</label>
+            <input type="text" id="tituloBloqueio" required placeholder="Ex: Proclamação da República, Troca de fiação...">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data de Início</label>
+            <div class="d-flex">
+              <input type="date" id="dataInicio" required style="flex: 2;">
+              <select id="horaInicio" style="flex: 1; display: none;"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Data de Fim</label>
+            <div class="d-flex">
+              <input type="date" id="dataFim" required style="flex: 2;">
+              <select id="horaFim" style="flex: 1; display: none;"></select>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" id="btnSalvar" class="btn-cadastrar">Cadastrar no Calendário</button>
+          <button type="button" id="btnCancelar" class="btn-cancelar" onclick="cancelarEdicao()">Cancelar Edição</button>
+        </div>
+      </form>
+    </div>
+
+    <hr style="border: none; border-top: 1px dashed var(--borda-suave); margin: 30px 0;">
+
+    <h3 style="color: var(--azul-marinho); margin-bottom: 15px;">Registros no Sistema</h3>
+    
+    <div class="filtros-lista">
+      <div class="filtro-box">
+        <label>Buscar por Título ou Tipo</label>
+        <input type="text" id="buscaTexto" placeholder="Ex: Natal, Manutenção..." onkeyup="filtrarTabela()">
+      </div>
+      <div class="filtro-box">
+        <label>Filtrar por Data Específica</label>
+        <input type="date" id="buscaData" onchange="filtrarTabela()">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Local / Contexto</th>
+            <th>Tipo e Detalhes</th>
+            <th>Período / Horário</th>
+            <th style="text-align: center;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaCorpo">
+          <tr><td colspan="4" class="status-msg">Carregando registros...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
+      authDomain: "formulario-reservas-cchla.firebaseapp.com",
+      projectId: "formulario-reservas-cchla",
+      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
+      messagingSenderId: "112276491941",
+      appId: "1:112276491941:web:f67cc53ce868764ea6474c",
+      measurementId: "G-4B1J48HDGF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let registrosGlobais = [];
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('appContainer').style.display = 'block';
+        popularSelectsHoraManutencao();
+        carregarRegistros();
+      } else {
+        window.location.replace('index.html'); 
+      }
+    });
+
+    window.sairDoSistema = function() {
+      signOut(auth).then(() => window.location.replace('index.html'));
+    };
+
+    // Alimenta os horários das 06:00 às 23:00 para as manutenções
+    function popularSelectsHoraManutencao() {
+      const selectIn = document.getElementById('horaInicio');
+      const selectOut = document.getElementById('horaFim');
+      let html = '<option value="" disabled selected>Hora</option>';
+      for (let h = 6; h <= 23; h++) {
+        let hStr = h.toString().padStart(2, '0');
+        html += `<option value="${hStr}:00">${hStr}:00</option>`;
+        html += `<option value="${hStr}:30">${hStr}:30</option>`;
+      }
+      selectIn.innerHTML = html;
+      selectOut.innerHTML = html;
+    }
+
+    // Gerencia dinamicamente o formulário baseado no tipo selecionado
+    window.ajustarFormularioPorTipo = function() {
+      const tipo = document.getElementById('tipoBloqueio').value;
+      const grupoAuditorio = document.getElementById('grupoAuditorio');
+      const selectAuditorio = document.getElementById('auditorioManutencao');
+      const selectHoraIn = document.getElementById('horaInicio');
+      const selectHoraOut = document.getElementById('horaFim');
+      const labelMotivo = document.getElementById('labelMotivo');
+      const idEditando = document.getElementById('idEditando').value;
+
+      if (tipo === "Manutenção") {
+        grupoAuditorio.style.display = "flex";
+        selectAuditorio.required = true;
+        selectHoraIn.style.display = "block";
+        selectHoraIn.required = true;
+        selectHoraOut.style.display = "block";
+        selectHoraOut.required = true;
+        labelMotivo.innerText = "Título da Manutenção";
+        
+        if(!idEditando) {
+          document.getElementById('tituloFormulario').innerText = '🔧 Agendar Manutenção de Auditório';
+        }
+      } else {
+        // Feriado ou Ponto Facultativo
+        grupoAuditorio.style.display = "none";
+        selectAuditorio.required = false;
+        selectAuditorio.value = "";
+        selectHoraIn.style.display = "none";
+        selectHoraIn.required = false;
+        selectHoraOut.style.display = "none";
+        selectHoraOut.required = false;
+        labelMotivo.innerText = "Motivo do Evento Coletivo";
+        
+        if(!idEditando) {
+          document.getElementById('tituloFormulario').innerText = '📅 Inserir Feriado ou Ponto Facultativo';
+        }
+      }
+    };
+
+    // Envio do formulário
+    document.getElementById('formFeriado').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvar');
+      
+      const tipo = document.getElementById('tipoBloqueio').value;
+      const motivo = document.getElementById('tituloBloqueio').value;
+      const dataIn = document.getElementById('dataInicio').value;
+      const dataOut = document.getElementById('dataFim').value;
+      const idEditando = document.getElementById('idEditando').value;
+
+      let dtInicioFull, dtFimFull, localDestino;
+
+      if (tipo === "Manutenção") {
+        const horaIn = document.getElementById('horaInicio').value;
+        const horaOut = document.getElementById('horaFim').value;
+        localDestino = document.getElementById('auditorioManutencao').value;
+        
+        dtInicioFull = dataIn + 'T' + horaIn;
+        dtFimFull = dataOut + 'T' + horaOut;
+      } else {
+        // Dias inteiros para Feriado/Ponto Facultativo
+        localDestino = "FERIADO";
+        dtInicioFull = dataIn + 'T00:00';
+        dtFimFull = dataOut + 'T23:59';
+      }
+
+      if (dtFimFull <= dtInicioFull) {
+        return alert("O momento de término deve ser posterior ao início.");
+      }
+
+      btn.innerText = 'Processando...';
+      btn.disabled = true;
+
+      try {
+        const payload = {
+          Auditório: localDestino, 
+          TipoBloqueio: tipo,
+          Motivo: motivo,
+          Atividade: `${tipo}: ${motivo}`,
+          Solicitante: "Sistema / Gestão CCHLA",
+          Departamento: "Administração",
+          Telefone: "-",
+          Email: "-",
+          Início: dtInicioFull,
+          Fim: dtFimFull,
+          Status: "Aprovado",
+          Data_Solicitacao: new Date().toLocaleString('pt-BR')
+        };
+
+        if (idEditando) {
+          await updateDoc(doc(db, "reservas", idEditando), payload);
+          alert("Lançamento alterado com sucesso!");
+        } else {
+          payload.Ticket = "SYS-" + Math.floor(1000 + Math.random() * 9000);
+          payload.timestamp_criacao = serverTimestamp();
+          await addDoc(collection(db, "reservas"), payload);
+          alert("Lançamento cadastrado com sucesso!");
+        }
+        
+        window.cancelarEdicao();
+        carregarRegistros(); 
+
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao salvar dados.");
+      } finally {
+        btn.disabled = false;
+        window.ajustarFormularioPorTipo();
+      }
+    });
+
+    window.cancelarEdicao = function() {
+      document.getElementById('formFeriado').reset();
+      document.getElementById('idEditando').value = '';
+      document.getElementById('btnSalvar').innerText = 'Cadastrar no Calendário';
+      document.getElementById('btnCancelar').style.display = 'none';
+      window.ajustarFormularioPorTipo();
+    };
+
+    async function carregarRegistros() {
+      try {
+        const snapshot = await getDocs(collection(db, "reservas"));
+        registrosGlobais = [];
+        
+        snapshot.forEach(doc => {
+          let data = doc.data();
+          // Filtra apenas o que for do escopo desta página administratriva (Feriados ou Manutenções)
+          if(data.Auditório === "FERIADO" || data.TipoBloqueio === "Manutenção") {
+            data.id = doc.id;
+            registrosGlobais.push(data);
+          }
+        });
+
+        registrosGlobais.sort((a, b) => (b.Início || "").localeCompare(a.Início || ""));
+        window.filtrarTabela(); 
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById('tabelaCorpo').innerHTML = `<tr><td colspan="4" class="status-msg" style="color:red;">Erro ao carregar dados.</td></tr>`;
+      }
+    }
+
+    function formatarDataHoraBR(isoStr, isAllDay) {
+      if(!isoStr) return "-";
+      let p = isoStr.split('T');
+      if(p.length < 2) return isoStr;
+      let d = p[0].split('-');
+      let dataFormatada = `${d[2]}/${d[1]}/${d[0]}`;
+      return isAllDay ? dataFormatada : `${dataFormatada} às ${p[1]}`;
+    }
+
+    window.filtrarTabela = function() {
+      const txt = document.getElementById('buscaTexto').value.toLowerCase();
+      const dtBusca = document.getElementById('buscaData').value;
+
+      const filtrados = registrosGlobais.filter(r => {
+        const matchTxt = (r.Atividade || "").toLowerCase().includes(txt) || (r.Auditório || "").toLowerCase().includes(txt);
+        const matchDt = dtBusca === "" || (r.Início && r.Início.startsWith(dtBusca));
+        return matchTxt && matchDt;
+      });
+
+      const tbody = document.getElementById('tabelaCorpo');
+      tbody.innerHTML = "";
+
+      if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="status-msg">Nenhum registro encontrado.</td></tr>`;
+        return;
+      }
+
+      filtrados.forEach(r => {
+        const isAllDay = r.TipoBloqueio !== "Manutenção";
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="padding: 4px 8px; border-radius:4px; font-size:12px; font-weight:bold; background:${r.Auditório === 'FERIADO' ? '#e2e8f0' : '#fed7aa'}">${r.Auditório}</span></td>
+          <td><strong>${r.Atividade || ''}</strong></td>
+          <td>De ${formatarDataHoraBR(r.Início, isAllDay)}<br>Até ${formatarDataHoraBR(r.Fim, isAllDay)}</td>
+          <td>
+            <div class="acoes-flex">
+              <button class="btn-editar" onclick="editarRegistro('${r.id}')">Alterar</button>
+              <button class="btn-remover" onclick="removerRegistro('${r.id}')">Remover</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.editarRegistro = function(idDoc) {
+      const reg = registrosGlobais.find(r => r.id === idDoc);
+      if(!reg) return;
+
+      document.getElementById('idEditando').value = reg.id;
+      document.getElementById('tipoBloqueio').value = reg.TipoBloqueio || "Feriado";
+      
+      // Carrega dependências visuais baseadas no tipo antes de preencher os valores
+      window.ajustarFormularioPorTipo();
+
+      if (reg.TipoBloqueio === "Manutenção") {
+        document.getElementById('auditorioManutencao').value = reg.Auditório || "";
+        document.getElementById('horaInicio').value = reg.Início ? reg.Início.split('T')[1] : "";
+        document.getElementById('horaFim').value = reg.Fim ? reg.Fim.split('T')[1] : "";
+      }
+      
+      document.getElementById('tituloBloqueio').value = reg.Motivo || "";
+      document.getElementById('dataInicio').value = reg.Início ? reg.Início.split('T')[0] : "";
+      document.getElementById('dataFim').value = reg.Fim ? reg.Fim.split('T')[0] : "";
+
+      document.getElementById('tituloFormulario').innerText = '✏️ Editando Lançamento';
+      document.getElementById('btnSalvar').innerText = 'Salvar Alterações';
+      document.getElementById('btnCancelar').style.display = 'block';
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.removerRegistro = async function(idDoc) {
+      if(!confirm("Tem certeza que deseja remover este lançamento? Ele sairá do sistema imediatamente.")) return;
+
+      try {
+        await deleteDoc(doc(db, "reservas", idDoc));
+        alert("Removido com sucesso.");
+        if(document.getElementById('idEditando').value === idDoc) {
+            window.cancelarEdicao();
+        }
+        carregarRegistros(); 
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao remover o registro.");
+      }
+    };
+  </script>
+</body>
+</html>
