@@ -46,6 +46,10 @@
     .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; margin-right: 10px; }
     .btn-imprimir:hover { background-color: #334155; }
 
+    /* Novo: Estilo do Botão WhatsApp */
+    .btn-whatsapp { background-color: #25D366; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; margin-right: 10px; }
+    .btn-whatsapp:hover { background-color: #128C7E; }
+
     /* Novo: Estilo para Alerta de Conflito */
     #avisoConflito { display: none; background-color: #fffbeb; border: 1px solid #fcd34d; border-left: 5px solid #f59e0b; color: #92400e; padding: 15px; margin-top: 15px; border-radius: 6px; font-size: 13px; line-height: 1.5; }
     #avisoConflito strong.aviso-titulo { color: #b45309; font-size: 14px; display: block; margin-bottom: 8px; }
@@ -55,7 +59,7 @@
     @media print {
       body { background-color: #ffffff; padding: 0; }
       .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
-      .btn-voltar, .btn-imprimir, .sucesso-icone, .no-print { display: none !important; }
+      .btn-voltar, .btn-imprimir, .btn-whatsapp, .sucesso-icone, .no-print { display: none !important; }
       .ticket-box { border: 2px solid #000; background-color: transparent; }
       .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
       table, th, td { border: 1px solid #000; }
@@ -87,27 +91,32 @@
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="responsavel">2) Responsável pela reserva e matrícula:</label>
-        <input type="text" id="responsavel" name="responsavel_e_matricula" required placeholder="Nome completo e número da matrícula">
+        <label for="responsavel">2) Responsável pela solicitação:</label>
+        <input type="text" id="responsavel" name="responsavel" required placeholder="Nome completo">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="telefone">3) Telefone para contato:</label>
-        <input type="tel" id="telefone" name="telefone_contato" required placeholder="(84) 99999-9999">
+        <label for="matricula">3) Matrícula:</label>
+        <input type="text" id="matricula" name="matricula" required placeholder="Número da matrícula">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="departamento">4) Departamento / Centro:</label>
+        <label for="telefone">4) Telefone para contato:</label>
+        <input type="tel" id="telefone" name="telefone_contato" required placeholder="(84) 99999-9999" maxlength="15">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="departamento">5) Departamento / Centro:</label>
         <input type="text" id="departamento" name="departamento_centro" required placeholder="Ex: Departamento de Letras / CCHLA">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="atividade">5) Atividade a ser realizada:</label>
+        <label for="atividade">6) Atividade a ser realizada:</label>
         <input type="text" id="atividade" name="atividade_realizada" required placeholder="Ex: Reunião, defesa, apresentação, etc.">
       </div>
 
       <div style="margin-bottom: 25px; background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-        <span style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 14px; color: var(--azul-marinho);">6) Período da Reserva (Início e Fim):</span>
+        <span style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 14px; color: var(--azul-marinho);">7) Período da Reserva (Início e Fim):</span>
         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 250px;">
             <label style="font-size: 12px; color: #64748b;">Início:</label>
@@ -131,7 +140,7 @@
       </div>
 
       <div style="margin-bottom: 25px;">
-        <label>Seu E-mail institucional:</label>
+        <label>8) Seu E-mail institucional:</label>
         <input type="email" name="_replyto" required placeholder="seuemail@ufrn.br">
       </div>
 
@@ -186,8 +195,9 @@
       </table>
     </div>
 
-    <button class="btn-imprimir no-print" onclick="window.print()">🖨️ Imprimir Comprovante</button>
-    <button class="btn-voltar no-print" onclick="novaSolicitacao()">Fazer Nova Solicitação</button>
+    <button class="btn-whatsapp no-print" onclick="compartilharWhatsApp()">📱 Exportar para WhatsApp</button>
+    <button class="btn-imprimir no-print" onclick="window.print()">🖨️ Imprimir</button>
+    <button class="btn-voltar no-print" onclick="novaSolicitacao()">Nova Solicitação</button>
   
   </div>
   
@@ -208,7 +218,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // SISTEMA DE VERIFICAÇÃO DE CONFLITOS EM TEMPO REAL
     const auditorioEl = document.getElementById('auditorio');
     const dataInicioEl = document.querySelector('input[name="data_inicio"]');
     const horaInicioEl = document.getElementById('select_hora_inicio');
@@ -216,68 +225,72 @@
     const horaFimEl = document.getElementById('select_hora_fim');
     const avisoConflito = document.getElementById('avisoConflito');
 
-    let ultimoAuditorio = null;
-    let ultimaData = null;
-    let reservasDoDia = [];
+    const inputTelefone = document.getElementById('telefone');
+    inputTelefone.addEventListener('input', function (e) {
+      let valor = e.target.value.replace(/\D/g, ''); 
+      let formatado = valor.match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+      e.target.value = !formatado[2] ? formatado[1] : '(' + formatado[1] + ') ' + formatado[2] + (formatado[3] ? '-' + formatado[3] : '');
+    });
 
-    async function checarEAtualizarConflitos() {
+    let ultimoAuditorio = null;
+    let todasReservasAuditorio = [];
+
+    async function checarEAtualUxConflitos() {
       const aud = auditorioEl.value;
       const dataIni = dataInicioEl.value;
       const hIni = horaInicioEl.value;
       const hFim = horaFimEl.value;
+      const dataFimReal = dataFimEl.value || dataIni;
 
-      // Só processa se os campos chaves já estiverem preenchidos
       if (!aud || !dataIni || !hIni || !hFim) {
         avisoConflito.style.display = 'none';
         return;
       }
 
-      // Otimização: Só busca no banco se o auditório ou a data mudaram
-      if (aud !== ultimoAuditorio || dataIni !== ultimaData) {
+      if (aud !== ultimoAuditorio) {
         ultimoAuditorio = aud;
-        ultimaData = dataIni;
-
         const reservasRef = collection(db, "reservas");
         const q = query(reservasRef, where("Auditório", "==", aud));
         const snapshot = await getDocs(q);
 
-        reservasDoDia = [];
+        todasReservasAuditorio = [];
         snapshot.forEach(doc => {
           const d = doc.data();
-          // Filtra pela data atual e ignora pedidos reprovados
-          if (d.Início && d.Início.startsWith(dataIni)) {
+          if (d.Início && d.Fim) {
             let st = d.Status ? d.Status.toLowerCase() : '';
             if (!st.includes('reprovad') && !st.includes('não atendida')) {
-              reservasDoDia.push(d);
+              todasReservasAuditorio.push(d);
             }
           }
         });
       }
-      analisarConflitos(dataIni, hIni, hFim);
+      analisarConflitos(dataIni, dataFimReal, hIni, hFim);
     }
 
-    function analisarConflitos(dataIni, hIni, hFim) {
-      const dataFimReal = dataFimEl.value || dataIni; // Prevenção
-      const meuInicio = dataIni + 'T' + hIni;
-      const meuFim = dataFimReal + 'T' + hFim;
-
+    function analisarConflitos(dataIni, dataFimReal, hIni, hFim) {
       let temConflito = false;
-      for (let r of reservasDoDia) {
-        // Fórmula de sobreposição: A inicia antes de B terminar E A termina depois de B iniciar
-        if (meuInicio < r.Fim && meuFim > r.Início) {
+
+      for (let r of todasReservasAuditorio) {
+        const [rDataIni, rHoraIni] = r.Início.split('T');
+        const [rDataFim, rHoraFim] = r.Fim.split('T');
+
+        const overlapData = (dataIni <= rDataFim) && (dataFimReal >= rDataIni);
+        const overlapHora = (hIni < rHoraFim) && (hFim > rHoraIni);
+
+        if (overlapData && overlapHora) {
           temConflito = true;
           break;
         }
       }
 
       if (temConflito) {
-        const sugestoes = calcularHorariosLivres();
+        const sugestoes = calcularHorariosLivres(dataIni, dataFimReal);
         avisoConflito.innerHTML = `
           <strong class="aviso-titulo">⚠️ Conflito de Horário Identificado</strong>
-          O auditório selecionado já possui uma atividade confirmada ou em análise cruzando este período.<br><br>
-          <strong>Horários livres sugeridos para este dia:</strong><br>
+          O auditório selecionado já possui uma atividade cruzando este horário nestes dias.<br><br>
+          <strong>Horários livres sugeridos em comum para este período:</strong><br>
           <div style="margin-top:8px; margin-bottom:8px;">${sugestoes}</div>
-          <em>Você pode enviar a solicitação mesmo assim. Ela ficará pendente para análise e deliberação da Secretaria.</em>
+          <em>Você pode enviar a solicitação mesmo assim. Ela ficará pendente para análise.</em>
         `;
         avisoConflito.style.display = 'block';
       } else {
@@ -285,21 +298,28 @@
       }
     }
 
-    function calcularHorariosLivres() {
-      // Converte horários ocupados para "minutos a partir de 00:00" para facilitar o cálculo
-      let ocupados = reservasDoDia.map(r => {
-        let tIni = r.Início.split('T')[1].split(':');
-        let tFim = r.Fim.split('T')[1].split(':');
-        return {
-          start: parseInt(tIni[0]) * 60 + parseInt(tIni[1]),
-          end: parseInt(tFim[0]) * 60 + parseInt(tFim[1])
-        };
-      });
+    function calcularHorariosLivres(dataIni, dataFimReal) {
+      let rangesOcupados = [];
 
-      // Mescla intervalos que se cruzam
-      ocupados.sort((a,b) => a.start - b.start);
+      for (let r of todasReservasAuditorio) {
+        const [rDataIni, rHoraIni] = r.Início.split('T');
+        const [rDataFim, rHoraFim] = r.Fim.split('T');
+
+        const overlapData = (dataIni <= rDataFim) && (dataFimReal >= rDataIni);
+        
+        if (overlapData) {
+          let tIni = rHoraIni.split(':');
+          let tFim = rHoraFim.split(':');
+          rangesOcupados.push({
+            start: parseInt(tIni[0]) * 60 + parseInt(tIni[1]),
+            end: parseInt(tFim[0]) * 60 + parseInt(tFim[1])
+          });
+        }
+      }
+
+      rangesOcupados.sort((a,b) => a.start - b.start);
       let merged = [];
-      for(let o of ocupados) {
+      for(let o of rangesOcupados) {
         if(merged.length === 0) { merged.push(o); continue; }
         let last = merged[merged.length-1];
         if(o.start <= last.end) {
@@ -310,10 +330,9 @@
       }
 
       let livres = [];
-      let curr = 6 * 60; // Início do expediente (06:00)
-      let endDay = 23 * 60; // Fim do expediente (23:00)
+      let curr = 6 * 60; 
+      let endDay = 23 * 60; 
 
-      // Calcula as lacunas
       for(let m of merged) {
         if(curr < m.start) {
           livres.push({start: curr, end: m.start});
@@ -324,9 +343,8 @@
         livres.push({start: curr, end: endDay});
       }
 
-      if(livres.length === 0) return "<span class='sugestao-livre' style='background-color:#fee2e2; border-color:#fca5a5; color:#991b1b;'>Nenhum horário livre restante neste dia.</span>";
+      if(livres.length === 0) return "<span class='sugestao-livre' style='background-color:#fee2e2; border-color:#fca5a5; color:#991b1b;'>Nenhum horário livre restante nestes dias.</span>";
 
-      // Formata os minutos de volta para relógio HH:MM
       return livres.map(l => {
         let sh = Math.floor(l.start / 60).toString().padStart(2, '0');
         let sm = (l.start % 60).toString().padStart(2, '0');
@@ -336,9 +354,8 @@
       }).join('');
     }
 
-    // Pendura os monitores em todos os campos de Data e Hora
     [auditorioEl, dataInicioEl, horaInicioEl, dataFimEl, horaFimEl].forEach(el => {
-      el.addEventListener('change', checarEAtualizarConflitos);
+      el.addEventListener('change', checarEAtualUxConflitos);
     });
 
     function gerarTicketMercosul() {
@@ -347,7 +364,6 @@
       return `${L()}${L()}${L()}${N()}${L()}${N()}${N()}`;
     }
 
-    // GERADOR DE HORÁRIOS CROSS-BROWSER (06:00 às 23:00 / 30 min)
     function popularHorarios() {
       const selectsHora = [document.getElementById('select_hora_inicio'), document.getElementById('select_hora_fim')];
       const optionsHTML = ['<option value="" disabled selected>Hora</option>'];
@@ -355,7 +371,7 @@
       for (let h = 6; h <= 23; h++) {
         let horaFormatada = h.toString().padStart(2, '0');
         optionsHTML.push(`<option value="${horaFormatada}:00">${horaFormatada}:00</option>`);
-        if(h !== 23) { // Impede de criar a opção 23:30, parando exatamente às 23:00
+        if(h !== 23) { 
           optionsHTML.push(`<option value="${horaFormatada}:30">${horaFormatada}:30</option>`);
         }
       }
@@ -365,13 +381,37 @@
       });
     }
     
-    // Executa a geração de horários assim que a página abre
     popularHorarios();
+
+    function formatarDataBR(dataValor) {
+      if (!dataValor) return '-';
+      if (typeof dataValor === 'string' && dataValor.includes('/')) {
+        const partes = dataValor.split(' ');
+        if (partes.length >= 2) {
+          const hms = partes[1].split(':');
+          if (hms.length >= 2) {
+            return `${partes[0]} às ${hms[0]}:${hms[1]}`; 
+          }
+        }
+        return dataValor;
+      }
+      return dataValor;
+    }
+
+    function formatarHoraInicio(inicioValor) {
+      if (!inicioValor) return '-';
+      if (typeof inicioValor === 'string' && inicioValor.includes('T')) {
+        const [data, hora] = inicioValor.split('T');
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano} às ${hora}`;
+      }
+      return inicioValor;
+    }
 
     document.getElementById('formReserva').addEventListener('submit', async function(e) {
       e.preventDefault();
+      console.log("Submit capturado. Iniciando validações...");
 
-      // VALIDAÇÃO DO RECAPTCHA
       const recaptchaResponse = grecaptcha.getResponse();
       if (recaptchaResponse.length === 0) {
         alert("Por favor, marque a caixa 'Não sou um robô' antes de enviar.");
@@ -384,13 +424,21 @@
 
       try {
         const formData = new FormData(this);
-        const telefoneAtual = formData.get('telefone_contato');
+        console.log("Valores coletados do form:", Object.fromEntries(formData.entries()));
         
-        // Reconstruindo as datas para o padrão YYYY-MM-DDTHH:MM para o BD
+        const telefoneDigitado = formData.get('telefone_contato');
+        const telefoneNumerico = telefoneDigitado.replace(/\D/g, ''); 
+        
+        let telefoneFormatadoPadrao = telefoneDigitado;
+        if (telefoneNumerico.length === 11) {
+          telefoneFormatadoPadrao = `(${telefoneNumerico.substring(0,2)}) ${telefoneNumerico.substring(2,7)}-${telefoneNumerico.substring(7,11)}`;
+        } else if (telefoneNumerico.length === 10) {
+          telefoneFormatadoPadrao = `(${telefoneNumerico.substring(0,2)}) ${telefoneNumerico.substring(2,6)}-${telefoneNumerico.substring(6,10)}`;
+        }
+
         const dataHoraInicioCompleta = formData.get('data_inicio') + 'T' + formData.get('hora_inicio');
         const dataHoraFimCompleta = formData.get('data_fim') + 'T' + formData.get('hora_fim');
 
-        // Validação extra de segurança
         if (dataHoraFimCompleta <= dataHoraInicioCompleta) {
           alert("A data/hora de término deve ser posterior à data/hora de início.");
           btn.innerText = 'Enviar Solicitação de Reserva';
@@ -398,55 +446,83 @@
           return;
         }
         
-        let meuTicket = null;
-        let historico = [];
-
+        console.log("Buscando histórico de reservas...");
         const reservasRef = collection(db, "reservas");
-        const q = query(reservasRef, where("Telefone", "==", telefoneAtual));
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(reservasRef); 
+        
+        let contagemTickets = {};
+        let historicoGeralTelefone = [];
 
         querySnapshot.forEach((doc) => {
           const dados = doc.data();
-          if(dados.Ticket && !meuTicket) meuTicket = dados.Ticket; 
-          historico.push(dados);
+          if (dados.Telefone) {
+            const telBancoNumerico = String(dados.Telefone).replace(/\D/g, '');
+            if (telBancoNumerico === telefoneNumerico && telBancoNumerico !== '') {
+              historicoGeralTelefone.push(dados);
+              if (dados.Ticket) {
+                contagemTickets[dados.Ticket] = (contagemTickets[dados.Ticket] || 0) + 1;
+              }
+            }
+          }
         });
 
-        if (!meuTicket) meuTicket = gerarTicketMercosul();
+        let meuTicket = null;
+        if (Object.keys(contagemTickets).length > 0) {
+          meuTicket = Object.keys(contagemTickets).reduce((a, b) => contagemTickets[a] > contagemTickets[b] ? a : b);
+        } else {
+          meuTicket = gerarTicketMercosul();
+        }
+
+        let historicoFiltrado = historicoGeralTelefone.filter(res => res.Ticket === meuTicket);
 
         const novaReserva = {
           Ticket: meuTicket,
           Auditório: formData.get('auditorio_selecionado'),
-          Solicitante: formData.get('responsavel_e_matricula'),
-          Telefone: telefoneAtual,
+          Solicitante: formData.get('responsavel'), 
+          Matricula: formData.get('matricula'), // Removido o acento desta chave por segurança
+          Telefone: telefoneFormatadoPadrao, 
           Departamento: formData.get('departamento_centro'),
           Atividade: formData.get('atividade_realizada'),
-          Início: dataHoraInicioCompleta, // Salva na estrutura exata de antes
-          Fim: dataHoraFimCompleta,       // Salva na estrutura exata de antes
+          Início: dataHoraInicioCompleta, 
+          Fim: dataHoraFimCompleta,      
           Email: formData.get('_replyto'),
           Data_Solicitacao: new Date().toLocaleString('pt-BR'),
           timestamp_criacao: serverTimestamp() 
         };
 
-        await addDoc(collection(db, "reservas"), novaReserva);
-        
-        historico.push(novaReserva); 
+        console.log("Payload pronto para o Firestore:", novaReserva);
 
-        // Captura a descrição completa do Auditório para exibir na tela de sucesso
+        await addDoc(collection(db, "reservas"), novaReserva);
+        console.log("Inserção no banco confirmada com sucesso!");
+        
+        historicoFiltrado.push(novaReserva); 
+
         const selectAuditorio = document.getElementById('auditorio');
         const descricaoAuditorio = selectAuditorio.options[selectAuditorio.selectedIndex].text;
+
+        window.dadosReservaAtual = {
+          ticket: meuTicket,
+          responsavel: formData.get('responsavel'),
+          matricula: formData.get('matricula'),
+          departamento: formData.get('departamento_centro'),
+          atividade: formData.get('atividade_realizada'),
+          auditorio: descricaoAuditorio,
+          inicioFormatado: formatarHoraInicio(dataHoraInicioCompleta),
+          fimFormatado: formatarHoraInicio(dataHoraFimCompleta)
+        };
 
         document.getElementById('telaFormulario').style.display = 'none';
         document.getElementById('telaSucesso').style.display = 'block';
 
         document.getElementById('ticketDisplay').innerText = meuTicket;
-        document.getElementById('nomeDisplay').innerText = formData.get('responsavel_e_matricula');
-        document.getElementById('telefoneDisplay').innerText = telefoneAtual;
+        document.getElementById('nomeDisplay').innerText = `${formData.get('responsavel')} - Matrícula: ${formData.get('matricula')}`;
+        document.getElementById('telefoneDisplay').innerText = telefoneFormatadoPadrao; 
         document.getElementById('localDisplay').innerText = descricaoAuditorio;
 
-        renderizarHistorico(historico);
+        renderizarHistorico(historicoFiltrado);
 
       } catch (erro) {
-        console.error(erro);
+        console.error("ERRO CAPTURADO DURANTE A EXECUÇÃO:", erro);
         alert("Erro ao salvar no banco: " + erro.message);
       } finally {
         btn.innerText = 'Enviar Solicitação de Reserva';
@@ -467,9 +543,12 @@
 
       historicoArray.forEach(reserva => {
         const tr = document.createElement('tr');
-        let inicioFmt = reserva['Início'] ? reserva['Início'].replace('T', ' às ') : '-';
+        
+        let dataSolicitacaoFmt = formatarDataBR(reserva['Data_Solicitacao']);
+        let inicioFmt = formatarHoraInicio(reserva['Início']);
+        
         tr.innerHTML = `
-          <td>${reserva['Data_Solicitacao'] || '-'}</td>
+          <td>${dataSolicitacaoFmt}</td>
           <td><strong>${reserva['Auditório'] || '-'}</strong></td>
           <td>${reserva['Atividade'] || '-'}</td>
           <td>${inicioFmt}</td>
@@ -478,11 +557,34 @@
       });
     }
 
+    window.compartilharWhatsApp = function() {
+      if (!window.dadosReservaAtual) return;
+      const d = window.dadosReservaAtual;
+      
+      const textoMensagem = 
+        `Olá! 👋 Seguem os dados da minha solicitação de reserva no CCHLA:\n\n` +
+        `🎫 *Ticket:* ${d.ticket}\n` +
+        `👤 *Responsável:* ${d.responsavel}\n` +
+        `🆔 *Matrícula:* ${d.matricula}\n` +
+        `🏢 *Setor:* ${d.departamento}\n` +
+        `🎯 *Atividade:* ${d.atividade}\n` +
+        `📍 *Local:* ${d.auditorio}\n` +
+        `📅 *Início:* ${d.inicioFormatado}\n` +
+        `⏳ *Fim:* ${d.fimFormatado}\n\n` +
+        `Aguardando confirmação da secretaria! 🚀`;
+      
+      const textoCodificado = encodeURIComponent(textoMensagem);
+      const url = `https://api.whatsapp.com/send?text=${textoCodificado}`;
+      
+      window.open(url, '_blank');
+    };
+
     window.novaSolicitacao = function() {
       document.getElementById('formReserva').reset();
       document.getElementById('telaSucesso').style.display = 'none';
       document.getElementById('telaFormulario').style.display = 'block';
       document.getElementById('avisoConflito').style.display = 'none';
+      window.dadosReservaAtual = null; 
     }
   </script>
 </body>
