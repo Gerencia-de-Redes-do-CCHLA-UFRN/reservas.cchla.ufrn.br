@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendário de Reservas - CCHLA</title>
 
-  <!-- Bibliotecas do FullCalendar (Via CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
   <style>
@@ -52,7 +51,7 @@
     #calendar { max-width: 100%; background: #fff; padding: 0 10px 10px 10px; border-radius: 8px; flex-grow: 1; margin-top: 10px; }
     .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 12px; border: none !important; font-weight: 600; }
 
-    /* LEGENDA E FILTROS INFERIORES - CORES ATUALIZADAS */
+    /* LEGENDA E FILTROS INFERIORES */
     .calendario-legenda { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; padding: 15px; background: #e2e8f0; border-radius: 8px; border: 1px solid var(--borda-suave); }
     .legenda-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; color: var(--texto-escuro); border: 2px solid transparent; }
     .legenda-item:hover { background-color: #cbd5e1; transform: translateY(-1px); }
@@ -88,7 +87,6 @@
 
   <div class="container">
     
-    <!-- Cabeçalho -->
     <div class="header">
       <div class="header-logo-title">
         <img src="cchla-logo.jpg" alt="Logo CCHLA">
@@ -107,12 +105,10 @@
       </div>
     </div>
 
-    <!-- Barra de Controle Superior -->
     <div class="barra-navegacao-custom no-print">
       <div class="nav-esquerda">
         <select id="selectMesesDropdown" class="select-meses-custom">
-          <!-- Alimentado via Javascript -->
-        </select>
+          </select>
       </div>
       
       <div class="nav-centro">
@@ -131,10 +127,8 @@
       </div>
     </div>
 
-    <!-- O Calendário -->
     <div id="calendar"></div>
 
-    <!-- Legenda de Cores e Filtro Inferior -->
     <div class="calendario-legenda no-print">
       <div class="legenda-item" id="leg-A" onclick="filtrarCalendario('Auditorio A', 'A')">
         <span class="legenda-cor" style="background:#ff0000;"></span>Auditório 'A'
@@ -165,7 +159,6 @@
     Gerência de Redes do CCHLA/UFRN - (84) 3342 2243 | Copyright © 2026 - UFRN
   </div>
 
-  <!-- Caixinha Flutuante (Hover) -->
   <div id="tooltipDetalhes">
     <h3 class="tooltip-titulo" id="t-atividade">Atividade</h3>
     <div class="tooltip-dado"><strong>Auditório:</strong> <span id="t-auditorio"></span></div>
@@ -176,7 +169,6 @@
     <div class="tooltip-dado"><strong>Ticket:</strong> <span id="t-ticket"></span></div>
   </div>
 
-  <!-- Janela Modal (Clique) -->
   <div id="modalDetalhes">
     <div class="modal-content">
       <button class="fechar-modal" onclick="fecharModal()">✕</button>
@@ -263,33 +255,85 @@
           const d = doc.data();
           let statusBD = d.Status || 'Pendente';
           
-          // O Calendário só exibe o que está Aprovado
           if (statusBD === 'Aprovado' || statusBD === 'Aprovada') {
             if(d.Início && d.Fim) {
               
-              // Define a cor
               let cores = getCorAuditorio(d.Auditório);
+              let tituloExibicao = `${d.Auditório} - ${d.Atividade}`;
               
-              eventos.push({
-                title: `${d.Auditório} - ${d.Atividade}`, 
-                start: d.Início,
-                end: d.Fim,
-                backgroundColor: cores.bg,
-                textColor: cores.text,
-                borderColor: cores.bg,
-                extendedProps: {
-                  auditorio: d.Auditório,
-                  atividade: d.Atividade,
-                  solicitante: d.Solicitante,
-                  departamento: d.Departamento,
-                  ticket: d.Ticket
+              if (d.Auditório && d.Auditório.toUpperCase() === 'FERIADO') {
+                tituloExibicao = d.Atividade;
+              }
+
+              // ==========================================
+              // NOVA LÓGICA: DIVISÃO DE EVENTOS "MULTIDAY"
+              // ==========================================
+              let startPart = d.Início.split('T');
+              let endPart = d.Fim.split('T');
+
+              // Verifica se o formato é válido e possui data e hora (Ex: 2027-01-01T08:00)
+              if (startPart.length === 2 && endPart.length === 2) {
+                // Separa ano, mes e dia para criar a data com segurança, ignorando timezone automático
+                let [anoIni, mesIni, diaIni] = startPart[0].split('-');
+                let [anoFim, mesFim, diaFim] = endPart[0].split('-');
+
+                let dataCorrente = new Date(anoIni, mesIni - 1, diaIni);
+                let dataLimite = new Date(anoFim, mesFim - 1, diaFim);
+
+                let horaInicio = startPart[1];
+                let horaFim = endPart[1];
+
+                // Loop passando por cada dia entre a Data de Início e a Data de Fim
+                if (dataLimite >= dataCorrente) {
+                  while (dataCorrente <= dataLimite) {
+                    let ano = dataCorrente.getFullYear();
+                    let mes = String(dataCorrente.getMonth() + 1).padStart(2, '0');
+                    let dia = String(dataCorrente.getDate()).padStart(2, '0');
+                    let dataStr = `${ano}-${mes}-${dia}`; // Remonta a string do dia iterado
+
+                    // Injeta a mesma faixa de horário para cada dia percorrido
+                    eventos.push({
+                      title: tituloExibicao, 
+                      start: `${dataStr}T${horaInicio}`,
+                      end: `${dataStr}T${horaFim}`,
+                      backgroundColor: cores.bg,
+                      textColor: cores.text,
+                      borderColor: cores.bg,
+                      extendedProps: {
+                        auditorio: d.Auditório,
+                        atividade: d.Atividade,
+                        solicitante: d.Solicitante,
+                        departamento: d.Departamento,
+                        ticket: d.Ticket
+                      }
+                    });
+
+                    // Avança 1 dia para o próximo ciclo do laço
+                    dataCorrente.setDate(dataCorrente.getDate() + 1);
+                  }
                 }
-              });
+              } else {
+                // Caso alguma data antiga do banco não tenha a letra "T" delimitando, exibe no formato original
+                eventos.push({
+                  title: tituloExibicao, 
+                  start: d.Início,
+                  end: d.Fim,
+                  backgroundColor: cores.bg,
+                  textColor: cores.text,
+                  borderColor: cores.bg,
+                  extendedProps: {
+                    auditorio: d.Auditório,
+                    atividade: d.Atividade,
+                    solicitante: d.Solicitante,
+                    departamento: d.Departamento,
+                    ticket: d.Ticket
+                  }
+                });
+              }
             }
           }
         });
 
-        // Salva tudo na memória e inicia o calendário
         todosEventosGlobais = eventos;
         inicializarCalendario(todosEventosGlobais);
 
@@ -413,35 +457,27 @@
       document.getElementById('btnViewLista').onclick = () => alterarVisualizacao('listWeek', 'btnViewLista');
     }
 
-    // ==========================================
-    // SISTEMA DE FILTRO POR CLIQUE NA LEGENDA
-    // ==========================================
+    // Sistema de Filtro por Clique na Legenda
     window.filtrarCalendario = function(categoriaBusca, idBotaoLegenda) {
-      
-      // 1. Efeito visual: Liga a borda de qual legenda foi clicada
       document.querySelectorAll('.legenda-item').forEach(el => el.classList.remove('ativo'));
       document.getElementById('leg-' + idBotaoLegenda).classList.add('ativo');
 
       let eventosFiltrados = [];
 
-      // 2. Lógica de Filtro
       if (categoriaBusca === 'TODOS') {
-        eventosFiltrados = todosEventosGlobais; // Retorna tudo
+        eventosFiltrados = todosEventosGlobais; 
       } else if (categoriaBusca === 'FERIADO') {
         eventosFiltrados = todosEventosGlobais.filter(e => {
           let aud = (e.extendedProps.auditorio || "").toUpperCase();
           return aud.includes('FERIADO');
         });
       } else {
-        // Exige que o nome gravado no banco seja igual ao que o usuário escolheu
         eventosFiltrados = todosEventosGlobais.filter(e => {
           let aud = e.extendedProps.auditorio || "";
-          // Compara ignorando acentos (Auditorio A == Auditório A)
           return aud.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() === categoriaBusca.toUpperCase();
         });
       }
 
-      // 3. Atualiza o calendário limpando a tela e jogando só o que passou no filtro
       if (calendarInstance) {
         calendarInstance.removeAllEventSources();
         calendarInstance.addEventSource(eventosFiltrados);
