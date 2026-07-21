@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação da API — Sistema de Reservas CCHLA</title>
+    <style>
+        :root { --azul-marinho: #051638; --azul-royal: #1653A1; --texto: #1e293b; --borda: #cbd5e1; --fundo: #f8fafc; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: var(--texto); max-width: 960px; margin: 40px auto; padding: 0 20px; }
+        .capa { text-align: center; padding: 80px 20px; border-bottom: 4px solid var(--azul-royal); margin-bottom: 50px; }
+        .capa h1 { color: var(--azul-marinho); font-size: 32px; text-transform: uppercase; margin-bottom: 10px; }
+        .capa p { color: #64748b; font-size: 16px; }
+        h2 { color: var(--azul-royal); font-size: 22px; border-bottom: 2px solid var(--borda); padding-bottom: 8px; margin-top: 40px; }
+        h3 { color: var(--azul-marinho); font-size: 18px; margin-top: 30px; }
+        p, li { font-size: 14px; margin-bottom: 10px; }
+        ul { margin-bottom: 20px; padding-left: 25px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid var(--borda); padding: 10px 12px; text-align: left; vertical-align: top; }
+        th { background-color: var(--fundo); font-weight: 700; color: var(--azul-marinho); }
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 3px; font-size: 13px; color: #b91c1c; border: 1px solid #e2e8f0; }
+        pre { background: #f8fafc; border: 1px solid var(--borda); border-left: 4px solid var(--azul-royal); padding: 15px; overflow-x: auto; border-radius: 4px; font-size: 13px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-get { background: #dbeafe; color: #1e40af; }
+        .badge-post { background: #d1fae5; color: #065f46; }
+        .badge-publico { background: #f0fdf4; color: #166534; }
+        .badge-admin { background: #fff7ed; color: #9a3412; }
+        .badge-root { background: #fef2f2; color: #991b1b; }
+        .badge-auth { background: #f5f3ff; color: #5b21b6; }
+        .endpoint { margin: 25px 0; border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; }
+        .endpoint-header { padding: 12px 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .endpoint-header.post { background: #f0fdf4; }
+        .endpoint-header.get { background: #dbeafe; }
+        .endpoint-path { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--azul-marinho); }
+        .endpoint-body { padding: 15px; }
+        .footer { text-align: center; padding: 30px 0; color: #94a3b8; font-size: 13px; border-top: 1px solid var(--borda); margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="capa">
+    <h1>Documentação da API REST</h1>
+    <p>18 endpoints do backend Node.js + Express — Sistema de Reservas CCHLA/UFRN</p>
+</div>
+
+<p>Base URL: <code>/api</code></p>
+<p>Autenticação: Bearer token JWT nas rotas protegidas. Token obtido via <code>/api/fazerLogin</code>, válido por 24h.</p>
+
+<h2>Rotas Públicas</h2>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/checarDisponibilidade</span>
+        <span class="badge badge-publico">Público</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Verifica conflitos de horário entre reservas solicitadas e reservas existentes no banco.</p>
+        <p><strong>Request:</strong></p>
+        <pre>{
+  "reservas": [
+    { "auditorio": "Auditorio A", "dateStr": "2026-07-20", "hIni": "08:00", "hFim": "10:00" }
+  ]
+}</pre>
+        <p><strong>Response 200:</strong></p>
+        <pre>{
+  "conflitos": [
+    { "solicitado": {...}, "conflitoCom": "Nome da Atividade", "dataBr": "20/07/2026", "hIniBanco": "08:00", "hFimBanco": "10:00" }
+  ],
+  "agendaCompleta": [...]
+}</pre>
+        <p><strong>Validações:</strong> Ignora reservas com status "Reprovado" ou "Cancelado". Busca reservas dos últimos 2 dias até o futuro.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:58</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/enviarSolicitacao</span>
+        <span class="badge badge-publico">Público</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Envia uma solicitação de reserva. Verifica reCAPTCHA, valida dados, insere no MongoDB e dispara e-mail de confirmação.</p>
+        <p><strong>Request:</strong></p>
+        <pre>{
+  "solicitante": "Nome",
+  "matricula": "20200000001",
+  "email": "email@ufrn.br",
+  "telefone": "84999999999",
+  "departamento": "DEPT",
+  "atividade": "Aula",
+  "recaptchaToken": "token_google",
+  "reservas": [
+    { "auditorio": "Auditorio A", "dateStr": "2026-07-20", "hIni": "08:00", "hFim": "10:00", "teveConflito": false }
+  ]
+}</pre>
+        <p><strong>Response 200:</strong> <code>{ "sucesso": true, "ticketGerado": "ABC123" }</code></p>
+        <p><strong>Validações:</strong></p>
+        <ul>
+            <li>reCAPTCHA obrigatório (verificação real apenas se RECAPTCHA_SECRET configurada)</li>
+            <li>Máximo 50 reservas por solicitação (anti-flood)</li>
+            <li>Campos obrigatórios: auditorio, dateStr, hIni, hFim</li>
+            <li>hIni deve ser anterior a hFim</li>
+            <li>Horários dentro de 07:00–21:30</li>
+        </ul>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:67</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header get">
+        <span class="badge badge-get">GET</span>
+        <span class="endpoint-path">/api/obterEventosCalendario</span>
+        <span class="badge badge-publico">Público</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Retorna todas as reservas com status "Aprovado" ou "Aprovada" para exibição no calendário público.</p>
+        <p><strong>Response 200:</strong> Array de objetos:</p>
+        <pre>[
+  { "id": "...", "Auditório": "Auditorio A", "Atividade": "Aula", "Início": "2026-07-20T08:00", "Fim": "2026-07-20T10:00", "Solicitante": "Nome", "Departamento": "DEPT" }
+]</pre>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:162</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/consultarTicket</span>
+        <span class="badge badge-publico">Público</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Consulta todas as reservas associadas a um ticket.</p>
+        <p><strong>Request:</strong> <code>{ "ticket": "ABC123" }</code></p>
+        <p><strong>Response 200:</strong> Array de reservas com id, Ticket, Status, Auditório, Atividade, Início, Fim, Solicitante, Departamento, Telefone, Email, Data_Solicitacao, Motivo_Reprovacao.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:185</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/fazerLogin</span>
+        <span class="badge badge-publico">Público</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Autenticação de administradores. Retorna token JWT válido por 24h.</p>
+        <p><strong>Request:</strong> <code>{ "email": "admin@cchla.ufrn.br", "senha": "******" }</code></p>
+        <p><strong>Response 200:</strong> <code>{ "sucesso": true, "token": "eyJhbG..." }</code></p>
+        <p><strong>Response 401:</strong> <code>{ "erro": true, "mensagem": "E-mail ou senha incorretos." }</code></p>
+        <p><strong>Segurança:</strong></p>
+        <ul>
+            <li>Rate limit: 5 tentativas falhas em 15 minutos bloqueiam o acesso (exceto root principal)</li>
+            <li>Log de segurança: todas as tentativas registradas no SecurityLog</li>
+            <li>Senha verificada com bcrypt</li>
+            <li>Token JWT assinado com JWT_SECRET, expira em 24h</li>
+        </ul>
+        <p><strong>Controller:</strong> <code>backend/controllers/authController.js:6</code></p>
+    </div>
+</div>
+
+<h2>Rotas Protegidas (Admin)</h2>
+
+<div class="endpoint">
+    <div class="endpoint-header get">
+        <span class="badge badge-get">GET</span>
+        <span class="endpoint-path">/api/adminObterReservas</span>
+        <span class="badge badge-admin">Admin</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Lista todas as reservas ordenadas por data de criação (decrescente). Adiciona campo <code>id_documento</code> para compatibilidade com frontend.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:217</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/adminAtualizarDocumento</span>
+        <span class="badge badge-admin">Admin</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Atualiza os dados de uma reserva (status, motivo, etc.). Se status for alterado, registra <code>Status_Alterado_Por</code> com e-mail do admin.</p>
+        <p><strong>Request:</strong> <code>{ "idDoc": "...", "dadosAtualizacao": { "Status": "Aprovado" } }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:235</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/adminExcluirDocumento</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Exclui uma reserva. Apenas usuários root ou <code>tobias.rocha@ufrn.br</code>.</p>
+        <p><strong>Request:</strong> <code>{ "idDoc": "..." }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:251</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/adminCadastrarDocumento</span>
+        <span class="badge badge-admin">Admin</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Cadastra uma nova reserva manualmente (pela secretaria).</p>
+        <p><strong>Request:</strong> <code>{ "payload": { ...dados da reserva } }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:265</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/notificar</span>
+        <span class="badge badge-admin">Admin</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Dispara e-mail de notificação para o solicitante. Janela unificada para confirmação e status update.</p>
+        <p><strong>Request:</strong> Objeto com <code>tipo: "status_update"</code> ou dados de confirmação.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/reservaController.js:282</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/alterarSenha</span>
+        <span class="badge badge-admin">Admin</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Altera a senha do usuário autenticado. Requer senha atual.</p>
+        <p><strong>Request:</strong> <code>{ "senhaAtual": "...", "novaSenha": "..." }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/authController.js:65</code></p>
+    </div>
+</div>
+
+<h2>Rotas Protegidas (Segurança — Root)</h2>
+
+<div class="endpoint">
+    <div class="endpoint-header get">
+        <span class="badge badge-get">GET</span>
+        <span class="endpoint-path">/api/security/stats</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Retorna estatísticas de segurança: top IPs bloqueados, top usuários com falha e falhas diárias (14 dias). Dados para o módulo CCHLAfense.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/securityController.js:4</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header get">
+        <span class="badge badge-get">GET</span>
+        <span class="endpoint-path">/api/security/config</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Obtém a configuração atual de monitoramento de segurança.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/securityController.js:52</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/security/config</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Atualiza a configuração de monitoramento (quais áreas rastrear).</p>
+        <p><strong>Request:</strong> Objeto com booleanos: <code>monitorarTodoProjeto</code>, <code>monitorarCalendarioPublico</code>, <code>monitorarFormularioPublico</code>, etc.</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/securityController.js:70</code></p>
+    </div>
+</div>
+
+<h2>Rotas Protegidas (Usuários — Root)</h2>
+
+<div class="endpoint">
+    <div class="endpoint-header get">
+        <span class="badge badge-get">GET</span>
+        <span class="endpoint-path">/api/adminListarUsuarios</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Lista todos os administradores (oculta password_hash).</p>
+        <p><strong>Controller:</strong> <code>backend/controllers/userController.js:4</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/adminCriarUsuario</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Cria um novo administrador. Valida e-mail duplicado.</p>
+        <p><strong>Request:</strong> <code>{ "email": "...", "senha": "...", "nivel": "admin"|"root" }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/userController.js:15</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/adminAtualizarUsuario</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Atualiza dados de um administrador (e-mail, nível, nome, senha).</p>
+        <p><strong>Request:</strong> <code>{ "id": "...", "email": "...", "nivel": "...", "senha": "..." }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/userController.js:34</code></p>
+    </div>
+</div>
+
+<div class="endpoint">
+    <div class="endpoint-header post">
+        <span class="badge badge-post">POST</span>
+        <span class="endpoint-path">/api/adminExcluirUsuario</span>
+        <span class="badge badge-root">Root</span>
+        <span class="badge badge-auth">JWT</span>
+    </div>
+    <div class="endpoint-body">
+        <p><strong>Descrição:</strong> Exclui um administrador. Não permite excluir a si mesmo.</p>
+        <p><strong>Request:</strong> <code>{ "id": "..." }</code></p>
+        <p><strong>Controller:</strong> <code>backend/controllers/userController.js:59</code></p>
+    </div>
+</div>
+
+<h2>Estrutura dos Dados</h2>
+
+<h3>Reserva (MongoDB — collection <code>reservas</code>)</h3>
+<table>
+    <tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr>
+    <tr><td>Ticket</td><td>String</td><td>Código único de 6 caracteres alfanumérico</td></tr>
+    <tr><td>Auditório</td><td>String</td><td>Nome do auditório (Auditorio A–E, FERIADO)</td></tr>
+    <tr><td>Solicitante</td><td>String</td><td>Nome do solicitante</td></tr>
+    <tr><td>Matrícula</td><td>String</td><td>Matrícula UFRN</td></tr>
+    <tr><td>Telefone</td><td>String</td><td>Telefone de contato</td></tr>
+    <tr><td>Departamento</td><td>String</td><td>Departamento lotação</td></tr>
+    <tr><td>Atividade</td><td>String</td><td>Descrição da atividade</td></tr>
+    <tr><td>Início</td><td>String (ISO)</td><td>Ex: 2026-07-20T08:00</td></tr>
+    <tr><td>Fim</td><td>String (ISO)</td><td>Ex: 2026-07-20T10:00</td></tr>
+    <tr><td>Email</td><td>String</td><td>E-mail do solicitante</td></tr>
+    <tr><td>Status</td><td>String</td><td>Pendente, Aprovado, Reprovado, Cancelado</td></tr>
+    <tr><td>Motivo_Reprovacao</td><td>String</td><td>Motivo (se reprovado)</td></tr>
+    <tr><td>Status_Alterado_Por</td><td>String</td><td>E-mail do admin que alterou</td></tr>
+    <tr><td>timestamp_criacao</td><td>Date</td><td>Data de criação automática</td></tr>
+</table>
+
+<h3>Admin (MongoDB — collection <code>admins</code>)</h3>
+<table>
+    <tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr>
+    <tr><td>email</td><td>String (unique)</td><td>E-mail do administrador</td></tr>
+    <tr><td>password_hash</td><td>String</td><td>Hash bcrypt da senha</td></tr>
+    <tr><td>nivel</td><td>String</td><td>admin ou root</td></tr>
+    <tr><td>permissoes</td><td>Map</td><td>Permissões granulares (ex: reservas:visualizar, usuarios:gerir)</td></tr>
+    <tr><td>data_criacao</td><td>Date</td><td>Data de criação</td></tr>
+</table>
+
+<h3>SecurityLog (MongoDB — collection <code>security-cchla</code>)</h3>
+<table>
+    <tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr>
+    <tr><td>ip</td><td>String</td><td>IP de origem</td></tr>
+    <tr><td>username</td><td>String</td><td>E-mail tentado</td></tr>
+    <tr><td>success</td><td>Boolean</td><td>Se o login foi bem-sucedido</td></tr>
+    <tr><td>userExists</td><td>Boolean</td><td>Se o usuário existe no banco</td></tr>
+    <tr><td>route</td><td>String</td><td>Rota acessada</td></tr>
+    <tr><td>country</td><td>String</td><td>País (geoip) — não implementado</td></tr>
+    <tr><td>timestamp</td><td>Date</td><td>Data/hora do evento</td></tr>
+</table>
+
+<div class="footer">
+    Gerência de Redes do CCHLA/UFRN — Documentação gerada em Julho/2026
+</div>
+
+</body>
+</html>

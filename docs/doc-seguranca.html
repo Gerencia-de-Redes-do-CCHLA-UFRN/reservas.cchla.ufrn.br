@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação de Segurança — Sistema de Reservas CCHLA</title>
+    <style>
+        :root { --vermelho: #dc2626; --verde: #059669; --azul-marinho: #0f172a; --fundo: #f8fafc; --borda: #e2e8f0; --texto: #334155; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: var(--texto); max-width: 960px; margin: 40px auto; padding: 0 20px; }
+        .capa { text-align: center; padding: 80px 20px; border-bottom: 4px solid var(--vermelho); margin-bottom: 50px; }
+        .capa h1 { color: var(--azul-marinho); font-size: 32px; text-transform: uppercase; margin-bottom: 10px; }
+        .capa p { color: #64748b; font-size: 16px; }
+        h2 { color: var(--vermelho); font-size: 22px; border-bottom: 2px solid var(--borda); padding-bottom: 8px; margin-top: 40px; }
+        h3 { color: var(--azul-marinho); font-size: 18px; margin-top: 30px; }
+        p, li { font-size: 14px; margin-bottom: 10px; }
+        ul, ol { margin-bottom: 20px; padding-left: 25px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid var(--borda); padding: 10px 12px; text-align: left; vertical-align: top; }
+        th { background-color: var(--fundo); font-weight: 700; color: var(--azul-marinho); }
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 3px; font-size: 13px; color: #b91c1c; border: 1px solid #e2e8f0; }
+        pre { background: #f8fafc; border: 1px solid var(--borda); border-left: 4px solid var(--vermelho); padding: 15px; overflow-x: auto; border-radius: 4px; font-size: 13px; }
+        .severity { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .alta { background: #fee2e2; color: #991b1b; }
+        .media { background: #fef3c7; color: #92400e; }
+        .baixa { background: #d1fae5; color: #065f46; }
+        .info { background: #dbeafe; color: #1e40af; }
+        .check { color: var(--verde); font-weight: bold; }
+        .cross { color: var(--vermelho); }
+        .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .matrix-card { border: 1px solid var(--borda); border-radius: 8px; padding: 15px; background: #ffffff; }
+        .matrix-card h4 { margin: 0 0 8px 0; color: var(--azul-marinho); }
+        .matrix-card .severity { float: right; }
+        .footer { text-align: center; padding: 30px 0; color: #94a3b8; font-size: 13px; border-top: 1px solid var(--borda); margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="capa">
+    <h1>Documentação de Segurança</h1>
+    <p>Análise das camadas de proteção do Sistema de Reservas de Auditórios do CCHLA/UFRN</p>
+</div>
+
+<h2>1. Matriz de Ameaças e Mitigações</h2>
+
+<div class="matrix">
+    <div class="matrix-card">
+        <span class="severity alta">Alta</span>
+        <h4>Acesso não autorizado ao painel</h4>
+        <p><strong>Mitigado por:</strong> JWT com expiração de 24h, senhas com bcrypt, rate limit de login, log de tentativas.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity alta">Alta</span>
+        <h4>Injeção no MongoDB</h4>
+        <p><strong>Mitigado por:</strong> Mongoose com schemas tipados, validação de campos no controller. Strict: false apenas para compatibilidade legado.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity alta">Alta</span>
+        <h4>Spam / Flood de solicitações</h4>
+        <p><strong>Mitigado por:</strong> reCAPTCHA no formulário público, limite de 50 itens por requisição.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity media">Média</span>
+        <h4>Exposição de credenciais no repositório</h4>
+        <p><strong>Mitigado por:</strong> .env no .gitignore, .env.example sem valores reais, serviceAccountKey.json ignorado.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity media">Média</span>
+        <h4>Cross-Origin (CORS) mal configurado</h4>
+        <p><strong>Mitigado por:</strong> CORS restrito a origens específicas (<code>reservas.cchla.ufrn.br</code> e <code>http://localhost</code>).</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity media">Média</span>
+        <h4>Acesso ao banco via mongo-express</h4>
+        <p><strong>Mitigado por:</strong> Restrição de IP no Nginx (127.0.0.1 e 10.0.0.0/8), autenticação basic auth.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity baixa">Baixa</span>
+        <h4>Vazamento de dados via calendário público</h4>
+        <p><strong>Mitigado por:</strong> Calendário expõe apenas reservas com status "Aprovado". Dados sensíveis como telefone e e-mail não são retornados.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity baixa">Baixa</span>
+        <h4>Falsificação de solicitação (CSRF)</h4>
+        <p><strong>Mitigado por:</strong> Formulário público usa reCAPTCHA. Rotas admin usam JWT via header (não cookies), imune a CSRF clássico.</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity baixa">Baixa</span>
+        <h4>Man-in-the-Middle (MitM)</h4>
+        <p><strong>Mitigado por:</strong> Produção em HTTPS via proxy reverso (nginx). SMTP com STARTTLS (porta 587).</p>
+    </div>
+    <div class="matrix-card">
+        <span class="severity info">Info</span>
+        <h4>Ataque de força bruta no login</h4>
+        <p><strong>Mitigado por:</strong> Bloqueio de 5 tentativas falhas em 15 minutos. Log de todas as tentativas no SecurityLog.</p>
+    </div>
+</div>
+
+<h2>2. Camadas de Segurança Implementadas</h2>
+
+<h3>2.1 Autenticação e Autorização</h3>
+<table>
+    <tr><th>Mecanismo</th><th>Local</th><th>Status</th></tr>
+    <tr><td>JWT Bearer Token</td><td><code>backend/middleware/auth.js:3</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Expiração de token (24h)</td><td><code>backend/controllers/authController.js:53</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Níveis de acesso (admin/root)</td><td><code>backend/models/Admin.js:26</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Permissões granulares por ação</td><td><code>backend/middleware/auth.js:22</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Senhas com bcrypt (salt rounds: 10)</td><td><code>backend/controllers/userController.js:23</code></td><td><span class="check">✓ Implementado</span></td></tr>
+</table>
+
+<h3>2.2 Proteção contra Ataques Comuns</h3>
+<table>
+    <tr><th>Mecanismo</th><th>Local</th><th>Status</th></tr>
+    <tr><td>reCAPTCHA no formulário público</td><td><code>app-formulario/index.html:10</code> + <code>reservaController.js:74</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Limite de 50 itens por solicitação (anti-flood)</td><td><code>reservaController.js:83</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Rate limit de login (5 falhas / 15 min)</td><td><code>authController.js:18-34</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Validação de horário operacional (07:00–21:30)</td><td><code>reservaController.js:93</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Validação de fraude temporal (hIni &lt; hFim)</td><td><code>reservaController.js:90</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Deleção restrita a root</td><td><code>reservaController.js:253</code>, <code>userController.js:6</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Auto-exclusão proibida</td><td><code>userController.js:64</code></td><td><span class="check">✓ Implementado</span></td></tr>
+</table>
+
+<h3>2.3 Segurança de Rede e Infraestrutura</h3>
+<table>
+    <tr><th>Mecanismo</th><th>Local</th><th>Status</th></tr>
+    <tr><td>CORS restrito por origem</td><td><code>backend/server.js:18-32</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Restrição de IP no mongo-express</td><td><code>nginx.conf:22-24</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Proxy reverso Nginx (sem exposição direta do backend)</td><td><code>nginx.conf:10-17</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Captura de IP real via proxy</td><td><code>nginx.conf:5-7</code> + <code>server.js:63</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Docker em rede isolada (backend + db)</td><td><code>docker-compose.yml:69-70</code></td><td><span class="check">✓ Implementado</span></td></tr>
+</table>
+
+<h3>2.4 Auditoria e Monitoramento</h3>
+<table>
+    <tr><th>Mecanismo</th><th>Local</th><th>Status</th></tr>
+    <tr><td>Log de tentativas de login</td><td><code>authController.js:39-56</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Middleware de rastreamento global</td><td><code>server.js:42-78</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Módulo CCHLAfense (estatísticas + gráficos)</td><td><code>app-painel/cchlafense.html</code> + <code>securityController.js</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Configuração de monitoramento por área</td><td><code>securityController.js:70</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Registro de quem alterou status da reserva</td><td><code>reservaController.js:240-242</code></td><td><span class="check">✓ Implementado</span></td></tr>
+</table>
+
+<h3>2.5 Segurança no Frontend</h3>
+<table>
+    <tr><th>Mecanismo</th><th>Local</th><th>Status</th></tr>
+    <tr><td>Filtro de horários passados (data = hoje)</td><td><code>app-formulario/index.html</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Timeout de inatividade (30 min)</td><td><code>app-acompanhamento/index.html:143-158</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Modal de "Manter-se logado" no painel</td><td><code>app-painel/painel.html</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Uppercase automático no campo de ticket</td><td><code>app-acompanhamento/index.html</code></td><td><span class="check">✓ Implementado</span></td></tr>
+    <tr><td>Botão de "Nova Solicitação" redireciona fora do iframe</td><td><code>app-acompanhamento/index.html:96</code></td><td><span class="check">✓ Implementado</span></td></tr>
+</table>
+
+<h2>3. Fluxo de Segurança no Login</h2>
+<pre>
+Usuário → POST /api/fazerLogin { email, senha }
+  │
+  ├─ 1. Valida campos obrigatórios
+  ├─ 2. Verifica rate limit (≤ 5 falhas em 15 min)
+  │     └─ Se excedido → 403 "bloqueado temporariamente"
+  ├─ 3. Busca admin no MongoDB por e-mail
+  │     └─ Se não encontrado → 401 + SecurityLog { success: false, userExists: false }
+  ├─ 4. Compara senha com bcrypt
+  │     └─ Se inválida → 401 + SecurityLog { success: false, userExists: true }
+  ├─ 5. Gera JWT { id, email, nivel } com expiração 24h
+  ├─ 6. SecurityLog { success: true }
+  └─ 7. Retorna { sucesso: true, token }
+</pre>
+
+<h2>4. Fluxo de Segurança nas Solicitações</h2>
+<pre>
+Usuário → POST /api/enviarSolicitacao { reservas[], recaptchaToken }
+  │
+  ├─ 1. Verifica se reCAPTCHA token está presente
+  ├─ 2. Valida reCAPTCHA com Google (se RECAPTCHA_SECRET configurada)
+  ├─ 3. Valida array de reservas (≤ 50 itens)
+  ├─ 4. Para cada item:
+  │     ├─ Campos obrigatórios presentes
+  │     ├─ hIni &lt; hFim (fraude temporal)
+  │     └─ Horários dentro de 07:00–21:30
+  ├─ 5. Busca histórico do solicitante por matrícula
+  │     └─ Reusa ticket se já existir
+  ├─ 6. Insere no MongoDB via insertMany
+  └─ 7. Dispara e-mail de confirmação (falha não bloqueia)
+</pre>
+
+<h2>5. Segurança do Repositório</h2>
+<table>
+    <tr><th>Item</th><th>Status</th></tr>
+    <tr><td><code>.env</code> no <code>.gitignore</code></td><td><span class="check">✓</span></td></tr>
+    <tr><td><code>.env.example</code> sem credenciais reais</td><td><span class="check">✓</span></td></tr>
+    <tr><td><code>serviceAccountKey.json</code> (Firebase) ignorado</td><td><span class="check">✓</span></td></tr>
+    <tr><td>Documentos com senhas antigas ignorados</td><td><span class="check">✓</span></td></tr>
+    <tr><td>URLs internas de Cloud Run ignoradas</td><td><span class="check">✓</span></td></tr>
+    <tr><td>Google Script URL removida do frontend</td><td><span class="check">✓</span></td></tr>
+</table>
+
+<h2>6. Recomendações Futuras</h2>
+<ol>
+    <li><strong>Helmet.js</strong> — Adicionar middleware helmet para headers de segurança (X-Content-Type-Options, X-Frame-Options, CSP).</li>
+    <li><strong>HTTPS forçado</strong> — Redirecionar HTTP → HTTPS no nginx (atualmente depende do proxy externo).</li>
+    <li><strong>Validação com express-validator</strong> — Substituir validações manuais por schema validation nos controllers.</li>
+    <li><strong>Refresh token</strong> — Implementar refresh token para evitar exposição prolongada do JWT.</li>
+    <li><strong>GeoIP no SecurityLog</strong> — Integrar geolocalização nos logs de segurança (campo country já previsto no schema).</li>
+    <li><strong>Revogar serviceAccountKey.json</strong> — A chave Firebase ainda existe no filesystem; deve ser revogada no GCP IAM.</li>
+    <li><strong>Testes de penetração</strong> — Realizar scan com OWASP ZAP ou similar.</li>
+</ol>
+
+<div class="footer">
+    Gerência de Redes do CCHLA/UFRN — Documentação de Segurança gerada em Julho/2026
+</div>
+
+</body>
+</html>

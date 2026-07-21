@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação do Frontend — Sistema de Reservas CCHLA</title>
+    <style>
+        :root { --azul-marinho: #051638; --azul-royal: #1653A1; --texto: #1e293b; --borda: #cbd5e1; --fundo: #f8fafc; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: var(--texto); max-width: 960px; margin: 40px auto; padding: 0 20px; }
+        .capa { text-align: center; padding: 80px 20px; border-bottom: 4px solid var(--azul-royal); margin-bottom: 50px; }
+        .capa h1 { color: var(--azul-marinho); font-size: 32px; text-transform: uppercase; margin-bottom: 10px; }
+        .capa p { color: #64748b; font-size: 16px; }
+        h2 { color: var(--azul-royal); font-size: 22px; border-bottom: 2px solid var(--borda); padding-bottom: 8px; margin-top: 40px; }
+        h3 { color: var(--azul-marinho); font-size: 18px; margin-top: 30px; }
+        h4 { color: #334155; font-size: 15px; margin-top: 20px; margin-bottom: 8px; }
+        p, li { font-size: 14px; margin-bottom: 10px; }
+        ul, ol { margin-bottom: 20px; padding-left: 25px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid var(--borda); padding: 10px 12px; text-align: left; vertical-align: top; }
+        th { background-color: var(--fundo); font-weight: 700; color: var(--azul-marinho); }
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 3px; font-size: 13px; color: #b91c1c; border: 1px solid #e2e8f0; }
+        pre { background: #f8fafc; border: 1px solid var(--borda); border-left: 4px solid var(--azul-royal); padding: 15px; overflow-x: auto; border-radius: 4px; font-size: 13px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-publico { background: #d1fae5; color: #065f46; }
+        .badge-admin { background: #dbeafe; color: #1e40af; }
+        .badge-root { background: #fee2e2; color: #991b1b; }
+        .screenshot { border: 1px solid var(--borda); border-radius: 8px; padding: 20px; background: #fafafa; margin: 20px 0; text-align: center; color: #94a3b8; font-style: italic; }
+        .feature-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .feature-card { border: 1px solid var(--borda); border-radius: 8px; padding: 15px; background: #ffffff; }
+        .feature-card h4 { margin: 0 0 8px 0; color: var(--azul-marinho); }
+        .feature-card p { margin: 0; font-size: 13px; color: #64748b; }
+        .footer { text-align: center; padding: 30px 0; color: #94a3b8; font-size: 13px; border-top: 1px solid var(--borda); margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="capa">
+    <h1>Documentação do Frontend</h1>
+    <p>5 SPAs que compõem a interface do Sistema de Reservas de Auditórios do CCHLA/UFRN</p>
+</div>
+
+<h2>1. app-calendario — Calendário de Ocupação</h2>
+<p><strong>Arquivo:</strong> <code>app-calendario/index.html</code> (501 linhas)</p>
+<p><strong>Rota:</strong> <code>/</code> (raiz) — Página principal do sistema.</p>
+<p>Calendário interativo com FullCalendar 6 que exibe todas as reservas aprovadas nos 5 auditórios.</p>
+
+<h3>1.1 Funcionalidades</h3>
+<div class="feature-list">
+    <div class="feature-card"><h4>Calendário FullCalendar</h4><p>Visões: Mês, Semana, Dia e Lista. Navegação entre meses com botões ou dropdown.</p></div>
+    <div class="feature-card"><h4>Legenda por Auditório</h4><p>Filtro por auditório (A ao E) com cores distintas. Clique para filtrar eventos.</p></div>
+    <div class="feature-card"><h4>Tooltip ao pairar</h4><p>Ao passar o mouse sobre um evento, exibe detalhes: atividade, auditório, horário, solicitante, departamento.</p></div>
+    <div class="feature-card"><h4>Modal de detalhes</h4><p>Ao clicar em um evento, abre modal com informações completas. Fecha ao clicar fora ou no X.</p></div>
+    <div class="feature-card"><h4>Feriados e Manutenções</h4><p>Eventos especiais com destaque laranja (feriado) ou vermelho (manutenção), exibidos como dia inteiro.</p></div>
+    <div class="feature-card"><h4>Menu de Solicitações</h4><p>Dropdown com links para: Solicitar Reserva, Acompanhar Solicitação e Gestão (Secretaria).</p></div>
+    <div class="feature-card"><h4>Botão "Hoje"</h4><p>Ao clicar no título do período, retorna para o dia atual.</p></div>
+    <div class="feature-card"><h4>Responsivo</h4><p>Layout adaptável para mobile com breakpoints.</p></div>
+</div>
+
+<h3>1.2 API utilizada</h3>
+<table>
+    <tr><th>Endpoint</th><th>Método</th><th>Descrição</th></tr>
+    <tr><td><code>/api/obterEventosCalendario</code></td><td>GET</td><td>Retorna todas as reservas com status "Aprovado"</td></tr>
+</table>
+
+<h2>2. app-formulario — Solicitação de Reserva</h2>
+<p><strong>Arquivo:</strong> <code>app-formulario/index.html</code> (1032 linhas)</p>
+<p><strong>Rota:</strong> <code>/formulario</code> — Página pública para solicitar reservas.</p>
+
+<h3>2.1 Funcionalidades</h3>
+<div class="feature-list">
+    <div class="feature-card"><h4>Dados do Solicitante</h4><p>Campos: nome, e-mail, matrícula, telefone, departamento, atividade.</p></div>
+    <div class="feature-card"><h4>Seleção de Auditórios</h4><p>Checkbox para selecionar 1 ou mais dos 5 auditórios disponíveis.</p></div>
+    <div class="feature-card"><h4>Calendário Semanal</h4><p>Seleção de data com calendário visual por dia da semana. Fins de semana bloqueados.</p></div>
+    <div class="feature-card"><h4>Filtro de Horários</h4><p>Dropdowns de hora início/fim por dia. Se data = hoje, horários passados são desabilitados automaticamente.</p></div>
+    <div class="feature-card"><h4>Verificação de Conflitos</h4><p>Ao clicar em "Adicionar à Lista", consulta API de disponibilidade. Exibe alerta rico com conflitos encontrados (auditório, horário, atividade conflitante).</p></div>
+    <div class="feature-card"><h4>Lista de Reservas</h4><p>Tabela com itens adicionados, permite remover itens, exibe conflitos.</p></div>
+    <div class="feature-card"><h4>reCAPTCHA</h4><p>Proteção contra bots com Google reCAPTCHA.</p></div>
+    <div class="feature-card"><h4>Envio e Ticket</h4><p>Ao enviar, exibe tela de sucesso com ticket gerado, dados da reserva e botões de imprimir/WhatsApp.</p></div>
+    <div class="feature-card"><h4>Histórico de Solicitações</h4><p>Busca automática por e-mail/matrícula: se já solicitou antes, reusa o ticket e exibe histórico.</p></div>
+    <div class="feature-card"><h4>E-mail de Confirmação</h4><p>Após envio bem-sucedido, dispara e-mail automático para o solicitante com resumo e link de acompanhamento.</p></div>
+    <div class="feature-card"><h4>Validação de Horário</h4><p>Bloqueia horário de término menor/igual ao início. Limite operacional 07:00–21:30. Máximo 50 solicitações por vez.</p></div>
+</div>
+
+<h3>2.2 APIs utilizadas</h3>
+<table>
+    <tr><th>Endpoint</th><th>Método</th><th>Descrição</th></tr>
+    <tr><td><code>/api/checarDisponibilidade</code></td><td>POST</td><td>Verifica conflitos de horário antes de adicionar à lista</td></tr>
+    <tr><td><code>/api/enviarSolicitacao</code></td><td>POST</td><td>Envia solicitação com dados + reCAPTCHA token</td></tr>
+</table>
+
+<h2>3. app-acompanhamento — Acompanhamento via Ticket</h2>
+<p><strong>Arquivo:</strong> <code>app-acompanhamento/index.html</code> (410 linhas)</p>
+<p><strong>Rota:</strong> <code>/acompanhamento</code> — Página pública para acompanhar solicitações.</p>
+
+<h3>3.1 Funcionalidades</h3>
+<div class="feature-list">
+    <div class="feature-card"><h4>Busca por Ticket</h4><p>Campo de busca com uppercase automático. Enter ou clique em "Consultar". Link direto via query string <code>?ticket=XXX</code>.</p></div>
+    <div class="feature-card"><h4>Dados do Solicitante</h4><p>Exibe nome, matrícula, departamento, telefone, e-mail e ticket em destaque.</p></div>
+    <div class="feature-card"><h4>Tabela de Reservas</h4><p>Lista todas as solicitações associadas ao ticket com data, status, auditório, atividade e início. Paginação de 10 itens.</p></div>
+    <div class="feature-card"><h4>Status com Cores</h4><p>Badges coloridos: amarelo (pendente), verde (aprovada), vermelho (reprovado). Tooltip com motivo ao passar sobre "Reprovado".</p></div>
+    <div class="feature-card"><h4>Impressão</h4><p>Botão "Imprimir Comprovante" com CSS @media print otimizado. Oculta elementos de navegação.</p></div>
+    <div class="feature-card"><h4>Contato Secretaria</h4><p>Link para WhatsApp da secretaria.</p></div>
+    <div class="feature-card"><h4>Inatividade</h4><p>Timer de 30 minutos: recarrega a página se o usuário ficar inativo.</p></div>
+</div>
+
+<h3>3.2 API utilizada</h3>
+<table>
+    <tr><th>Endpoint</th><th>Método</th><th>Descrição</th></tr>
+    <tr><td><code>/api/consultarTicket</code></td><td>POST</td><td>Retorna todas as reservas de um ticket</td></tr>
+</table>
+
+<h2>4. app-painel — Painel Administrativo (Secretaria)</h2>
+<p><strong>Arquivos:</strong> <code>app-painel/painel.html</code> (1366 linhas), <code>cad-reservas-secretaria.html</code>, <code>feriados.html</code>, <code>gerir-contas.html</code>, <code>cchlafense.html</code></p>
+<p><strong>Rota:</strong> <code>/admin</code> — Requer autenticação JWT.</p>
+
+<h3>4.1 painel.html — Gestão Principal de Reservas</h3>
+<div class="feature-list">
+    <div class="feature-card"><h4>Cards de Reserva</h4><p>Cada reserva exibida em card com header colorido por status (verde/aprovado, amarelo/pendente, vermelho/reprovado).</p></div>
+    <div class="feature-card"><h4>Filtros Avançados</h4><p>Filtros por: nome, matrícula, data, status, auditório, departamento, atividade, período e busca geral verde.</p></div>
+    <div class="feature-card"><h4>CRUD Completo</h4><p>Aprovar, reprovar (com motivo), editar dados, excluir (root apenas), cadastrar nova reserva manualmente.</p></div>
+    <div class="feature-card"><h4>Notificação por E-mail</h4><p>Ao alterar status, botão "Notificar" dispara e-mail automático ao solicitante com o novo status.</p></div>
+    <div class="feature-card"><h4>Exportação</h4><p>Exportar dados filtrados para CSV, 1 por linha ou agrupado por ticket.</p></div>
+    <div class="feature-card"><h4>Páginação</h4><p>Controles de página e seleção de itens por página.</p></div>
+    <div class="feature-card"><h4>Modal de Inatividade</h4><p>Após período de inatividade, exibe modal "Manter-se logado" ou faz logout automático.</p></div>
+    <div class="feature-card"><h4>Menu Dropdown</h4><p>Navegação para: Cadastro Manual, Feriados, Segurança (CCHLAfense), Usuários, Alterar Senha.</p></div>
+</div>
+
+<h3>4.2 cad-reservas-secretaria.html — Cadastro Manual</h3>
+<p>Formulário idêntico ao público, porém sem reCAPTCHA. Permite à secretaria cadastrar reservas em nome de terceiros. Inclui verificação de conflitos e e-mail de confirmação.</p>
+
+<h3>4.3 feriados.html — Gestão de Feriados e Manutenções</h3>
+<div class="feature-list">
+    <div class="feature-card"><h4>CRUD de Eventos</h4><p>Cadastrar, editar e excluir feriados e manutenções. Campos: tipo, descrição, data, horário.</p></div>
+    <div class="feature-card"><h4>Filtros</h4><p>Filtrar por tipo (feriado/manutenção), mês e busca textual. Exibição em tabela.</p></div>
+    <div class="feature-card"><h4>Cores no Calendário</h4><p>Feriados em laranja, manutenções em vermelho escuro. Aparecem no calendário público.</p></div>
+</div>
+
+<h3>4.4 gerir-contas.html — Gestão de Usuários (Root)</h3>
+<p>CRUD de administradores. Apenas usuários root podem acessar. Criação com níveis (admin/root), edição de senha, exclusão (não pode excluir a si mesmo).</p>
+
+<h3>4.5 cchlafense.html — Módulo de Segurança</h3>
+<p>Inspirado no Wordfence. Exibe estatísticas com gráficos Chart.js:</p>
+<ul>
+    <li><strong>Top IPs bloqueados</strong> — IPs com mais tentativas de login falhas</li>
+    <li><strong>Top usuários com falha</strong> — E-mails com mais tentativas incorretas</li>
+    <li><strong>Falhas diárias</strong> — Gráfico de barras dos últimos 14 dias</li>
+    <li><strong>Configuração de rastreamento</strong> — Checkboxes para ativar/desativar monitoramento por área (calendário, formulário, painel, etc.)</li>
+</ul>
+
+<h3>4.6 APIs utilizadas pelo Painel</h3>
+<table>
+    <tr><th>Endpoint</th><th>Método</th><th>Autenticação</th><th>Descrição</th></tr>
+    <tr><td><code>/api/adminObterReservas</code></td><td>GET</td><td>JWT</td><td>Lista todas as reservas</td></tr>
+    <tr><td><code>/api/adminAtualizarDocumento</code></td><td>POST</td><td>JWT</td><td>Atualiza status/dados de uma reserva</td></tr>
+    <tr><td><code>/api/adminExcluirDocumento</code></td><td>POST</td><td>JWT (root)</td><td>Exclui uma reserva</td></tr>
+    <tr><td><code>/api/adminCadastrarDocumento</code></td><td>POST</td><td>JWT</td><td>Cria nova reserva manualmente</td></tr>
+    <tr><td><code>/api/notificar</code></td><td>POST</td><td>JWT</td><td>Dispara e-mail de notificação</td></tr>
+    <tr><td><code>/api/alterarSenha</code></td><td>POST</td><td>JWT</td><td>Altera senha do usuário logado</td></tr>
+    <tr><td><code>/api/fazerLogin</code></td><td>POST</td><td>—</td><td>Login</td></tr>
+    <tr><td><code>/api/security/stats</code></td><td>GET</td><td>JWT (root)</td><td>Estatísticas de segurança</td></tr>
+    <tr><td><code>/api/security/config</code></td><td>GET/POST</td><td>JWT (root)</td><td>Configurações de monitoramento</td></tr>
+    <tr><td><code>/api/adminListarUsuarios</code></td><td>GET</td><td>JWT (root)</td><td>Lista administradores</td></tr>
+    <tr><td><code>/api/adminCriarUsuario</code></td><td>POST</td><td>JWT (root)</td><td>Cria administrador</td></tr>
+    <tr><td><code>/api/adminAtualizarUsuario</code></td><td>POST</td><td>JWT (root)</td><td>Atualiza administrador</td></tr>
+    <tr><td><code>/api/adminExcluirUsuario</code></td><td>POST</td><td>JWT (root)</td><td>Exclui administrador</td></tr>
+</table>
+
+<h2>5. app-manutencao — Página de Manutenção</h2>
+<p><strong>Arquivo:</strong> <code>app-manutencao/index.html</code> (200 linhas)</p>
+<p><strong>Rota:</strong> Usada quando o sistema está fora do ar ou como página 404.</p>
+<p>Layout centralizado com logo, mensagem "Em Construção", ícones de redes sociais (Instagram, WhatsApp, E-mail) e informações da Gerência de Redes.</p>
+
+<h2>6. Infraestrutura Frontend</h2>
+
+<h3>6.1 Nginx</h3>
+<p><strong>Arquivo:</strong> <code>nginx.conf</code> (58 linhas)</p>
+<ul>
+    <li>Proxy reverso: <code>/api/</code> → backend na porta 3000</li>
+    <li>Proxy restrito: <code>/db-admin/</code> → mongo-express (apenas rede local e 10.0.0.0/8)</li>
+    <li>Rotas das SPAs: <code>/</code> → calendário, <code>/formulario</code> → formulário, <code>/acompanhamento</code> → acompanhamento, <code>/admin</code> → painel</li>
+    <li>Real IP: <code>set_real_ip_from</code> para capturar IP real atrás do proxy</li>
+</ul>
+
+<h3>6.2 Docker</h3>
+<p><strong>Arquivo:</strong> <code>frontend.Dockerfile</code> — baseado em <code>nginx:alpine</code>, copia todas as SPAs e o nginx.conf.</p>
+
+<h2>7. Dependências Externas (CDN)</h2>
+<table>
+    <tr><th>Recurso</th><th>CDN</th><th>Usado em</th></tr>
+    <tr><td>FullCalendar 6</td><td>cdn.jsdelivr.net</td><td>app-calendario</td></tr>
+    <tr><td>reCAPTCHA</td><td>google.com/recaptcha/api.js</td><td>app-formulario, cad-reservas-secretaria</td></tr>
+    <tr><td>SweetAlert2</td><td>cdn.jsdelivr.net</td><td>app-acompanhamento</td></tr>
+    <tr><td>Chart.js</td><td>cdn.jsdelivr.net</td><td>cchlafense.html</td></tr>
+    <tr><td>Font Awesome</td><td>cdnjs.cloudflare.com</td><td>app-manutencao</td></tr>
+    <tr><td>Google Fonts</td><td>fonts.googleapis.com</td><td>app-manutencao</td></tr>
+</table>
+
+<div class="footer">
+    Gerência de Redes do CCHLA/UFRN — Documentação gerada em Julho/2026
+</div>
+
+</body>
+</html>

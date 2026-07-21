@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação do Backend — Sistema de Reservas CCHLA</title>
+    <style>
+        :root { --azul-marinho: #051638; --azul-royal: #1653A1; --texto: #1e293b; --borda: #cbd5e1; --fundo: #f8fafc; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: var(--texto); max-width: 960px; margin: 40px auto; padding: 0 20px; }
+        .capa { text-align: center; padding: 80px 20px; border-bottom: 4px solid var(--azul-royal); margin-bottom: 50px; }
+        .capa h1 { color: var(--azul-marinho); font-size: 32px; text-transform: uppercase; margin-bottom: 10px; }
+        .capa p { color: #64748b; font-size: 16px; }
+        h2 { color: var(--azul-royal); font-size: 22px; border-bottom: 2px solid var(--borda); padding-bottom: 8px; margin-top: 40px; }
+        h3 { color: var(--azul-marinho); font-size: 18px; margin-top: 30px; }
+        h4 { color: #334155; font-size: 15px; margin-top: 20px; margin-bottom: 8px; }
+        p, li { font-size: 14px; margin-bottom: 10px; }
+        ul, ol { margin-bottom: 20px; padding-left: 25px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid var(--borda); padding: 10px 12px; text-align: left; vertical-align: top; }
+        th { background-color: var(--fundo); font-weight: 700; color: var(--azul-marinho); }
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 3px; font-size: 13px; color: #b91c1c; border: 1px solid #e2e8f0; }
+        pre { background: #f8fafc; border: 1px solid var(--borda); border-left: 4px solid var(--azul-royal); padding: 15px; overflow-x: auto; border-radius: 4px; font-size: 13px; }
+        .file-tree { background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; }
+        .file-tree .dir { color: #60a5fa; }
+        .file-tree .file { color: #e2e8f0; }
+        .footer { text-align: center; padding: 30px 0; color: #94a3b8; font-size: 13px; border-top: 1px solid var(--borda); margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="capa">
+    <h1>Documentação do Backend</h1>
+    <p>Arquitetura Node.js + Express + MongoDB — Sistema de Reservas CCHLA/UFRN</p>
+</div>
+
+<h2>Estrutura de Diretórios</h2>
+<div class="file-tree">
+<span class="dir">backend/</span>
+├── <span class="dir">controllers/</span>
+│   ├── <span class="file">reservaController.js</span>  (295 linhas)
+│   ├── <span class="file">authController.js</span>      (95 linhas)
+│   ├── <span class="file">securityController.js</span>  (105 linhas)
+│   ├── <span class="file">userController.js</span>      (72 linhas)
+│   └── <span class="file">adminController.js</span>      (158 linhas)
+├── <span class="dir">middleware/</span>
+│   └── <span class="file">auth.js</span>                 (48 linhas)
+├── <span class="dir">models/</span>
+│   ├── <span class="file">Reserva.js</span>             (25 linhas)
+│   ├── <span class="file">Admin.js</span>               (34 linhas)
+│   ├── <span class="file">SecurityLog.js</span>         (34 linhas)
+│   └── <span class="file">SecurityConfig.js</span>       (13 linhas)
+├── <span class="dir">services/</span>
+│   └── <span class="file">emailService.js</span>         (201 linhas)
+├── <span class="dir">scripts/</span>
+│   ├── <span class="file">seed-admin.js</span>           (45 linhas)
+│   └── <span class="file">migrate-firestore-to-mongo.js</span>
+├── <span class="file">server.js</span>                  (108 linhas)
+├── <span class="file">Dockerfile</span>
+└── <span class="file">package.json</span>
+</div>
+
+<h2>server.js — Ponto de Entrada</h2>
+<p><strong>Arquivo:</strong> <code>backend/server.js</code> (108 linhas)</p>
+<p>Configura e inicializa o servidor Express na porta 3000.</p>
+
+<h3>Inicialização</h3>
+<ol>
+    <li><strong>dotenv</strong> — carrega variáveis de ambiente do <code>.env</code></li>
+    <li><strong>CORS</strong> — permite apenas origens autorizadas (<code>https://reservas.cchla.ufrn.br</code> e <code>http://localhost</code>)</li>
+    <li><strong>JSON body parser</strong> — <code>express.json()</code></li>
+    <li><strong>MongoDB</strong> — conexão via Mongoose com <code>MONGO_URI</code></li>
+    <li><strong>Middleware de segurança global</strong> — rastreia acessos a rotas específicas conforme configurado no SecurityConfig</li>
+</ol>
+
+<h3>Middleware de Rastreamento</h3>
+<p>Middleare global (<code>server.js:42</code>) que intercepta requisições e registra no SecurityLog se o monitoramento estiver ativo para aquela rota. Ignora a rota de login (já rastreada no authController).</p>
+
+<h2>Controllers — Lógica de Negócio</h2>
+
+<h3>reservaController.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/controllers/reservaController.js</code> (295 linhas)</p>
+<p>Controller principal com lógica de disponibilidade, solicitação, calendário e CRUD admin.</p>
+
+<table>
+    <tr><th>Função</th><th>Rota</th><th>Descrição</th></tr>
+    <tr><td><code>checarDisponibilidade</code></td><td>POST /api/checarDisponibilidade</td><td>Verifica overlaps entre reservas solicitadas e existentes no banco. Ignora status "Reprovado" e "Cancelado". Busca reservas a partir de 2 dias atrás.</td></tr>
+    <tr><td><code>enviarSolicitacao</code></td><td>POST /api/enviarSolicitacao</td><td>Valida reCAPTCHA, dados, insere no MongoDB via <code>insertMany</code> e dispara e-mail de confirmação. Reusa ticket se solicitante já existir.</td></tr>
+    <tr><td><code>obterEventosCalendario</code></td><td>GET /api/obterEventosCalendario</td><td>Retorna reservas com status "Aprovado" ou "Aprovada" para o calendário público.</td></tr>
+    <tr><td><code>consultarTicket</code></td><td>POST /api/consultarTicket</td><td>Busca reservas por ticket. Retorna dados completos incluindo Motivo_Reprovacao.</td></tr>
+    <tr><td><code>adminObterReservas</code></td><td>GET /api/adminObterReservas</td><td>Lista todas as reservas ordenadas por timestamp decrescente. Adiciona <code>id_documento</code>.</td></tr>
+    <tr><td><code>adminAtualizarDocumento</code></td><td>POST /api/adminAtualizarDocumento</td><td>Atualiza campos de uma reserva. Registra quem alterou o status.</td></tr>
+    <tr><td><code>adminExcluirDocumento</code></td><td>POST /api/adminExcluirDocumento</td><td>Exclui reserva (root apenas).</td></tr>
+    <tr><td><code>adminCadastrarDocumento</code></td><td>POST /api/adminCadastrarDocumento</td><td>Cria nova reserva manualmente.</td></tr>
+    <tr><td><code>notificar</code></td><td>POST /api/notificar</td><td>Dispara e-mail de confirmação ou status update conforme <code>tipo</code>.</td></tr>
+</table>
+
+<h3>authController.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/controllers/authController.js</code> (95 linhas)</p>
+
+<table>
+    <tr><th>Função</th><th>Rota</th><th>Descrição</th></tr>
+    <tr><td><code>fazerLogin</code></td><td>POST /api/fazerLogin</td><td>Autentica admin com e-mail + senha. Rate limit de 5 falhas em 15 min. Gera JWT com id, email, nivel. Loga no SecurityLog.</td></tr>
+    <tr><td><code>alterarSenha</code></td><td>POST /api/alterarSenha</td><td>Altera senha do admin autenticado. Verifica senha atual com bcrypt.</td></tr>
+</table>
+
+<h3>securityController.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/controllers/securityController.js</code> (105 linhas)</p>
+
+<table>
+    <tr><th>Função</th><th>Rota</th><th>Descrição</th></tr>
+    <tr><td><code>getStats</code></td><td>GET /api/security/stats</td><td>Agrega dados do SecurityLog: top IPs, top usuários com falha, falhas diárias (14 dias). Root apenas.</td></tr>
+    <tr><td><code>getConfig</code></td><td>GET /api/security/config</td><td>Retorna configuração atual de monitoramento. Root apenas.</td></tr>
+    <tr><td><code>updateConfig</code></td><td>POST /api/security/config</td><td>Atualiza configuração de monitoramento (7 áreas). Root apenas.</td></tr>
+</table>
+
+<h3>userController.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/controllers/userController.js</code> (72 linhas)</p>
+<p>CRUD de administradores. Todas as rotas exigem nível root.</p>
+
+<table>
+    <tr><th>Função</th><th>Descrição</th></tr>
+    <tr><td><code>listarUsuarios</code></td><td>Lista admins (oculta password_hash)</td></tr>
+    <tr><td><code>criarUsuario</code></td><td>Cria admin com validação de e-mail duplicado</td></tr>
+    <tr><td><code>atualizarUsuario</code></td><td>Atualiza e-mail, nível, senha. Hash recalculado se senha fornecida</td></tr>
+    <tr><td><code>excluirUsuario</code></td><td>Exclui admin. Não permite auto-exclusão</td></tr>
+</table>
+
+<h3>adminController.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/controllers/adminController.js</code> (158 linhas)</p>
+<p>Controller alternativo de gestão de contas (legado). Similar ao userController mas com tratamento de Map de permissões.</p>
+
+<h2>Middleware</h2>
+
+<h3>auth.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/middleware/auth.js</code> (48 linhas)</p>
+<p>Middleware JWT obrigatório para todas as rotas protegidas. Verifica token Bearer no header <code>Authorization</code>, decodifica com <code>jwt.verify</code> e injeta <code>req.usuarioLogado</code>. Também exporta <code>verificarPermissao</code> para controle granular por ação.</p>
+
+<pre>const verificarToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer '))
+    return res.status(401).json({ erro: true, mensagem: "Token ausente." });
+
+  const token = authHeader.split('Bearer ')[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  req.usuarioLogado = decoded;
+  next();
+};</pre>
+
+<h2>Models — Mongoose Schemas</h2>
+
+<h3>Reserva.js</h3>
+<p><strong>Coleção:</strong> <code>reservas</code> | <strong>Strict:</strong> <code>false</code> (aceita campos extras do Firestore legado)</p>
+<p>Campos: Ticket, Auditório, Solicitante, Matrícula, Telefone, Departamento, Atividade, Início (ISO), Fim (ISO), Email, Data_Solicitacao, Status (default "Pendente"), Alerta_Conflito, Motivo_Reprovacao, Status_Alterado_Por, timestamp_criacao.</p>
+
+<h3>Admin.js</h3>
+<p><strong>Coleção:</strong> <code>admins</code></p>
+<p>Campos: email (unique), password_hash, nivel (admin/root), permissoes (Map), data_criacao. Contém <code>permissoesPadrao</code> e <code>permissoesRoot</code> estáticos.</p>
+
+<h3>SecurityLog.js</h3>
+<p><strong>Coleção:</strong> <code>security-cchla</code></p>
+<p>Campos: ip, username, success, userExists, route, country, timestamp.</p>
+
+<h3>SecurityConfig.js</h3>
+<p><strong>Coleção:</strong> <code>security-cchla-config</code></p>
+<p>Campos booleanos para monitorar: TodoProjeto, CalendarioPublico, FormularioPublico, AcompanhamentoPublico, Painel, Feriados, FormularioPainel.</p>
+
+<h2>Services</h2>
+
+<h3>emailService.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/services/emailService.js</code> (201 linhas)</p>
+<p>Serviço de notificação por e-mail usando nodemailer com SMTP Gmail.</p>
+
+<table>
+    <tr><th>Método</th><th>Descrição</th></tr>
+    <tr><td><code>enviarConfirmacao(data)</code></td><td>E-mail de confirmação de recebimento da solicitação. Template: título azul "Solicitação Recebida com Sucesso!", detalhes em card, botão "Acompanhar Solicitação", aviso laranja de pendência.</td></tr>
+    <tr><td><code>enviarStatusUpdate(data)</code></td><td>E-mail de atualização de status. Template com título colorido por status (verde/aprovado, vermelho/reprovado, azul/pendente), motivo (se reprovado), botão de acompanhamento.</td></tr>
+</table>
+
+<p><strong>Configuração SMTP:</strong> <code>smtp.gmail.com:587</code> com <code>secure: false</code> (STARTTLS). Autenticação com EMAIL_USER e EMAIL_PASS. CC fixo para <code>reservascchlaufrn@gmail.com</code> e <code>mensageiro@cchla.ufrn.br</code>.</p>
+
+<h2>Scripts</h2>
+
+<h3>seed-admin.js</h3>
+<p><strong>Arquivo:</strong> <code>backend/scripts/seed-admin.js</code> (45 linhas)</p>
+<p>Script interativo via terminal para criar o primeiro administrador root. Pergunta e-mail e senha, verifica duplicidade, gera hash bcrypt e salva no MongoDB.</p>
+
+<h3>migrate-firestore-to-mongo.js</h3>
+<p>Script de migração do Firestore (legado Firebase) para MongoDB. Utilizado na transição do projeto para a stack atual.</p>
+
+<h2>Dependências (package.json)</h2>
+<table>
+    <tr><th>Pacote</th><th>Versão</th><th>Uso</th></tr>
+    <tr><td>express</td><td>^4.19.2</td><td>Framework HTTP</td></tr>
+    <tr><td>mongoose</td><td>^8.4.0</td><td>ODM MongoDB</td></tr>
+    <tr><td>jsonwebtoken</td><td>^9.0.2</td><td>Tokens JWT</td></tr>
+    <tr><td>bcrypt</td><td>^5.1.1</td><td>Hash de senhas</td></tr>
+    <tr><td>nodemailer</td><td>^9.0.3</td><td>Envio de e-mails</td></tr>
+    <tr><td>cors</td><td>^2.8.5</td><td>Cross-Origin Resource Sharing</td></tr>
+    <tr><td>dotenv</td><td>^16.4.5</td><td>Variáveis de ambiente</td></tr>
+    <tr><td>axios</td><td>^1.18.0</td><td>HTTP client (reCAPTCHA verification)</td></tr>
+    <tr><td>firebase-admin</td><td>^13.0.0</td><td>Legado (Firestore) — não utilizado ativamente</td></tr>
+    <tr><td>nodemon</td><td>^3.1.0 (dev)</td><td>Hot reload em desenvolvimento</td></tr>
+</table>
+
+<h2>Docker</h2>
+<p><strong>Arquivo:</strong> <code>backend/Dockerfile</code></p>
+<pre>FROM node:20-alpine
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+EXPOSE 3000
+CMD [ "npm", "start" ]</pre>
+
+<div class="footer">
+    Gerência de Redes do CCHLA/UFRN — Documentação gerada em Julho/2026
+</div>
+
+</body>
+</html>
