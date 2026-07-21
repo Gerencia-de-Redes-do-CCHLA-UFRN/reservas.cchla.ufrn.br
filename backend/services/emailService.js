@@ -118,7 +118,7 @@ function confirmacaoHtml(data) {
       </ul>
     </div>
     <div class="btn-container">
-      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${data.ticket}" class="btn">Acompanhar Solicitação em Tempo Real</a>
+      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${data.ticket}" class="btn" style="color:#ffffff;text-decoration:none;">Acompanhar Solicitação em Tempo Real</a>
     </div>
     <div class="warning">⚠️ Atenção: Este e-mail é apenas uma confirmação de recebimento. Sua reserva está PENDENTE de análise pela secretaria.</div>
     <hr>
@@ -170,7 +170,7 @@ function statusHtml(data) {
       </ul>
     </div>
     <div class="btn-container">
-      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${data.ticket}" class="btn">Acompanhar Solicitação em Tempo Real</a>
+      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${data.ticket}" class="btn" style="color:#ffffff;text-decoration:none;">Acompanhar Solicitação em Tempo Real</a>
     </div>
     <div class="warning">${warningText}</div>
     <hr>
@@ -210,7 +210,7 @@ function statusGrupoHtml(data) {
 <head><meta charset="UTF-8"><style>${style}</style></head>
 <body>
   <div class="card">
-    <h1>Atualização em Lote das Solicitações</h1>
+    <h1>Atualização de status das Solicitações</h1>
     <p>Olá, <strong>${solicitante}</strong>.</p>
     <p>A secretaria processou suas solicitações de reserva. Confira o resultado de cada uma:</p>
     <p style="font-size:15px;font-weight:600;color:#12519e;">${resumo}</p>

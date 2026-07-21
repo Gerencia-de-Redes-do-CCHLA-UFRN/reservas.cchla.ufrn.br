@@ -875,9 +875,19 @@
             if (!gruposPorEmail[email]) {
               gruposPorEmail[email] = { email, solicitante: doc.Solicitante || '', itens: [] };
             }
-            const dataInicio = formatarDataGMT3(doc.Início || doc.data_inicio || '');
-            const dataFim = formatarDataGMT3(doc.Fim || doc.data_fim || '');
-            const periodo = dataInicio !== '-' ? `${dataInicio} — ${dataFim}` : '';
+            const rawInicio = doc.Início || doc.data_inicio || '';
+            const rawFim = doc.Fim || doc.data_fim || '';
+            let periodo = '';
+            if (rawInicio && rawFim) {
+              const dI = rawInicio.substring(0, 10);
+              const dF = rawFim.substring(0, 10);
+              if (dI === dF) {
+                const dataBr = dI.split('-').reverse().join('/');
+                periodo = `${dataBr} das ${rawInicio.substring(11, 16)} às ${rawFim.substring(11, 16)}`;
+              } else {
+                periodo = `${formatarDataGMT3(rawInicio)} — ${formatarDataGMT3(rawFim)}`;
+              }
+            }
             gruposPorEmail[email].itens.push({
               ticket: doc.Ticket || '',
               auditorio: doc.Auditório || '',
