@@ -189,11 +189,15 @@ function statusGrupoHtml(data) {
     .map(([s, c]) => `${c} ${s === 'Aprovado' ? 'aprovada(s)' : s === 'Reprovado' ? 'reprovada(s)' : 'pendente(s)'}`)
     .join(', ');
 
+  const tickets = [...new Set(itens.map(i => i.ticket))];
+  const ticketLabel = tickets.length === 1
+    ? `<p style="font-size:16px;font-weight:700;color:#12519e;margin-bottom:12px;">Ticket: ${tickets[0]}</p>`
+    : `<p style="font-size:16px;font-weight:700;color:#12519e;margin-bottom:12px;">Tickets: ${tickets.join(', ')}</p>`;
+
   const linhas = itens.map(item => {
     const cor = item.status === 'Aprovado' ? '#16a34a' : item.status === 'Reprovado' ? '#dc2626' : '#ca8a04';
     const motivoExtra = item.status === 'Reprovado' && item.motivo ? `<br><small style="color:#991b1b;">Motivo: ${item.motivo}</small>` : '';
     return `<tr>
-      <td style="padding:10px;border:1px solid #e5e7eb;font-weight:600;">${item.ticket}</td>
       <td style="padding:10px;border:1px solid #e5e7eb;">${item.auditorio}</td>
       <td style="padding:10px;border:1px solid #e5e7eb;">${item.atividade}</td>
       <td style="padding:10px;border:1px solid #e5e7eb;white-space:nowrap;">${item.data_inicio}</td>
@@ -210,11 +214,11 @@ function statusGrupoHtml(data) {
     <p>Olá, <strong>${solicitante}</strong>.</p>
     <p>A secretaria processou suas solicitações de reserva. Confira o resultado de cada uma:</p>
     <p style="font-size:15px;font-weight:600;color:#12519e;">${resumo}</p>
+    ${ticketLabel}
     <div class="details-box" style="padding:0;overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <thead>
           <tr style="background:#f1f5f9;text-align:left;">
-            <th style="padding:10px;border:1px solid #e5e7eb;">Ticket</th>
             <th style="padding:10px;border:1px solid #e5e7eb;">Local</th>
             <th style="padding:10px;border:1px solid #e5e7eb;">Atividade</th>
             <th style="padding:10px;border:1px solid #e5e7eb;">Período</th>
@@ -225,7 +229,7 @@ function statusGrupoHtml(data) {
       </table>
     </div>
     <div class="btn-container">
-      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${itens[0].ticket}" class="btn">Acompanhar no Site</a>
+      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${itens[0].ticket}" class="btn" style="color:#ffffff;text-decoration:none;">Acompanhar no Site</a>
     </div>
     <hr>
     <div class="footer">Secretaria do Centro de Ciências Humanas, Letras e Artes (CCHLA) — UFRN</div>
