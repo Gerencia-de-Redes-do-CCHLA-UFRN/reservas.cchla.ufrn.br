@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Técnica - Sistema de Reservas CCHLA</title>
+    <style>
+        :root {
+            --azul-marinho: #051638;
+            --azul-royal: #1653A1;
+            --texto-escuro: #1e293b;
+            --texto-claro: #64748b;
+            --borda: #cbd5e1;
+            --fundo-tabela: #f8fafc;
+            --fundo-destaque: #f0f9ff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--texto-escuro);
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .capa {
+            text-align: center;
+            padding: 100px 20px;
+            border-bottom: 4px solid var(--azul-royal);
+            margin-bottom: 50px;
+        }
+        .capa h1 {
+            color: var(--azul-marinho);
+            font-size: 36px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .capa p {
+            color: var(--texto-claro);
+            font-size: 18px;
+            font-weight: 500;
+        }
+        h2 {
+            color: var(--azul-royal);
+            font-size: 24px;
+            border-bottom: 2px solid var(--borda);
+            padding-bottom: 8px;
+            margin-top: 50px;
+            page-break-after: avoid;
+        }
+        h3 {
+            color: var(--azul-marinho);
+            font-size: 18px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+        p, li {
+            font-size: 15px;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 14px;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th, td {
+            border: 1px solid var(--borda);
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: var(--fundo-tabela);
+            font-weight: 700;
+            color: var(--azul-marinho);
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #f1f5f9;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            color: #b91c1c;
+            border: 1px solid #e2e8f0;
+        }
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid var(--borda);
+            border-left: 4px solid var(--azul-royal);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            color: #0f172a;
+            page-break-inside: avoid;
+        }
+        .highlight {
+            font-weight: 700;
+            color: var(--azul-marinho);
+        }
+        .sumario {
+            background-color: var(--fundo-destaque);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+            margin-bottom: 50px;
+        }
+        .sumario h3 {
+            margin-top: 0;
+            color: #0284c7;
+        }
+        .sumario ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .sumario li {
+            margin-bottom: 8px;
+        }
+        .sumario a {
+            color: var(--azul-royal);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Otimização rigorosa para PDF/Impressão */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+                font-size: 11pt;
+                color: #000;
+            }
+            .capa {
+                padding: 50px 0;
+                margin-bottom: 30px;
+                page-break-after: always;
+            }
+            h2 {
+                page-break-before: always;
+                margin-top: 0;
+            }
+            h2, h3, h4 {
+                page-break-after: avoid;
+            }
+            table, pre, .sumario {
+                page-break-inside: avoid;
+            }
+            a {
+                color: #000;
+                text-decoration: none;
+            }
+            /* Oculta links no sumário na versão impressa para focar no texto */
+            .sumario a::after {
+                content: " (Pág. " target-counter(attr(href), page) ")";
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="capa">
+        <h1>Documentação Técnica Unificada</h1>
+        <p>Sistema de Gestão de Reservas de Auditórios e Espaços Físicos</p>
+        <p style="margin-top: 20px; font-size: 14px;">Centro de Ciências Humanas, Letras e Artes (CCHLA) - UFRN<br>Versão 2.0 - Arquitetura Serverless</p>
+    </div>
+
+    <div class="sumario">
+        <h3>Índice</h3>
+        <ul>
+            <li><a href="#sec-engenharia">1. Engenharia de Software e Análise de Requisitos</a></li>
+            <li><a href="#sec-banco">2. Modelagem do Banco de Dados (Firestore)</a></li>
+            <li><a href="#sec-backend">3. Especificação da API e Backend (Cloud Functions)</a></li>
+            <li><a href="#sec-frontend">4. Especificação do Frontend (Multisite Application)</a></li>
+            <li><a href="#sec-infra">5. Infraestrutura e Roteiro Histórico de Sustentação</a></li>
+            <li><a href="#sec-deploy">6. Protocolo de Deploy e Implantação</a></li>
+        </ul>
+    </div>
+
+    <h2 id="sec-engenharia">1. Engenharia de Software e Análise de Requisitos</h2>
+
+    <h3>1.1. Visão Geral e Processos de Negócio</h3>
+    <p>O Sistema de Gestão de Reservas CCHLA foi arquitetado para automatizar, rastrear e proteger o agendamento de infraestrutura física da instituição. O fluxo de negócio baseia-se na captação de demandas acadêmicas, cruzamento em tempo real com matrizes de bloqueio (manutenções preventivas, feriados e colisão de turmas) e deliberação via interface administrativa blindada sob o paradigma <em>Zero-Trust</em>.</p>
+
+    <h3>1.2. Atores do Sistema</h3>
+    <ul>
+        <li><span class="highlight">Solicitante (Público):</span> Representado pela comunidade acadêmica. Interage com a camada pública do sistema exclusivamente para submissão de intenções de reserva, visualização da grade ocupacional no calendário e acompanhamento de protocolo (Ticket).</li>
+        <li><span class="highlight">Secretaria (Administrador):</span> Operador interno. Possui acesso restrito protegido por JSON Web Tokens (JWT). Detém autonomia global para homologar, rejeitar, criar, retificar e excluir registros, além de gerir paralisações de infraestrutura.</li>
+        <li><span class="highlight">Engine Serverless (Backend):</span> Camada lógica invisível. Responsável por arbitrar regras de negócio, assinar trilhas de auditoria forense, proteger a base de dados contra <em>scraping</em> (raspagem) e invocar rotinas de disparo de correio eletrônico.</li>
+    </ul>
+
+    <h3>1.3. Requisitos Funcionais (RF)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descrição do Requisito</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>RF01</td><td>O sistema deve captar reservas na modalidade única, recorrente semanal e recorrência personalizada com salto de semanas.</td></tr>
+            <tr><td>RF02</td><td>O motor lógico deve agrupar requisições isoladas oriundas do mesmo solicitante sob um identificador transacional único (Ticket Mercosul).</td></tr>
+            <tr><td>RF03</td><td>A interface administrativa deve consolidar solicitações pendentes atreladas ao mesmo autor para viabilizar homologações e indeferimentos em lote (Batch Processing).</td></tr>
+            <tr><td>RF04</td><td>O sistema deve emitir avisos de nível <code>Warning</code> caso uma homologação concorra com reservas aprovadas, e nível <code>Critical</code> (bloqueio de submissão) caso concorra com manutenções de infraestrutura ativas.</td></tr>
+            <tr><td>RF05</td><td>Deve existir um módulo de consulta de acesso público capaz de ler parâmetros de URL (Query Strings) para injeção automática do número do Ticket.</td></tr>
+            <tr><td>RF06</td><td>Sessões administrativas devem possuir tempo de vida ocioso máximo de 30 minutos (Inactivity Timeout), com aviso prévio em Modal antes da destruição da sessão.</td></tr>
+            <tr><td>RF07</td><td>A matriz de tempo para qualquer auditório deve estar restrita ao escopo operacional das 06:00 às 23:00.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>1.4. Requisitos Não Funcionais (RNF)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descrição do Requisito</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>RNF01</td><td>A arquitetura geral do sistema deve ser obrigatoriamente Serverless, suportada por provedores de nuvem em contêineres sob demanda (Google Cloud Run).</td></tr>
+            <tr><td>RNF02</td><td>O frontend não deve armazenar credenciais estáticas de banco de dados, atuando exclusivamente como um cliente HTTP/REST cego.</td></tr>
+            <tr><td>RNF03</td><td>O banco de dados deve utilizar o paradigma NoSQL orientado a documentos para sustentar picos de leitura rápida (Read-Heavy).</td></tr>
+            <tr><td>RNF04</td><td>A aplicação cliente deve ser fracionada em múltiplos domínios (Firebase Hosting Multisite) visando isolamento de falhas, independência de cache e organização modular de rotas.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>1.5. Modelagem de Fluxos (User Flow)</h3>
+    <p><strong>Fluxo Primário (Submissão):</strong> Acesso à SPA de Formulário &rarr; Preenchimento de perfil &rarr; Construção de matrizes de local/tempo &rarr; Avaliação passiva de colisões residuais pelo backend &rarr; Confirmação ReCAPTCHA &rarr; Submissão HTTP POST &rarr; Recepção do Ticket de Protocolo.</p>
+    <p><strong>Fluxo Secundário (Triagem):</strong> Autenticação Administrativa &rarr; Captura de JWT &rarr; Carregamento de Cache Completo do Banco &rarr; Processamento em RAM de Agrupamentos por Ticket &rarr; Avaliação Humana de Alertas Sintéticos &rarr; Emissão de Decisão (Aprovação/Reprovação) &rarr; Gravação de Metadados de Auditoria.</p>
+
+
+    <h2 id="sec-banco">2. Modelagem do Banco de Dados (Firestore)</h2>
+
+    <h3>2.1. Escolha Arquitetural</h3>
+    <p>A persistência de dados foi implementada no Google Cloud Firestore. A natureza NoSQL foi selecionada em virtude da ausência de rigidez estrutural, permitindo a evolução de atributos sem a necessidade de migrações pesadas de esquemas (Schema Migrations) comuns em bancos relacionais como PostgreSQL ou MySQL. O design utiliza um modelo <em>Flat</em> (única coleção principal) para evitar as limitações de junções (Joins).</p>
+
+    <h3>2.2. Dicionário de Dados da Coleção: <code>reservas</code></h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Campo / Atributo</th>
+                <th>Tipo</th>
+                <th>Detalhamento Técnico</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id_documento</code></td>
+                <td>String</td>
+                <td>Hash criptográfica primária (PK) autogerada pela engine do Firestore.</td>
+            </tr>
+            <tr>
+                <td><code>Ticket</code></td>
+                <td>String</td>
+                <td>Chave estrangeira lógica de agrupamento. Formato: 3 letras, 1 número, 1 letra, 2 números (ex: ABC1D23) ou "SYS-XXXX" para registros nativos da secretaria.</td>
+            </tr>
+            <tr>
+                <td><code>Auditório</code></td>
+                <td>String</td>
+                <td>Nomenclatura do espaço físico alocado ou flag global institucional "FERIADO".</td>
+            </tr>
+            <tr>
+                <td><code>Atividade</code></td>
+                <td>String</td>
+                <td>Descritor livre contendo a natureza acadêmica ou técnica da ocupação.</td>
+            </tr>
+            <tr>
+                <td><code>Solicitante</code></td>
+                <td>String</td>
+                <td>Autor do pedido. Em bloqueios institucionais, é preenchido como "Sistema / Gestão CCHLA".</td>
+            </tr>
+            <tr>
+                <td><code>Matrícula</code></td>
+                <td>String</td>
+                <td>Chave secundária de identificação institucional usada pelas rotas de backend para reaproveitamento de histórico.</td>
+            </tr>
+            <tr>
+                <td><code>Telefone / Email</code></td>
+                <td>String</td>
+                <td>Vetores de comunicação. Telefone formatado via Regex no frontend antes da submissão.</td>
+            </tr>
+            <tr>
+                <td><code>Início / Fim</code></td>
+                <td>String (ISO)</td>
+                <td>Marcos temporais absolutos no formato estrito <code>YYYY-MM-DDTHH:mm</code>. O armazenamento em string pura contorna ambiguidades de instâncias do tipo <code>Date</code> baseadas no timezone regional do servidor host.</td>
+            </tr>
+            <tr>
+                <td><code>Status</code></td>
+                <td>String</td>
+                <td>Máquina de estados. Valores finitos: <code>Pendente</code>, <code>Aprovado</code>, <code>Reprovado</code>.</td>
+            </tr>
+            <tr>
+                <td><code>Motivo_Reprovacao</code></td>
+                <td>String</td>
+                <td>Campo variante. Alocado estritamente quando o status transita para Reprovado.</td>
+            </tr>
+            <tr>
+                <td><code>timestamp_criacao</code></td>
+                <td>Timestamp</td>
+                <td>Data escalar (UNIX Epoch). Usado exclusivamente para garantia de ordenação sequencial cronológica (LIFO).</td>
+            </tr>
+            <tr>
+                <td><code>Status_Alterado_Por</code></td>
+                <td>String</td>
+                <td>Auditoria: E-mail decodificado do JWT do administrador no momento do POST.</td>
+            </tr>
+            <tr>
+                <td><code>Status_Alterado_IP</code></td>
+                <td>String</td>
+                <td>Auditoria: Assinatura de rede do terminal originador da homologação.</td>
+            </tr>
+            <tr>
+                <td><code>TipoBloqueio</code></td>
+                <td>String</td>
+                <td>Metadado de indexação usado pela tela de Manutenções para distinguir paradas técnicas de feriados normais.</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <h2 id="sec-backend">3. Especificação da API e Backend (Cloud Functions)</h2>
+
+    <h3>3.1. Arquitetura da API REST</h3>
+    <p>O backend, escrito em Node.js (Ambiente Node 18+), atua como barreira de contenção. A integração de rotas (Endpoints) é despachada através de contêineres independentes no Google Cloud Run, respondendo a gatilhos HTTP puros.</p>
+
+    <h3>3.2. Funções e Endpoints Documentados</h3>
+    <ul>
+        <li>
+            <strong><code>validarTokenAdmin(req)</code> [Middleware de Segurança]</strong><br>
+            Rotina interna transversal. Intercepta o <code>req.headers.authorization</code>. Quebra o prefixo "Bearer " e submete o hash ao módulo <code>admin.auth().verifyIdToken()</code>. Exceções criptográficas, assinaturas adulteradas ou tokens expirados disparam erro estrito <code>HTTP 401 Unauthorized</code> com drop de pacote imediato.
+        </li>
+        <li>
+            <strong><code>fazerLogin</code> [POST]</strong><br>
+            Abertura de túnel OAUTH. Captura JSON contendo credenciais nativas. Instancia conexão S2S (Server-to-Server) contra os servidores do Google Identity Toolkit via `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword`. Retorna ao frontend um payload contendo o <code>idToken</code> seguro.
+        </li>
+        <li>
+            <strong><code>checarDisponibilidade</code> [POST]</strong><br>
+            Motor de interseção de calendário. Aceita arrays de pacotes de dados temporais recém-construídos pelo usuário no frontend. Executa <em>Queries</em> limitadas na janela temporal D-2 a D+2 do alvo para mitigar gargalos de I/O. Retorna as matrizes <code>conflitos</code> e <code>agendaCompleta</code>.
+        </li>
+        <li>
+            <strong><code>enviarSolicitacao</code> [POST]</strong><br>
+            Endpoint de finalização de pedido público. Valida a integridade do desafio Google reCAPTCHA. Utiliza a instrução <code>db.batch()</code> do Firestore para aplicar escritas em lote atômicas (garantindo que se um registro da lista falhar por timeout, o lote inteiro sofre <em>Rollback</em>). Invoca webhook HTTP auxiliar no App Script da reitoria para despacho de confirmação SMTP.
+        </li>
+        <li>
+            <strong><code>obterEventosCalendario</code> [GET]</strong><br>
+            Rota pública de leitura higienizada. Executa busca ampla apenas em documentos filtrados com <code>Status == 'Aprovado'</code>. Mapeia e omite propriedades de PII (Personally Identifiable Information) como e-mail, telefone e IP antes de serializar o JSON, garantindo aderência rigorosa a políticas de proteção de dados (LGPD).
+        </li>
+        <li>
+            <strong><code>adminObterReservas</code> [GET]</strong><br>
+            Extrator integral da base. Exige JWT. <strong>Decisão de Engenharia Crítica:</strong> A rotina omite a cláusula de busca <code>.orderBy()</code> na requisição direta ao Firestore, varrendo toda a coleção sem filtros nativos. A ordenação decrescente baseada no <code>timestamp</code> é executada nativamente pela máquina virtual V8 do Node.js através de `Array.sort()`. Isso assegura que documentos legados desprovidos de carimbo de tempo não sejam vítimas de omissão de índice.
+        </li>
+        <li>
+            <strong><code>adminAtualizarDocumento</code> [POST]</strong><br>
+            Responsável por transições de estado (Aprovar/Reprovar/Corrigir). Extrai silenciosamente o <code>email</code> do payload validado no JWT e injeta compulsóriamente no atributo <code>Status_Alterado_Por</code> junto de <code>Status_Alterado_Data</code>.
+        </li>
+        <li>
+            <strong><code>adminCadastrarDocumento</code> [POST]</strong><br>
+            Canal de injeção direta de sistema (Bypass de triagem). Autoconcebe a propriedade <code>Status: "Aprovado"</code>.
+        </li>
+        <li>
+            <strong><code>adminExcluirDocumento</code> [POST]</strong><br>
+            Endpoint de aniquilação destrutiva. Exige JWT. Aplica <em>Privilege Hardcoding</em>, checando explicitamente se o e-mail validado no decodificador é correspondente à credencial de root configurada na instituição. Submissões forjadas por contas legítimas não-autorizadas resultam em <code>HTTP 403 Forbidden</code>.
+        </li>
+        <li>
+            <strong><code>consultarTicket</code> [POST]</strong><br>
+            Motor de consulta pública. Aplica coerção algorítmica (`toUpperCase()`) no parâmetro injetado pelo usuário e executa varredura do índice "Ticket". Retorna subset filtrado do documento original.
+        </li>
+    </ul>
+
+
+    <h2 id="sec-frontend">4. Especificação do Frontend (Multisite Application)</h2>
+
+    <h3>4.1. Fundamentos da Camada Cliente</h3>
+    <p>As interfaces foram construídas sob a égide do "Vanilla JavaScript" puro (ES6+), desprovidas de <em>bloatwares</em> como React ou Angular, garantindo métricas de Time-To-Interactive (TTI) na casa dos milissegundos. Toda a lógica de estado do SDK do Firebase foi removida do código executado no navegador, forçando as aplicações a operarem como clientes isolados que gerenciam seus próprios pacotes HTTP.</p>
+
+    <h3>4.2. Tratamento Global de Ciclos de Vida</h3>
+    <ul>
+        <li><strong>Sessões (Zero-Trust):</strong> O manuseio de segurança é atrelado exclusivamente à Storage local do navegador (<code>sessionStorage</code>). Fechar a aba acarreta na aniquilação criptográfica da prova de identidade.</li>
+        <li><strong>Temporal Dead Zone (TDZ):</strong> Todas as chamadas de inicialização de UI e Fetch API foram encapsuladas em listeners de <code>DOMContentLoaded</code>. Esta contenção previne cenários de "Silent Crash" onde o Javascript tentaria manipular seletores de DOM e tags DIV não resolvidas na árvore de renderização do Webkit.</li>
+        <li><strong>Inactivity Engine:</strong> O módulo varre inputs de interface e engatilha a cadeia de Timeout usando <code>setTimeout</code>. Eventos passivos de rolar de tela ou mover o ponteiro anulam o relógio, garantindo proteção sem impactar UX.</li>
+    </ul>
+
+    <h3>4.3. Detalhamento por Módulo (Micro-Frontends)</h3>
+    <ul>
+        <li>
+            <strong>Formulário Público (<code>app-formulario</code>):</strong><br>
+            Opera um array virtual atuando como um "carrinho de compras" de tempo. A conversão de pedidos semanais/personalizados engatilha um iterador matemático (Date Cursor) que projeta instâncias diárias incrementais, convertendo uma intenção macro em micro-registros isolados, submetidos em bloco. Emprega heurísticas de intersecção em matrizes de tempo para sugerir ao usuário períodos vagos em caso de choque no calendário.
+        </li>
+        <li>
+            <strong>Painel Administrativo (<code>app-painel</code>):</strong><br>
+            Aplica rotinas pesadas de ordenação e <em>Batch Rendering</em> (Renderização em Lote). Ao receber as matrizes do servidor, reduz os dados unindo entradas pendentes pelo atributo <code>Solicitante</code> e exibe um cartão condensado contendo múltiplos Checkboxes/Radios, promovendo processamento sistêmico acelerado. Inclui um <em>Logger de Exceções</em> que desenha o stack-trace de falhas na porta 443 visualmente no HTML.
+        </li>
+        <li>
+            <strong>Calendário de Ocupação (<code>app-calendario</code>):</strong><br>
+            Incorpora a engine de terceiros <code>FullCalendar</code>. A importação sofre mutação de comportamento para mitigar <strong>Timezone Shifts</strong>: Em vez de permitir a serialização nativa da biblioteca (que abatia 3 horas da exibição de feriados via GMT-3), o parser extrai as propriedades absolutas da string ISO via método <code>split('T')</code>, garantindo sincronia perfeita com matrizes do banco independente do país do terminal que requisita a página.
+        </li>
+        <li>
+            <strong>Acompanhamento (<code>app-acompanhamento</code>):</strong><br>
+            Rota flexível desenhada para integrar-se ao App Script de reitoria. Executa parseamento do objeto <code>window.location.search</code> interceptando variáveis de query string. Converte entradas passivas do tipo <code>?ticket=AAA00</code> em requisições ativas instantâneas. Provê balões textuais instanciados por coordenadas de mouse (Tooltip) sobre a camada Z-Index.
+        </li>
+    </ul>
+
+
+    <h2 id="sec-infra">5. Infraestrutura e Roteiro Histórico de Sustentação</h2>
+
+    <h3>5.1. Log Forense de Mudanças de Paradigma (Changelog Resolutivo)</h3>
+    <p>O ecossistema em produção hoje é reflexo direto de processos de estabilização contínua. As cinco fases críticas abaixo documentam anomalias nativas das infraestruturas de nuvem superadas no código em vigor:</p>
+
+    <ol>
+        <li>
+            <strong>Fase 1: Eliminação de Vulnerabilidade Client-Side</strong><br>
+            <em>Anomalia Histórica:</em> A arquitetura preliminar injetava a constante de configuração `firebaseConfig` diretamente na tag de inicialização, deixando o banco suscetível a scripts injetáveis pelo console do Chrome.<br>
+            <em>Solução Permanente:</em> Excisão sumária de todo o ecossistema Firestore do lado do navegador. Todo o fluxo de manipulação de dados foi transposto e centralizado nos Cloud Functions, convertendo as SPA's em clientes burros.
+        </li>
+        <li>
+            <strong>Fase 2: Conflito de Variáveis no Identity Toolkit</strong><br>
+            <em>Anomalia Histórica:</em> Durante a tentativa inicial de login via Fetch API na rota REST do Google, o servidor estourou recusa em virtude do uso de nome de variável proibido (`FIREBASE_API_KEY`) no ambiente de virtualização do Node.<br>
+            <em>Solução Permanente:</em> Renomeação e isolamento das chaves de autorização para propriedades anônimas independentes (<code>IDENTITY_API_KEY</code>) dentro do wrapper <code>.env</code>.
+        </li>
+        <li>
+            <strong>Fase 3: Queda de CORS e Omissão de Banco de Dados</strong><br>
+            <em>Anomalia Histórica:</em> A aplicação de JWT forçou o envio de Headers não-padrão no fluxo HTTP, causando erro de <code>Preflight OPTIONS (401/403)</code> nas portas do Google Cloud Run. Simultaneamente, painéis renderizavam vazios porque a requisição de busca <code>orderBy('timestamp')</code> omitia as centenas de reservas anteriores à migração.<br>
+            <em>Solução Permanente:</em> Atribuição de configuração <code>allUsers</code> nas invocações do Cloud Run aliada a hardcoding no Node retornando <code>Status 204 No Content</code> para tráfego em OPTIONS. Transferência da responsabilidade de cronologia do motor do Firebase para o V8-Engine da RAM do servidor.
+        </li>
+        <li>
+            <strong>Fase 4: Dessincronização Visual Temporal (DST Bug)</strong><br>
+            <em>Anomalia Histórica:</em> O lançamento de Feriados Integrais com demarcação `T00:00` sofria subtração automática pelo JavaScript do navegador baseado no fuso horário do aparelho, exibindo eventos de dia integral ocorrendo na noite do dia anterior.<br>
+            <em>Solução Permanente:</em> Refatoração completa dos iteradores que alimentam o grid dinâmico. O sistema passou a rejeitar heurísticas de fuso, analisando as Strings em formato primitivo de texto puro.
+        </li>
+    </ol>
+
+
+    <h2 id="sec-deploy">6. Protocolo de Deploy e Implantação</h2>
+
+    <h3>6.1. Otimização de Hospedagem (Firebase Hosting Multisite)</h3>
+    <p>Tendo em vista a quantidade de portais desacoplados, a infraestrutura abandona o modelo de pasta única <code>public/</code> e adota o roteamento avançado via arquivo <code>firebase.json</code>. Esta técnica mapeia "Targets" (alvos virtuais na nuvem) para subdiretórios individuais do seu repositório local, preservando as referências relativas do código sem a necessidade de reescrever links de imagens.</p>
+
+    <h3>6.2. Diagrama de Árvore de Diretórios (Obrigatório)</h3>
+<pre>
+📦 ROOT_PROJECT/
+ ┣ 📂 app-acompanhamento/ (Index independente)
+ ┣ 📂 app-calendario/ (Index independente)
+ ┣ 📂 app-formulario/ (Index independente)
+ ┣ 📂 app-manutencao/ (Index independente)
+ ┣ 📂 app-painel/ (Index independente)
+ ┣ 📂 functions/
+ ┃ ┣ 📜 index.js
+ ┃ ┣ 📜 package.json
+ ┃ ┗ 📜 .env
+ ┣ 📜 .firebaserc (Arquivo de mapeamento oculto)
+ ┗ 📜 firebase.json (Arquivo de orquestração de deploy)
+</pre>
+
+    <h3>6.3. Operações via Linha de Comando (Firebase CLI)</h3>
+    <p>Ao mudar de máquina de desenvolvimento, clone o repositório, abra o terminal e assegure que o vínculo dos targets na nuvem seja restabelecido apenas uma vez executando as rotinas de apply:</p>
+<pre>
+firebase target:apply hosting formulario-reservas NOME_ALVO_LÁ_NO_CONSOLE_1
+firebase target:apply hosting painel NOME_ALVO_LÁ_NO_CONSOLE_2
+firebase target:apply hosting calendario NOME_ALVO_LÁ_NO_CONSOLE_3
+firebase target:apply hosting acompanhamento NOME_ALVO_LÁ_NO_CONSOLE_4
+</pre>
+
+    <p>Para publicações contínuas e rotineiras de manutenção, utilize os empacotadores modulares abaixo visando implantações limpas e rápidas (na ordem de segundos):</p>
+<pre>
+// Envio global unificado (Frontend e Backend - Não Recomendado para rotina)
+firebase deploy
+
+// Atualização exclusiva de Regras de Negócio de Servidor
+firebase deploy --only functions
+
+// Atualização global de todas as frentes de Interface
+firebase deploy --only hosting
+
+// Atualização Modular (Específica - Altamente Recomendado)
+firebase deploy --only hosting:painel
+firebase deploy --only hosting:calendario
+</pre>
+
+</body>
+</html>

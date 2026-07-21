@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <title>Painel de Portaria - Fluxo de Auditórios CCHLA</title>
+  
+  <style>
+    :root {
+      --bg-painel: #05070f;
+      --bg-linha: #111625;
+      --bg-linha-alt: #161c2e;
+      --azul-royal: #1653A1;
+      --azul-marinho: #030a1c;
+      --texto-claro: #f9fafb;
+      --texto-muto: #6b7280;
+      --cor-previsto: #f59e0b;  
+      --cor-andamento: #10b981; 
+      --cor-encerrado: #4b5563;  
+    }
+
+    body {
+      background-color: var(--bg-painel);
+      color: var(--texto-claro);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      padding-bottom: 50px; 
+    }
+
+    /* Topo do Painel */
+    .topo-painel {
+      background-color: var(--azul-marinho);
+      border-bottom: 2px solid var(--azul-royal);
+      padding: 12px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .topo-esq {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo-cchla {
+      height: 40px; 
+      object-fit: contain;
+      background-color: white;
+      padding: 1px;
+      border-radius: 1px;
+      border: 1px solid rgba(255, 255, 255, 0.6); 
+    }
+
+    .topo-titulo h1 {
+      margin: 0;
+      font-size: 26px; 
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .topo-centro {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .qr-img {
+      height: 85px; 
+      width: 85px;
+      background-color: white; 
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .qr-texto {
+      font-size: 14px;
+      color: #e2e8f0;
+      line-height: 1.3;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-texto strong {
+      color: #38bdf8;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .relogio-container {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    #relogio {
+      font-size: 42px; 
+      font-weight: 900;
+      font-family: monospace;
+      color: var(--cor-previsto); 
+      margin: 0;
+      line-height: 1;
+      text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
+
+    #data-atual {
+      font-size: 16px; 
+      color: #cbd5e1;
+      margin: 0;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .controles-painel {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .seletor-dark {
+      background-color: #000000;
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      outline: none;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    /* Central da Tabela */
+    .grade-aeroporto {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tabela-vessel {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tabela-vessel thead tr {
+      display: flex;
+      background-color: #000000;
+      border-bottom: 2px solid #334155;
+      padding: 12px 15px;
+      box-sizing: border-box;
+    }
+
+    .tabela-vessel th {
+      color: var(--texto-muto);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tabela-vessel tbody {
+      flex: 1;
+      overflow-y: hidden; 
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .tabela-vessel tbody tr {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-linha);
+      padding: 12px 15px;
+      border-radius: 4px;
+      box-sizing: border-box;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+    }
+
+    .tabela-vessel tbody tr:nth-child(even) {
+      background-color: var(--bg-linha-alt);
+    }
+
+    /* Otimização da Quebra de Horário */
+    .col-horario { 
+      width: 15%; 
+      font-family: monospace; 
+      color: #cbd5e1; 
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .hora-inicio {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .hora-fim {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--texto-muto);
+      line-height: 1;
+    }
+
+    .col-auditorio { width: 20%; font-size: 20px; font-weight: 800; color: #38bdf8; text-transform: uppercase; }
+    
+    .col-atividade { 
+      width: 45%; 
+      font-weight: 700; 
+      font-size: 22px; 
+      color: #ffffff; 
+      padding-right: 15px; 
+      white-space: normal;      
+      word-wrap: break-word;    
+      line-height: 1.2;
+    }
+    
+    .col-situacao { width: 20%; text-align: right; font-weight: 900; font-size: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+    /* Estados de Sinalização */
+    .situacao-previsto { color: var(--cor-previsto); }
+    .situacao-andamento { color: var(--cor-andamento); animation: piscaPainel 1.5s infinite alternate; }
+    .situacao-encerrado { color: var(--cor-encerrado); opacity: 0.6; }
+
+    @keyframes piscaPainel {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .linha-encerrada { opacity: 0.3; }
+    .linha-encerrada .col-atividade { text-decoration: line-through; color: var(--texto-muto); }
+
+    .sem-vios-tr { width: 100%; display: flex !important; justify-content: center; align-items: center; }
+    .sem-vios-td { text-align: center !important; padding: 60px 20px; color: var(--texto-muto); font-size: 16px; font-style: italic; width: 100% !important; border: none !important; }
+
+    /* Letreiro Digital Continuo e Lento */
+    .letreiro-noticias {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #000000;
+      border-top: 2px solid var(--azul-royal);
+      height: 50px; 
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 9999;
+      box-sizing: border-box;
+    }
+
+    .letreiro-marquee {
+      display: inline-block;
+      padding-left: 100%;
+      animation: correrLetreiro 160s linear infinite; 
+    }
+
+    .noticia-item {
+      display: inline-block;
+      font-size: 18px; 
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-right: 70px;
+    }
+
+    .noticia-tag {
+      color: #38bdf8;
+      background-color: rgba(56, 189, 248, 0.1);
+      padding: 3px 8px; 
+      border-radius: 4px;
+      font-size: 13px; 
+      margin-right: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .noticia-hora {
+      color: var(--texto-muto);
+      font-size: 13px; 
+      margin-left: 8px;
+    }
+
+    @keyframes correrLetreiro {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topo-painel">
+    <div class="topo-esq">
+      <img src="cchla-logo.jpg" alt="Logo CCHLA" class="logo-cchla" onerror="this.style.display='none'">
+      <div class="topo-titulo">
+        <h1>Ocupação dos Auditórios</h1>
+      </div>
+    </div>
+
+    <div class="topo-centro">
+      <img src="qr-code-reservas-cchla.png" alt="QR Code Reservas CCHLA" class="qr-img" onerror="this.style.display='none'">
+      <div class="qr-texto">
+        Faça a sua <strong>Solicitação</strong> de Reserva<br>para os Auditórios do CCHLA
+      </div>
+    </div>
+    
+    <div class="relogio-container">
+      <div id="relogio">--:--:--</div>
+      <div id="data-atual">Carregando...</div>
+      <div class="controles-painel">
+        <select id="seletor-data" class="seletor-dark"></select>
+        <select id="seletor-auditorio" class="seletor-dark">
+          <option value="TODOS" selected>Todos os Auditórios</option>
+          <option value="AUDITÓRIO A">Auditório A</option>
+          <option value="AUDITÓRIO B">Auditório B</option>
+          <option value="AUDITÓRIO C">Auditório C</option>
+          <option value="AUDITÓRIO D">Auditório D</option>
+          <option value="AUDITÓRIO E">Auditório E</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="grade-aeroporto">
+    <table class="tabela-vessel">
+      <thead>
+        <tr>
+          <th class="col-horario">Horário</th>
+          <th class="col-auditorio">Auditório</th>
+          <th class="col-atividade">Atividade</th>
+          <th class="col-situacao">Situação</th>
+        </tr>
+      </thead>
+      <tbody id="corpo-painel-fids"></tbody>
+    </table>
+  </div>
+
+  <div class="letreiro-noticias">
+    <div class="letreiro-marquee" id="container-marquee"></div>
+  </div>
+
+  <script>
+    const API_EVENTOS = '/api/obterEventosCalendario';
+    const API_NOTICIAS = '/sua-rota-de-noticias-no-backend'; // Rota futura para integrar o scraping
+        const API_CLIMA = "https://api.open-meteo.com/v1/forecast?latitude=-5.795&longitude=-35.2094&current=temperature_2m,weather_code&timezone=America%2FFortaleza";
+    
+    // Tradutor de códigos de tempo (WMO)
+      function traduzirClima(code) {
+        if (code === 0) return "Céu Limpo";
+        if (code < 3) return "Parcialmente Nublado";
+        return "Tempo Nublado/Chuvoso";
+      }
+
+      async function buscarDadosBase() {
+        let html = "";
+      
+        // 1. Busca Clima
+        try {
+         const respClima = await fetch(API_CLIMA);
+          const data = await respClima.json();
+          const clima = `NATAL: ${data.current.temperature_2m}°C - ${traduzirClima(data.current.weather_code)}`;
+          html += `<span class="noticia-item"><span class="noticia-tag" style="background:#f59e0b; color:black">CLIMA</span>${clima}</span>`;
+        } catch(e) {}
+
+        // 2. Busca RSS
+        for (const fonte of fontesRSS) {
+          try {
+            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(fonte.url)}`);
+            const data = await res.json();
+            if (data.status === 'ok') {
+              data.items.slice(0, 2).forEach(item => {
+                html += `<span class="noticia-item"><span class="noticia-tag">${fonte.portal}</span>${item.title}</span>`;
+              });
+            }
+          } catch(e) {}
+        }
+        document.getElementById('container-marquee').innerHTML = html;
+      }
+
+
+const fontesRSS = [
+      { portal: "CCHLA", url: "https://cchla.ufrn.br/feed/" },
+      { portal: "AGÊNCIA BRASIL", url: "https://agenciabrasil.ebc.com.br/rss/esportes/feed.xml" },
+      { portal: "INPE", url: "https://servicos.cptec.inpe.br/XML/cidade/235/previsao.xml" },
+      { portal: "AGÊNCIA BRASIL", url: "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml" },
+      { portal: "UOL TECH", url: "https://rss.uol.com.br/feed/tecnologia.xml" },
+      { portal: "AGÊNCIA BRASIL", url: "https://agenciabrasil.ebc.com.br/rss/educacao/feed.xml" },
+      { portal: "TRIBUNA", url: "https://tribunadonorte.com.br/feed/" },
+      { portal: "AGÊNCIA BRASIL", url: "https://agenciabrasil.ebc.com.br/rss/geral/feed.xml" },
+      { portal: "CÂMARA", url: "https://www.camara.leg.br/noticias/rss/dinamico/SAUDE" },
+      { portal: "AGÊNCIA BRASIL", url: "https://agenciabrasil.ebc.com.br/rss/economia/feed.xml" },
+      { portal: "CÂMARA", url: "https://www.camara.leg.br/noticias/rss/dinamico/CIENCIA-E-TECNOLOGIA" }
+    ];
+
+    // --- Lógica de Notícias via RSS ---
+    async function buscarNoticias() {
+      let noticiasHTML = "";
+      for (const fonte of fontesRSS) {
+        try {
+          const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(fonte.url)}`);
+          const data = await res.json();
+          if (data.status === 'ok') {
+            data.items.slice(0, 2).forEach(item => {
+              noticiasHTML += `<span class="noticia-item"><span class="noticia-tag">${fonte.portal}</span>${item.title}</span>`;
+            });
+          }
+        } catch(e) { console.warn("Erro ao carregar RSS: " + fonte.portal); }
+      }
+      document.getElementById('container-marquee').innerHTML = noticiasHTML || "Notícias temporariamente indisponíveis";
+    }
+
+    let cacheEventosGlobais = [];
+    let cacheNoticiasGlobais = [];
+    
+    let motorScrollIniciado = false;
+    let direcaoScroll = 1;
+    let emPausaScroll = false;
+
+    //const mockNoticiasBackup = [
+    //  { portal: "CCHLA", titulo: "Secretaria Geral publica prazos para trancamento de turmas e solicitações de reingresso do período vigente", hora: "20/06/2026 14:32" },
+    //  { portal: "UFRN", titulo: "Comissão de Infraestrutura realiza manutenção preventiva nos sistemas elétricos e de climatização do Centro", hora: "20/06/2026 11:15" },
+    //  { portal: "MEC", titulo: "Governo Federal abre consulta pública nacional para novas diretrizes de fomento à pesquisa em ciências humanas", hora: "20/06/2026 08:30" },
+    //  { portal: "CAPES", titulo: "Portal de Periódicos expande acervo digital com a integração de novas bases internacionais de artigos científicos", hora: "19/06/2026 16:40" },
+    //  { portal: "CCHLA", titulo: "Abertas as inscrições para o exame de proficiência em línguas estrangeiras para os programas de pós-graduação", hora: "19/06/2026 10:22" },
+    //  { portal: "UFRN", titulo: "Pró-Reitoria de Graduação emite nota sobre os critérios de distribuição de auxílio estudantil para o próximo semestre", hora: "19/06/2026 09:12" }
+    // ];
+
+    function renderizarLetreiro(noticias) {
+      const container = document.getElementById('container-marquee');
+      container.innerHTML = noticias.map(n => `
+        <span class="noticia-item">
+          <span class="noticia-tag">${n.portal}</span>${n.titulo}<span class="noticia-hora">[${n.hora}]</span>
+        </span>
+      `).join('');
+    }
+
+    // Função assíncrona que consumirá seu futuro serviço de scraping
+    async function buscarNoticiasAPI() {
+      try {
+        const resposta = await fetch(API_NOTICIAS);
+        if (!resposta.ok) throw new Error("API de notícias indisponível no momento.");
+        
+        const dados = await resposta.json();
+        
+        // Verifica se houve mudança nas notícias antes de re-renderizar para não bugar a animação do letreiro
+        if(JSON.stringify(dados) !== JSON.stringify(cacheNoticiasGlobais)) {
+          cacheNoticiasGlobais = dados;
+          renderizarLetreiro(cacheNoticiasGlobais);
+        }
+      } catch (error) {
+        // Se a API não existir ou falhar, roda o mock como contingência segura
+        if(cacheNoticiasGlobais.length === 0) {
+          cacheNoticiasGlobais = mockNoticiasBackup;
+          renderizarLetreiro(cacheNoticiasGlobais);
+        }
+      }
+    }
+
+    function obterCorAuditorio(nomeAuditorio, nomeAtividade) {
+      let n = (nomeAuditorio || "").toUpperCase();
+      let ativ = (nomeAtividade || "").toUpperCase();
+      if(n.includes("MANUTENÇÃO") || n.includes("MANUTENCAO") || ativ.includes("MANUTENÇÃO") || ativ.includes("MANUTENCAO")) return "#991b1b"; 
+      if(n === "AUDITORIO A" || n === "AUDITÓRIO A") return "#ff0000"; 
+      if(n === "AUDITORIO B" || n === "AUDITÓRIO B") return "#000080"; 
+      if(n === "AUDITORIO C" || n === "AUDITÓRIO C") return "#ffff00"; 
+      if(n === "AUDITORIO D" || n === "AUDITÓRIO D") return "#008000"; 
+      if(n === "AUDITORIO E" || n === "AUDITÓRIO E") return "#4682B4"; 
+      return "#cbd5e1"; 
+    }
+
+    function popularSeletorDias() {
+      const seletor = document.getElementById('seletor-data');
+      const agora = new Date();
+      const ano = agora.getFullYear();
+      const mes = agora.getMonth();
+      const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+      
+      const diaHojeFormatoStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+
+      for (let i = 1; i <= diasNoMes; i++) {
+        const dataLoop = new Date(ano, mes, i);
+        const isoValue = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        const diaSemanaTexto = dataLoop.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+        const textoVisivel = `${String(i).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')} - ${diaSemanaTexto}`;
+        
+        const opt = document.createElement('option');
+        opt.value = isoValue;
+        opt.innerText = textoVisivel;
+        if (isoValue === diaHojeFormatoStr) opt.selected = true;
+        seletor.appendChild(opt);
+      }
+
+      seletor.addEventListener('change', () => processarEPainelar(cacheEventosGlobais, true));
+      document.getElementById('seletor-auditorio').addEventListener('change', () => processarEPainelar(cacheEventosGlobais, true));
+    }
+
+    function atualizarRelogio() {
+      const agora = new Date();
+      document.getElementById('relogio').innerText = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}:${String(agora.getSeconds()).padStart(2, '0')}`;
+      
+      const opcoesData = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('data-atual').innerText = agora.toLocaleDateString('pt-BR', opcoesData).replace(/ De /gi, ' de ').toUpperCase();
+    }
+
+    async function buscarEventos() {
+      try {
+        const resposta = await fetch(API_EVENTOS);
+        if (!resposta.ok) throw new Error("Erro de resposta API de Eventos");
+        cacheEventosGlobais = await resposta.json();
+        processarEPainelar(cacheEventosGlobais, false);
+      } catch (error) {
+        cacheEventosGlobais = gerarContingenciaMockEventos();
+        processarEPainelar(cacheEventosGlobais, false);
+      }
+    }
+
+    function processarEPainelar(eventos, resetarScroll) {
+      if(!eventos || eventos.length === 0) return;
+      const agora = new Date();
+      const dataSelecionadaIso = document.getElementById('seletor-data').value; 
+      const auditorioSelecionado = document.getElementById('seletor-auditorio').value;
+      const corpoPainel = document.getElementById('corpo-painel-fids');
+      
+      const scrollAtual = resetarScroll ? 0 : corpoPainel.scrollTop;
+
+      let filtrados = eventos.filter(ev => {
+        if (!ev.Início || !ev.Fim) return false;
+        if (ev.Início.substring(0, 10) !== dataSelecionadaIso) return false;
+
+        if (auditorioSelecionado !== "TODOS") {
+          let audNorm = (ev.Auditório || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+          let filtroNorm = auditorioSelecionado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+          if (audNorm !== filtroNorm) return false;
+        }
+
+        let audUpper = (ev.Auditório || "").toUpperCase();
+        let ativUpper = (ev.Atividade || "").toUpperCase();
+        return !(audUpper.includes("FERIADO") || ativUpper.includes("FERIADO") || audUpper.includes("FACULTATIVO") || ativUpper.includes("FACULTATIVO"));
+      });
+
+      filtrados.sort((a, b) => {
+        let audA = (a.Auditório || "").toUpperCase(); let audB = (b.Auditório || "").toUpperCase();
+        if (audA < audB) return -1; if (audA > audB) return 1;
+        let ativA = (a.Atividade || "").toUpperCase(); let ativB = (b.Atividade || "").toUpperCase();
+        let isManutA = (ativA.includes("MANUTENÇÃO") || ativA.includes("MANUTENCAO") || audA.includes("MANUTENÇÃO") || audA.includes("MANUTENCAO")) ? 1 : 0;
+        let isManutB = (ativB.includes("MANUTENÇÃO") || ativB.includes("MANUTENCAO") || audB.includes("MANUTENÇÃO") || audB.includes("MANUTENCAO")) ? 1 : 0;
+        if (isManutA !== isManutB) return isManutA - isManutB;
+        return new Date(a.Início) - new Date(b.Início);
+      });
+
+      let htmlGerado = "";
+
+      if (filtrados.length === 0) {
+        htmlGerado = `<tr class="sem-vios-tr"><td colspan="4" class="sem-vios-td">NENHUMA OPERAÇÃO AGENDADA PARA O PERÍODO SELECIONADO.</td></tr>`;
+      } else {
+        filtrados.forEach(ev => {
+          const objetoInicio = new Date(ev.Início);
+          const objetoFim = new Date(ev.Fim);
+          const hIniExibicao = ev.Início.substring(11, 16);
+          const hFimExibicao = ev.Fim.substring(11, 16);
+          const colateralColor = obterCorAuditorio(ev.Auditório, ev.Atividade);
+          
+          let statusTexto = "PREVISTO", statusClasse = "situacao-previsto", linhaClasse = "";
+
+          if (agora >= objetoInicio && agora <= objetoFim) {
+            statusTexto = "EM ANDAMENTO";
+            statusClasse = "situacao-andamento";
+          } else if (agora > objetoFim) {
+            statusTexto = "ENCERRADO";
+            statusClasse = "situacao-encerrado";
+            linhaClasse = "linha-encerrada";
+          }
+
+          htmlGerado += `
+            <tr class="${linhaClasse}" style="border-left-color: ${colateralColor}; border-right-color: ${colateralColor}">
+              <td class="col-horario">
+                <span class="hora-inicio">${hIniExibicao}</span>
+                <span class="hora-fim">${hFimExibicao}</span>
+              </td>
+              <td class="col-auditorio">${ev.Auditório}</td>
+              <td class="col-atividade"><span>${ev.Atividade}</span></td>
+              <td class="col-situacao ${statusClasse}"><span>${statusTexto}</span></td>
+            </tr>
+          `;
+        });
+      }
+
+      corpoPainel.innerHTML = htmlGerado;
+      corpoPainel.scrollTop = scrollAtual;
+
+      if (!motorScrollIniciado) {
+        iniciarMotorDesacopladoDeScroll();
+        motorScrollIniciado = true;
+      }
+    }
+
+    function iniciarMotorDesacopladoDeScroll() {
+      const elemento = document.getElementById('corpo-painel-fids');
+      
+      setInterval(() => {
+        if (emPausaScroll) return;
+        
+        if (elemento.scrollHeight <= elemento.clientHeight) {
+            elemento.scrollTop = 0;
+            return;
+        }
+
+        elemento.scrollTop += direcaoScroll;
+        
+        if (direcaoScroll === 1 && Math.ceil(elemento.scrollTop + elemento.clientHeight) >= elemento.scrollHeight) {
+          emPausaScroll = true;
+          setTimeout(() => { 
+            direcaoScroll = -1; 
+            emPausaScroll = false; 
+          }, 4000); 
+        }
+        else if (direcaoScroll === -1 && elemento.scrollTop <= 0) {
+          emPausaScroll = true;
+          setTimeout(() => { 
+            direcaoScroll = 1; 
+            emPausaScroll = false; 
+          }, 4000); 
+        }
+      }, 40); 
+    }
+
+    function gerarContingenciaMockEventos() {
+      const dSel = document.getElementById('seletor-data').value;
+      const agora = new Date();
+      const fmtH = (o) => { const d = new Date(agora.getTime() + (o * 3600000)); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+      
+      return [
+        { Auditório: "Auditório B", Atividade: "Defesa de Doutorado em Linguística Aplicada e Psicolinguística do Rio Grande do Norte", Início: `${dSel}T${fmtH(-1)}:00`, Fim: `${dSel}T${fmtH(2)}:00` },
+        { Auditório: "Auditório A", Atividade: "Manutenção do Projetor Multimídia", Início: `${dSel}T${fmtH(1)}:00`, Fim: `${dSel}T${fmtH(3)}:00` },
+        { Auditório: "Auditório A", Atividade: "Reunião Geral de Departamento", Início: `${dSel}T${fmtH(-2)}:00`, Fim: `${dSel}T${fmtH(-0.5)}:00` },
+        { Auditório: "Auditório C", Atividade: "Palestra Magna de Filosofia Moderna", Início: `${dSel}T${fmtH(1.5)}:00`, Fim: `${dSel}T${fmtH(4)}:00` },
+        { Auditório: "Auditório D", Atividade: "Aula Magna do Curso de Ciências Sociais e Sociologia Regional", Início: `${dSel}T${fmtH(2)}:00`, Fim: `${dSel}T${fmtH(5)}:00` },
+        { Auditório: "Auditório E", Atividade: "Workshop de Integração Tecnológica e Metodologias Ativas no Ensino Superior", Início: `${dSel}T${fmtH(2.5)}:00`, Fim: `${dSel}T${fmtH(6)}:00` }
+      ];
+    }
+
+    let ultimoDiaVerificado = new Date().getDate();
+
+    function verificarMudancaDeDia() {
+      const hoje = new Date().getDate();
+      if (hoje !== ultimoDiaVerificado) {
+        ultimoDiaVerificado = hoje;
+        const seletor = document.getElementById('seletor-data');
+        seletor.innerHTML = '';
+        popularSeletorDias();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      atualizarRelogio();
+      popularSeletorDias();
+      
+      // Carga inicial
+      buscarEventos();
+      buscarNoticiasAPI();
+      buscarNoticias();
+      buscarDadosBase();
+
+      setInterval(atualizarRelogio, 1000);
+      
+      // Ciclos de atualização
+      setInterval(buscarDadosBase, 600000);
+      setInterval(buscarNoticias, 600000);
+      setInterval(() => {
+        verificarMudancaDeDia();
+        buscarEventos();
+      }, 15000); 
+      setInterval(buscarNoticiasAPI, 300000); // Atualiza notícias a cada 5 minutos
+    });
+  </script>
+</body>
+</html>

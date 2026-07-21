@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
   <title>Solicitação de Reserva de Auditórios - CCHLA</title>
   
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -16,13 +18,25 @@
     .header h2 { margin: 0 0 10px 0; color: var(--azul-marinho); font-size: 24px; font-weight: 700; }
     .header p { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
     label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-    input, select { width: 100%; padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s; }
+    input[type="text"], input[type="tel"], input[type="email"], input[type="date"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s; }
     input:focus, select:focus { outline: none; border-color: var(--azul-royal); box-shadow: 0 0 0 3px rgba(22, 83, 161, 0.1); }
+    select option:disabled { color: #cbd5e1; background-color: #f1f5f9; }
     .obs-text { display: block; font-size: 12px; color: #64748b; margin-top: 5px; font-style: italic; }
-    .btn-submit { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background-color 0.2s ease-in-out; }
+    .btn-submit { background-color: var(--azul-royal); color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: background-color 0.2s ease-in-out; margin-top: 15px;}
     .btn-submit:hover { background-color: var(--azul-marinho); }
-    .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; }
+    .btn-submit:disabled { background-color: #94a3b8; cursor: not-allowed; opacity: 0.7; }
     
+    /* Calendário Semanal/Personalizado */
+    .grid-semana { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+    .linha-dia { display: flex; align-items: center; gap: 10px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--borda-suave); }
+    .linha-dia .dia-nome { width: 45px; font-weight: bold; font-size: 14px; color: var(--azul-marinho); }
+    .linha-dia select { width: auto; flex: 1; max-width: 120px; padding: 8px; }
+    .linha-dia input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    .linha-dia.disabled { background-color: #f8fafc; opacity: 0.6; }
+
+    .btn-add-lista { background-color: #10b981; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background-color 0.2s; width: 100%; margin-top: 15px; font-size: 14px; }
+    .btn-add-lista:hover { background-color: #059669; }
+
     /* Telas Auxiliares */
     #telaSucesso { display: none; text-align: center; }
     .sucesso-icone { font-size: 50px; color: #10b981; margin-bottom: 10px; }
@@ -42,20 +56,88 @@
     .btn-voltar { background-color: #e2e8f0; color: var(--texto-escuro); padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; }
     .btn-voltar:hover { background-color: #cbd5e1; }
     
-    /* Estilo do Botão Imprimir */
     .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; margin-right: 10px; }
     .btn-imprimir:hover { background-color: #334155; }
-
-    /* Novo: Estilo do Botão WhatsApp */
     .btn-whatsapp { background-color: #25D366; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 25px; margin-right: 10px; }
     .btn-whatsapp:hover { background-color: #128C7E; }
 
-    /* Novo: Estilo para Alerta de Conflito */
-    #avisoConflito { display: none; background-color: #fffbeb; border: 1px solid #fcd34d; border-left: 5px solid #f59e0b; color: #92400e; padding: 15px; margin-top: 15px; border-radius: 6px; font-size: 13px; line-height: 1.5; }
-    #avisoConflito strong.aviso-titulo { color: #b45309; font-size: 14px; display: block; margin-bottom: 8px; }
-    .sugestao-livre { display: inline-block; background-color: #fef3c7; padding: 4px 8px; border-radius: 4px; margin: 3px 3px 3px 0; font-weight: 600; border: 1px solid #fde68a; }
+    /* Alerta de Conflito Base */
+    #avisoConflito { display: none; margin-top: 15px; }
 
-    /* Regras de Limpeza para a Impressora */
+    /* Novos Estilos Restaurados do Alerta de Conflito Rico */
+    .alerta-conflito-box {
+        background-color: #fdfbf7;
+        border-left: 5px solid #f59e0b;
+        padding: 20px;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        text-align: left;
+    }
+    .alerta-conflito-header {
+        color: #b45309;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .alerta-evento-lista {
+        list-style: none;
+        padding: 0;
+        margin: 15px 0;
+    }
+    .alerta-evento-item {
+        margin-bottom: 12px;
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.5;
+    }
+    .status-badge {
+        font-weight: bold;
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .status-Pendente { color: #d97706; background-color: #fef3c7; }
+    .status-Aprovado { color: #059669; background-color: #d1fae5; }
+    .caixa-sugestao {
+        background-color: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 15px;
+        color: #065f46;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    .btn-forcar {
+        background-color: transparent;
+        color: #d97706;
+        border: 1px solid #d97706;
+        padding: 10px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 15px;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+    .btn-forcar:hover { background-color: #fef3c7; }
+
+    /* Modal de Sucesso Amigável */
+    #modalSucesso {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(5, 22, 56, 0.7); z-index: 9999; justify-content: center; align-items: center;
+        backdrop-filter: blur(3px);
+    }
+    .modal-box {
+        background: #ffffff; padding: 35px; border-radius: 12px; text-align: center; 
+        max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease-out;
+    }
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
     @media print {
       body { background-color: #ffffff; padding: 0; }
       .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
@@ -69,89 +151,188 @@
 </head>
 <body>
 
+  <div id="modalSucesso">
+    <div class="modal-box">
+      <div class="sucesso-icone">✓</div>
+      <h3 style="color: var(--azul-marinho); margin-top: 0; font-size: 22px;">Sucesso!</h3>
+      <p style="color: var(--texto-escuro); font-size: 15px; line-height: 1.5; margin-bottom: 25px;">Sua reserva foi registrada com sucesso. Aguarde <b>Confirmação</b> da Secretaria do CCHLA.</p>
+      <button id="btnModalCiente" style="background-color: var(--azul-royal); color: white; padding: 12px 30px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%;">Ciente</button>
+    </div>
+  </div>
+
   <div class="container" id="telaFormulario">
     <div class="header">
       <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
       <h2>Solicitação de Reserva de Auditórios</h2>
-      <p>Preencha os dados abaixo. As reservas devem ser feitas exclusivamente em dias úteis, salvo autorização prévia da direção.</p>
+      <p>Preencha os dados abaixo. As reservas devem ser feitas <b>exclusivamente em dias úteis</b>, salvo <b>autorização prévia da Direção do CCHLA</b>.</p>
+      <br>
+      <p style="color: #000;">Nota: Para que as suas solicitações sejam agrupadas somente num Ticket, por favor atente ao preenchimento correto dos campos do formulário.</p>
     </div>
 
     <form id="formReserva">
       <div style="margin-bottom: 20px;">
-        <label for="auditorio">1) Escolha o local da atividade  :</label>
-        <select id="auditorio" name="auditorio_selecionado" required>
-          <option value="" disabled selected>Selecione um auditório...</option>
-          <option value="Auditorio A">Auditório 'A' (20 lugares - Projetor, PC, TV, Webcam, Caixa de Som para computador)</option>
-          <option value="Auditorio B">Auditório 'B' (95 lugares - Projetor, PC, Webcam, Caixa de Som para computador, Mesa de Som 2 canais)</option>
-          <option value="Auditorio C">Auditório 'C' (42 lugares - Projetor, PC, TV, Webcam, Caixa de Som para computador)</option>
-          <option value="Auditorio D">Auditório 'D' (60 lugares - Projetor, PC, Webcam, Caixa de Som para computador)</option>
-          <option value="Auditorio E">Auditório 'E' (30 lugares - Projetor, PC, TV, Webcam, Caixa de Som para computador)</option>
-        </select>
-        <span class="obs-text"><h2>* OBS.: Caso necessite de microfone e caixa de som acústica, solicitar na Assessoria.</h2></span>
-      </div>
-
-      <div style="margin-bottom: 20px;">
-        <label for="responsavel">2) Responsável pela solicitação:</label>
+        <label for="responsavel">1) Responsável pela reserva:</label>
         <input type="text" id="responsavel" name="responsavel" required placeholder="Nome completo">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="matricula">3) Matrícula:</label>
+        <label for="matricula">2) Matrícula:</label>
         <input type="text" id="matricula" name="matricula" required placeholder="Número da matrícula">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="telefone">4) Telefone para contato:</label>
+        <label for="telefone">3) Telefone para contato:</label>
         <input type="tel" id="telefone" name="telefone_contato" required placeholder="(84) 99999-9999" maxlength="15">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="departamento">5) Departamento / Centro:</label>
+        <label for="departamento">4) Departamento / Centro:</label>
         <input type="text" id="departamento" name="departamento_centro" required placeholder="Ex: Departamento de Letras / CCHLA">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label for="atividade">6) Atividade a ser realizada:</label>
+        <label for="atividade">5) Atividade a ser realizada:</label>
         <input type="text" id="atividade" name="atividade_realizada" required placeholder="Ex: Reunião, defesa, apresentação, etc.">
       </div>
 
-      <div style="margin-bottom: 25px; background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
-        <span style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 14px; color: var(--azul-marinho);">7) Período da Reserva (Início e Fim):</span>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 250px;">
-            <label style="font-size: 12px; color: #64748b;">Início:</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="date" name="data_inicio" required style="flex: 2;">
-              <select name="hora_inicio" id="select_hora_inicio" required style="flex: 1;">
-                </select>
+      <div style="margin-bottom: 20px;">
+        <label>6) E-mail institucional:</label>
+        <input type="email" id="email" name="_replyto" required placeholder="seuemail@ufrn.br">
+      </div>
+
+      <div style="margin-bottom: 25px; background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 2px solid var(--borda-suave);">
+        <h3 style="margin-top: 0; color: var(--azul-marinho); font-size: 16px; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">7) Construa sua Solicitação (Locais e Datas)</h3>
+        <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Selecione o auditório, configure as datas e clique em <b>"Adicionar"</b>. Você pode repetir o processo para adicionar vários auditórios e horários diferentes na mesma solicitação.</p>
+
+        <div style="margin-bottom: 15px;">
+          <label for="auditorio_in" style="font-size: 13px;">Selecione o Auditório:</label>
+          <select id="auditorio_in">
+            <option value="" disabled selected>Selecione...</option>
+            <option value="Auditório A">Auditório 'A' (20 lugares - Projetor, PC, TV, Webcam, Caixa de Som do PC)</option>
+            <option value="Auditório B">Auditório 'B' (95 lugares - Projetor, PC, Webcam, Caixa de Som, Mesa 2 canais)</option>
+            <option value="Auditório C">Auditório 'C' (42 lugares - Projetor, PC, TV, Webcam, Caixa de Som do PC)</option>
+            <option value="Auditório D">Auditório 'D' (60 lugares - Projetor, PC, Webcam, Caixa de Som do Auditório ligado ao PC)</option>
+            <option value="Auditório E">Auditório 'E' (30 lugares - Projetor, PC, TV, Webcam, Caixa de Som do PC)</option>
+          </select>
+          <span class="obs-text"><b>Caso necessite de microfone/caixa acústica extra, solicitar na Assessoria do CCHLA.</b></span>
+        </div>
+
+        <label for="tipo_reserva" style="font-size: 13px;">Data e Horário para este local:</label>
+        <select id="tipo_reserva" style="margin-bottom: 10px;">
+          <option value="unico" selected>Não se repete (Evento Único / Dia Avulso)</option>
+          <option value="semanal">Semanalmente (Grade por Dias da Semana)</option>
+          <option value="personalizada">Recorrência Personalizada</option>
+        </select>
+
+        <div id="bloco_unico" style="margin-top: 15px;">
+          <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+              <label style="font-size: 12px; color: #64748b;">Data da Reserva:</label>
+              <input type="date" id="data_unico">
             </div>
-          </div>
-          <div style="flex: 1; min-width: 250px;">
-            <label style="font-size: 12px; color: #64748b;">Fim:</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="date" name="data_fim" required style="flex: 2;">
-              <select name="hora_fim" id="select_hora_fim" required style="flex: 1;">
-                </select>
+            <div style="flex: 2; min-width: 200px;">
+              <label style="font-size: 12px; color: #64748b;">Horário (Início - Fim):</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <select id="hora_ini_unico"></select>
+                <span style="color: #64748b;">às</span>
+                <select id="hora_fim_unico"></select>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div id="avisoConflito"></div>
-      </div>
 
-      <div style="margin-bottom: 25px;">
-        <label>8) Seu E-mail institucional:</label>
-        <input type="email" name="_replyto" required placeholder="seuemail@ufrn.br">
+        <div id="bloco_semanal" style="display: none; margin-top: 15px; border-top: 1px dashed var(--borda-suave); padding-top: 15px;">
+          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 1;">
+              <label style="font-size: 12px; color: #64748b;">A partir de (Início):</label>
+              <input type="date" id="data_ini_semanal">
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 12px; color: #64748b;">Até (Data Limite):</label>
+              <input type="date" id="data_fim_semanal">
+            </div>
+          </div>
+          <label style="font-size: 13px; color: var(--azul-marinho);">Configurar horários por dia da semana:</label>
+          <div class="grid-semana">
+            <div class="linha-dia disabled" id="row_dia_0">
+              <input type="checkbox" id="chk_0" value="0"> <span class="dia-nome">Dom.</span>
+              <select id="h_ini_0" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_0" disabled></select>
+            </div>
+            <div class="linha-dia disabled" id="row_dia_1">
+              <input type="checkbox" id="chk_1" value="1"> <span class="dia-nome">Seg.</span>
+              <select id="h_ini_1" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_1" disabled></select>
+            </div>
+            <div class="linha-dia disabled" id="row_dia_2">
+              <input type="checkbox" id="chk_2" value="2"> <span class="dia-nome">Ter.</span>
+              <select id="h_ini_2" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_2" disabled></select>
+            </div>
+            <div class="linha-dia disabled" id="row_dia_3">
+              <input type="checkbox" id="chk_3" value="3"> <span class="dia-nome">Qua.</span>
+              <select id="h_ini_3" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_3" disabled></select>
+            </div>
+            <div class="linha-dia disabled" id="row_dia_4">
+              <input type="checkbox" id="chk_4" value="4"> <span class="dia-nome">Qui.</span>
+              <select id="h_ini_4" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_4" disabled></select>
+            </div>
+            <div class="linha-dia disabled" id="row_dia_5">
+              <input type="checkbox" id="chk_5" value="5"> <span class="dia-nome">Sex.</span>
+              <select id="h_ini_5" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_5" disabled></select>
+            </div>
+            <div class="linha-dia disabled" id="row_dia_6">
+              <input type="checkbox" id="chk_6" value="6"> <span class="dia-nome">Sáb.</span>
+              <select id="h_ini_6" disabled></select> <span style="color:#64748b">-</span> <select id="h_fim_6" disabled></select>
+            </div>
+          </div>
+        </div>
+
+        <div id="bloco_personalizada" style="display: none; margin-top: 15px; border-top: 1px dashed var(--borda-suave); padding-top: 15px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+            <label style="margin: 0; font-size: 13px;">Repetir a cada:</label>
+            <input type="number" id="intervalo_semanas" min="1" max="12" value="2" style="width: 70px; padding: 8px;">
+            <span style="font-size: 13px;">semana(s)</span>
+          </div>
+          <span class="obs-text" style="margin-bottom: 15px;">A reserva será repetida de <b>Segunda a Sexta-feira</b> nas semanas ativas.</span>
+          
+          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 1; min-width: 150px;">
+              <label style="font-size: 12px; color: #64748b;">Início:</label>
+              <input type="date" id="data_ini_pers">
+            </div>
+            <div style="flex: 2; min-width: 200px;">
+              <label style="font-size: 12px; color: #64748b;">Horário (Início - Fim):</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <select id="hora_ini_pers"></select>
+                <span style="color: #64748b;">às</span>
+                <select id="hora_fim_pers"></select>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: #64748b;">Termina em (Data Limite):</label>
+            <input type="date" id="data_fim_pers">
+          </div>
+        </div>
+
+        <button type="button" id="btn_add_lista" class="btn-add-lista">+ Adicionar à Solicitação</button>
+
+        <div style="margin-top: 20px; border-top: 2px solid var(--borda-suave); padding-top: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: var(--azul-marinho);">📋 Sua Lista de Reservas:</h4>
+          <div id="lista_reservas_container" style="display: flex; flex-direction: column; gap: 8px;">
+            <span style="font-size: 12px; color: #94a3b8; text-align: center; padding: 10px; background: #fff; border-radius: 6px; border: 1px dashed #cbd5e1;">Sua lista está vazia. Adicione os locais e horários acima.</span>
+          </div>
+        </div>
+
+        <div id="avisoConflito"></div>
       </div>
 
       <div style="margin-bottom: 25px; background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid var(--borda-suave); font-size: 13px; color: var(--texto-escuro); line-height: 1.5;">
         <p style="margin-top: 0; margin-bottom: 12px; text-align: justify;">
-          Os dados pessoais (nome, matrícula, telefone e e-mail) coletados neste formulário serão utilizados exclusivamente pela Secretaria do CCHLA para a identificação do solicitante, gestão da reserva de auditórios e comunicação oficial sobre o agendamento. Seus dados não serão compartilhados com terceiros e serão mantidos apenas pelo tempo necessário para a administração do espaço, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+          Os dados pessoais coletados neste formulário serão utilizados exclusivamente pela Secretaria do CCHLA para a gestão da reserva, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
         </p>
         <div style="display: flex; align-items: flex-start; gap: 10px;">
           <input type="checkbox" id="aceite_lgpd" name="aceite_lgpd" required style="width: auto; margin-top: 2px; cursor: pointer;">
           <label for="aceite_lgpd" style="font-weight: normal; margin-bottom: 0; cursor: pointer;">
-            Declaro que li e estou ciente do Aviso de Privacidade para a solicitação desta reserva.
+            Declaro que li e estou ciente do Aviso de Privacidade.
           </label>
         </div>
       </div>
@@ -159,7 +340,7 @@
         <div class="g-recaptcha" data-sitekey="6LfFXAYtAAAAAPjEUVRbChvxRMnsX668C7lLEgcT"></div>
       </div>
 
-      <button type="submit" id="btnSubmit" class="btn-submit">Enviar Solicitação de Reserva</button>
+      <button type="submit" id="btnSubmit" class="btn-submit">Enviar Solicitação Completa</button>
     </form>
   </div>
 
@@ -167,7 +348,6 @@
     <div class="header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
       <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
     </div>
-    
     <div class="sucesso-icone">✓</div>
     <h2 style="color: var(--azul-marinho); margin-top: 0;">Solicitação Enviada!</h2>
     <p style="color: #64748b;">Sua reserva foi registrada com sucesso. Aguarde <b>Confirmação</b> da Secretaria do CCHLA</p>
@@ -176,19 +356,17 @@
       <div class="ticket-label">Seu Ticket de Acompanhamento</div>
       <div class="ticket-numero" id="ticketDisplay">---</div>
       <div class="ticket-dados"><strong>Responsável:</strong> <span id="nomeDisplay"></span></div>
-      <div class="ticket-dados"><strong>Telefone:</strong> <span id="telefoneDisplay"></span></div>
-      <div class="ticket-dados"><strong>Local:</strong> <span id="localDisplay"></span></div>
     </div>
 
-    <h3 class="historico-titulo">Histórico de Solicitações deste Ticket</h3>
+    <h3 class="historico-titulo">Itens Solicitados</h3>
     <div class="table-responsive">
       <table>
         <thead>
           <tr>
-            <th>Data Solicitação</th>
             <th>Auditório</th>
-            <th>Atividade</th>
+            <th>Data</th>
             <th>Início</th>
+            <th>Fim</th>
           </tr>
         </thead>
         <tbody id="historicoTabela"></tbody>
@@ -197,395 +375,658 @@
 
     <button class="btn-whatsapp no-print" onclick="compartilharWhatsApp()">📱 Exportar para WhatsApp</button>
     <button class="btn-imprimir no-print" onclick="window.print()">🖨️ Imprimir</button>
-    <button class="btn-voltar no-print" onclick="novaSolicitacao()">Nova Solicitação</button>
-  
+    <button class="btn-voltar no-print" onclick="window.location.reload()">Nova Solicitação</button>
+    <button class="btn-voltar no-print" onclick="window.location.href='/'">Voltar para o Calendário</button>
   </div>
   
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyChpGsnFgCBh-2TToJic2u1tt4zwaWJtQA",
-      authDomain: "formulario-reservas-cchla.firebaseapp.com",
-      projectId: "formulario-reservas-cchla",
-      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
-      messagingSenderId: "112276491941",
-      appId: "1:112276491941:web:dfc41772f1a2989ba6474c",
-      measurementId: "G-EPW7FC8CCT"
+  <script>
+  // ==========================================
+    // SISTEMA DE SEGURANÇA CONTRA XSS
+    // ==========================================
+    const escapeHTML = (str) => {
+        if (!str) return '';
+        return String(str).replace(/[&<>'"]/g, 
+            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const auditorioEl = document.getElementById('auditorio');
-    const dataInicioEl = document.querySelector('input[name="data_inicio"]');
-    const horaInicioEl = document.getElementById('select_hora_inicio');
-    const dataFimEl = document.querySelector('input[name="data_fim"]');
-    const horaFimEl = document.getElementById('select_hora_fim');
+    // ==========================================
+    // VARIÁVEIS GLOBAIS
+    // ==========================================
+    const tipoReservaEl = document.getElementById('tipo_reserva');
     const avisoConflito = document.getElementById('avisoConflito');
+    const btnSubmit = document.getElementById('btnSubmit'); 
+    const blocoUnico = document.getElementById('bloco_unico');
+    const blocoSemanal = document.getElementById('bloco_semanal');
+    const blocoPersonalizada = document.getElementById('bloco_personalizada');
 
-    const inputTelefone = document.getElementById('telefone');
-    inputTelefone.addEventListener('input', function (e) {
+    let listaDeReservasGeral = []; 
+    window.horariosGlobaisHtml = '';
+    window.dadosReservaAtual = {};
+    window.forcarEnvioAtual = false; 
+    window.pacotesPendentes = []; // Usado para a tela amarela
+
+    // ==========================================
+    // INICIALIZAÇÃO E LIMITES DE DATAS
+    // ==========================================
+    const formataAnoMesDia = (dateObj) => {
+      let y = dateObj.getFullYear();
+      let m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+      let d = dateObj.getDate().toString().padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const hojeDate = new Date();
+      const limite6MesesDate = new Date();
+      limite6MesesDate.setMonth(limite6MesesDate.getMonth() + 6);
+      
+      const minStr = formataAnoMesDia(hojeDate);
+      const maxStr = formataAnoMesDia(limite6MesesDate);
+
+      ['data_unico', 'data_ini_semanal', 'data_fim_semanal', 'data_ini_pers', 'data_fim_pers'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) { el.min = minStr; el.max = maxStr; }
+      });
+      
+      popularHorarios();
+      configurarTravasDeHorario();
+      configurarFiltroDataPassada();
+      ['data_unico', 'data_ini_pers', 'data_ini_semanal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.value) filtrarHorariosPorData(el.value);
+      });
+    });
+
+    function popularHorarios() {
+      const idsHora = [
+        'hora_ini_unico', 'hora_fim_unico',
+        'h_ini_0', 'h_fim_0', 'h_ini_1', 'h_fim_1', 'h_ini_2', 'h_fim_2', 
+        'h_ini_3', 'h_fim_3', 'h_ini_4', 'h_fim_4', 'h_ini_5', 'h_fim_5', 'h_ini_6', 'h_fim_6',
+        'hora_ini_pers', 'hora_fim_pers'
+      ];
+      const optionsHTML = ['<option value="" disabled selected>Hora</option>'];
+      
+      for (let h = 7; h <= 21; h++) {
+        let horaFmt = h.toString().padStart(2, '0');
+        optionsHTML.push(`<option value="${horaFmt}:00">${horaFmt}:00</option>`);
+        optionsHTML.push(`<option value="${horaFmt}:30">${horaFmt}:30</option>`);
+      }
+      
+      window.horariosGlobaisHtml = optionsHTML.join('');
+
+      idsHora.forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) sel.innerHTML = window.horariosGlobaisHtml;
+      });
+    }
+
+    // ==========================================
+    // TRAVA AUTOMÁTICA: HORA FIM > HORA INÍCIO
+    // ==========================================
+    const paresDeHorario = [
+      { ini: 'hora_ini_unico', fim: 'hora_fim_unico' },
+      { ini: 'h_ini_0', fim: 'h_fim_0' }, { ini: 'h_ini_1', fim: 'h_fim_1' }, { ini: 'h_ini_2', fim: 'h_fim_2' },
+      { ini: 'h_ini_3', fim: 'h_fim_3' }, { ini: 'h_ini_4', fim: 'h_fim_4' }, { ini: 'h_ini_5', fim: 'h_fim_5' },
+      { ini: 'h_ini_6', fim: 'h_fim_6' }, { ini: 'hora_ini_pers', fim: 'hora_fim_pers' }
+    ];
+
+    window.travarHoraFim = function(idIni, idFim) {
+      const elIni = document.getElementById(idIni);
+      const elFim = document.getElementById(idFim);
+      if (!elIni || !elFim) return;
+
+      const valIni = elIni.value;
+
+      Array.from(elFim.options).forEach(opt => {
+        if (opt.value === "") return; 
+        if (valIni && opt.value <= valIni) {
+          opt.disabled = true;
+          if (elFim.value === opt.value) elFim.value = "";
+        } else {
+          opt.disabled = false;
+        }
+      });
+    }
+
+    function configurarTravasDeHorario() {
+      paresDeHorario.forEach(par => {
+        const elIni = document.getElementById(par.ini);
+        if (elIni) elIni.addEventListener('change', () => travarHoraFim(par.ini, par.fim));
+      });
+    }
+
+    const todosSelectsHorario = [
+      'hora_ini_unico', 'hora_fim_unico',
+      'h_ini_0', 'h_fim_0', 'h_ini_1', 'h_fim_1', 'h_ini_2', 'h_fim_2',
+      'h_ini_3', 'h_fim_3', 'h_ini_4', 'h_fim_4', 'h_ini_5', 'h_fim_5', 'h_ini_6', 'h_fim_6',
+      'hora_ini_pers', 'hora_fim_pers'
+    ];
+
+    function filtrarHorariosPorData(dataStr) {
+      const hoje = new Date();
+      const dataSelecionada = new Date(dataStr + 'T12:00:00');
+      const ehHoje = dataSelecionada.getFullYear() === hoje.getFullYear()
+        && dataSelecionada.getMonth() === hoje.getMonth()
+        && dataSelecionada.getDate() === hoje.getDate();
+
+      const minutosAtuais = hoje.getHours() * 60 + hoje.getMinutes();
+
+      todosSelectsHorario.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        Array.from(sel.options).forEach(opt => {
+          if (!opt.value) return;
+          if (ehHoje) {
+            const [h, m] = opt.value.split(':').map(Number);
+            const minutosOpt = h * 60 + m;
+            if (minutosOpt <= minutosAtuais) {
+              opt.disabled = true;
+              if (sel.value === opt.value) sel.value = '';
+            } else {
+              opt.disabled = false;
+            }
+          } else {
+            opt.disabled = false;
+          }
+        });
+      });
+    }
+
+    function configurarFiltroDataPassada() {
+      document.getElementById('data_unico').addEventListener('change', function() {
+        if (this.value) filtrarHorariosPorData(this.value);
+      });
+      document.getElementById('data_ini_pers').addEventListener('change', function() {
+        if (this.value) filtrarHorariosPorData(this.value);
+      });
+      document.getElementById('data_ini_semanal').addEventListener('change', function() {
+        if (this.value) filtrarHorariosPorData(this.value);
+      });
+    }
+
+    // ==========================================
+    // INTERFACE DE RECORRÊNCIA
+    // ==========================================
+    tipoReservaEl.addEventListener('change', function() {
+      blocoUnico.style.display = 'none';
+      blocoSemanal.style.display = 'none';
+      blocoPersonalizada.style.display = 'none';
+
+      if(this.value === 'unico') blocoUnico.style.display = 'block';
+      if(this.value === 'semanal') blocoSemanal.style.display = 'block';
+      if(this.value === 'personalizada') blocoPersonalizada.style.display = 'block';
+    });
+
+    for(let i=0; i<=6; i++) {
+       document.getElementById('chk_'+i).addEventListener('change', (e) => {
+          const row = document.getElementById('row_dia_'+i);
+          const selIni = document.getElementById('h_ini_'+i);
+          const selFim = document.getElementById('h_fim_'+i);
+          
+          if(e.target.checked) {
+             row.classList.remove('disabled');
+             selIni.disabled = false;
+             selFim.disabled = false;
+             if (i === 0 || i === 6) alert("Atenção: Reservas em finais de semana requerem autorização.");
+          } else {
+             row.classList.add('disabled');
+             selIni.disabled = true;
+             selFim.disabled = true;
+             selIni.value = "";
+             selFim.value = "";
+          }
+       });
+    }
+
+    function checarAlertaFds(dateStr) {
+      if(!dateStr) return;
+      const d = new Date(dateStr + 'T12:00:00');
+      if(d.getDay() === 0 || d.getDay() === 6) {
+         alert("Atenção: Você selecionou um Sábado ou Domingo. Requer autorização.");
+      }
+    }
+    document.getElementById('data_unico').addEventListener('change', (e) => checarAlertaFds(e.target.value));
+    document.getElementById('data_ini_pers').addEventListener('change', (e) => checarAlertaFds(e.target.value));
+
+    document.getElementById('telefone').addEventListener('input', function (e) {
       let valor = e.target.value.replace(/\D/g, ''); 
       let formatado = valor.match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
       e.target.value = !formatado[2] ? formatado[1] : '(' + formatado[1] + ') ' + formatado[2] + (formatado[3] ? '-' + formatado[3] : '');
     });
 
-    let ultimoAuditorio = null;
-    let todasReservasAuditorio = [];
+    // ==========================================
+    // EXTRATOR DO BLOCO VISUAL ATUAL
+    // ==========================================
+    function extrairPacoteTemporario() {
+      let tempLista = [];
+      const tipo = tipoReservaEl.value;
 
-    async function checarEAtualUxConflitos() {
-      const aud = auditorioEl.value;
-      const dataIni = dataInicioEl.value;
-      const hIni = horaInicioEl.value;
-      const hFim = horaFimEl.value;
-      const dataFimReal = dataFimEl.value || dataIni;
-
-      if (!aud || !dataIni || !hIni || !hFim) {
-        avisoConflito.style.display = 'none';
-        return;
-      }
-
-      if (aud !== ultimoAuditorio) {
-        ultimoAuditorio = aud;
-        const reservasRef = collection(db, "reservas");
-        const q = query(reservasRef, where("Auditório", "==", aud));
-        const snapshot = await getDocs(q);
-
-        todasReservasAuditorio = [];
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          if (d.Início && d.Fim) {
-            let st = d.Status ? d.Status.toLowerCase() : '';
-            if (!st.includes('reprovad') && !st.includes('não atendida')) {
-              todasReservasAuditorio.push(d);
+      if (tipo === 'unico') {
+         let d = document.getElementById('data_unico').value;
+         let hI = document.getElementById('hora_ini_unico').value;
+         let hF = document.getElementById('hora_fim_unico').value;
+         if (d && hI && hF) tempLista.push({ dateStr: d, hIni: hI, hFim: hF });
+      } 
+      else if (tipo === 'semanal') {
+         let ini = document.getElementById('data_ini_semanal').value;
+         let fim = document.getElementById('data_fim_semanal').value;
+         if (ini && fim) {
+            let cursor = new Date(ini + 'T12:00:00');
+            let limite = new Date(fim + 'T12:00:00');
+            while (cursor <= limite) {
+               let dW = cursor.getDay();
+               let chk = document.getElementById('chk_' + dW);
+               if (chk && chk.checked) {
+                  let hI = document.getElementById('h_ini_' + dW).value;
+                  let hF = document.getElementById('h_fim_' + dW).value;
+                  if (hI && hF) tempLista.push({ dateStr: formataAnoMesDia(cursor), hIni: hI, hFim: hF });
+               }
+               cursor.setDate(cursor.getDate() + 1);
             }
-          }
-        });
+         }
+      } 
+      else if (tipo === 'personalizada') {
+         let ini = document.getElementById('data_ini_pers').value;
+         let fim = document.getElementById('data_fim_pers').value;
+         let hI = document.getElementById('hora_ini_pers').value;
+         let hF = document.getElementById('hora_fim_pers').value;
+         let saltos = parseInt(document.getElementById('intervalo_semanas').value) || 1;
+
+         if (ini && fim && hI && hF) {
+            let cursor = new Date(ini + 'T12:00:00');
+            let limite = new Date(fim + 'T12:00:00');
+            while (cursor <= limite) {
+               let dW = cursor.getDay();
+               if (dW >= 1 && dW <= 5) tempLista.push({ dateStr: formataAnoMesDia(cursor), hIni: hI, hFim: hF });
+               if (dW === 5) cursor.setDate(cursor.getDate() + 3 + ((saltos - 1) * 7));
+               else cursor.setDate(cursor.getDate() + 1);
+            }
+         }
       }
-      analisarConflitos(dataIni, dataFimReal, hIni, hFim);
+      return tempLista;
     }
 
-    function analisarConflitos(dataIni, dataFimReal, hIni, hFim) {
-      let temConflito = false;
+    // ==========================================
+    // SISTEMA DE GERENCIAMENTO DA LISTA (CARRINHO) E CHECAGEM NO BACKEND
+    // ==========================================
+    // ==========================================
+    // SISTEMA DE GERENCIAMENTO DA LISTA E CHECAGEM NO BACKEND
+    // ==========================================
+    document.getElementById('btn_add_lista').addEventListener('click', () => {
+        const audSelecionado = document.getElementById('auditorio_in').value;
+        if (!audSelecionado) return alert("Por favor, selecione um Auditório antes de adicionar.");
 
-      for (let r of todasReservasAuditorio) {
-        const [rDataIni, rHoraIni] = r.Início.split('T');
-        const [rDataFim, rHoraFim] = r.Fim.split('T');
+        const pacotesNovos = extrairPacoteTemporario();
+        if(pacotesNovos.length === 0) return alert("Preencha as datas e horários corretamente.");
 
-        const overlapData = (dataIni <= rDataFim) && (dataFimReal >= rDataIni);
-        const overlapHora = (hIni < rHoraFim) && (hFim > rHoraIni);
-
-        if (overlapData && overlapHora) {
-          temConflito = true;
-          break;
+        for(let p of pacotesNovos) {
+            if(p.hFim <= p.hIni) return alert(`Atenção: Na data ${p.dateStr}, a hora fim deve ser maior que a hora de início.`);
+            const duplicado = listaDeReservasGeral.find(item => item.auditorio === audSelecionado && item.dateStr === p.dateStr && item.hIni === p.hIni);
+            if(duplicado) return alert(`A data ${p.dateStr} às ${p.hIni} já foi adicionada na sua lista abaixo.`);
         }
-      }
 
-      if (temConflito) {
-        const sugestoes = calcularHorariosLivres(dataIni, dataFimReal);
-        avisoConflito.innerHTML = `
-          <strong class="aviso-titulo">⚠️ Conflito de Horário Identificado</strong>
-          O auditório selecionado já possui uma atividade cruzando este horário nestes dias.<br><br>
-          <strong>Horários livres sugeridos em comum para este período:</strong><br>
-          <div style="margin-top:8px; margin-bottom:8px;">${sugestoes}</div>
-          <em>Você pode enviar a solicitação mesmo assim. Ela ficará pendente para análise.</em>
-        `;
-        avisoConflito.style.display = 'block';
-      } else {
-        avisoConflito.style.display = 'none';
-      }
-    }
-
-    function calcularHorariosLivres(dataIni, dataFimReal) {
-      let rangesOcupados = [];
-
-      for (let r of todasReservasAuditorio) {
-        const [rDataIni, rHoraIni] = r.Início.split('T');
-        const [rDataFim, rHoraFim] = r.Fim.split('T');
-
-        const overlapData = (dataIni <= rDataFim) && (dataFimReal >= rDataIni);
+        // 1. ADICIONA DIRETO NA LISTA (Igual ao seu sistema original)
+        listaDeReservasGeral.push(...pacotesNovos.map(p => ({...p, auditorio: audSelecionado, teveConflito: false})));
         
-        if (overlapData) {
-          let tIni = rHoraIni.split(':');
-          let tFim = rHoraFim.split(':');
-          rangesOcupados.push({
-            start: parseInt(tIni[0]) * 60 + parseInt(tIni[1]),
-            end: parseInt(tFim[0]) * 60 + parseInt(tFim[1])
-          });
-        }
-      }
-
-      rangesOcupados.sort((a,b) => a.start - b.start);
-      let merged = [];
-      for(let o of rangesOcupados) {
-        if(merged.length === 0) { merged.push(o); continue; }
-        let last = merged[merged.length-1];
-        if(o.start <= last.end) {
-          last.end = Math.max(last.end, o.end);
-        } else {
-          merged.push(o);
-        }
-      }
-
-      let livres = [];
-      let curr = 6 * 60; 
-      let endDay = 23 * 60; 
-
-      for(let m of merged) {
-        if(curr < m.start) {
-          livres.push({start: curr, end: m.start});
-        }
-        curr = Math.max(curr, m.end);
-      }
-      if(curr < endDay) {
-        livres.push({start: curr, end: endDay});
-      }
-
-      if(livres.length === 0) return "<span class='sugestao-livre' style='background-color:#fee2e2; border-color:#fca5a5; color:#991b1b;'>Nenhum horário livre restante nestes dias.</span>";
-
-      return livres.map(l => {
-        let sh = Math.floor(l.start / 60).toString().padStart(2, '0');
-        let sm = (l.start % 60).toString().padStart(2, '0');
-        let eh = Math.floor(l.end / 60).toString().padStart(2, '0');
-        let em = (l.end % 60).toString().padStart(2, '0');
-        return `<span class="sugestao-livre">${sh}:${sm} às ${eh}:${em}</span>`;
-      }).join('');
-    }
-
-    [auditorioEl, dataInicioEl, horaInicioEl, dataFimEl, horaFimEl].forEach(el => {
-      el.addEventListener('change', checarEAtualUxConflitos);
+        // 2. LIMPA OS CAMPOS
+        document.getElementById('data_unico').value = '';
+        document.getElementById('hora_ini_unico').value = '';
+        document.getElementById('hora_fim_unico').value = '';
+        
+        // 3. RENDERIZA E DISPARA A VERIFICAÇÃO GERAL
+        renderizarListaGeral();
+        verificarConflitosDaListaGeral();
     });
 
-    function gerarTicketMercosul() {
-      const L = () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
-      const N = () => "0123456789"[Math.floor(Math.random() * 10)];
-      return `${L()}${L()}${L()}${N()}${L()}${N()}${N()}`;
-    }
+    window.removerDaListaGeral = function(index) {
+        listaDeReservasGeral.splice(index, 1);
+        renderizarListaGeral();
+        verificarConflitosDaListaGeral(); // Re-verifica se o erro sumiu
+    };
 
-    function popularHorarios() {
-      const selectsHora = [document.getElementById('select_hora_inicio'), document.getElementById('select_hora_fim')];
-      const optionsHTML = ['<option value="" disabled selected>Hora</option>'];
-      
-      for (let h = 6; h <= 23; h++) {
-        let horaFormatada = h.toString().padStart(2, '0');
-        optionsHTML.push(`<option value="${horaFormatada}:00">${horaFormatada}:00</option>`);
-        if(h !== 23) { 
-          optionsHTML.push(`<option value="${horaFormatada}:30">${horaFormatada}:30</option>`);
+    // NOVA FUNÇÃO: Faz o Raio-X da lista inteira no servidor
+    async function verificarConflitosDaListaGeral() {
+        if(listaDeReservasGeral.length === 0) {
+            avisoConflito.style.display = 'none';
+            return;
         }
-      }
 
-      selectsHora.forEach(select => {
-        if (select) select.innerHTML = optionsHTML.join('');
-      });
-    }
-    
-    popularHorarios();
+        try {
+            // =========================================================
+            // COLE SUA URL AQUI (checarDisponibilidade)
+            // =========================================================
+            const res = await fetch('/api/checarDisponibilidade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reservas: listaDeReservasGeral })
+            });
 
-    function formatarDataBR(dataValor) {
-      if (!dataValor) return '-';
-      if (typeof dataValor === 'string' && dataValor.includes('/')) {
-        const partes = dataValor.split(' ');
-        if (partes.length >= 2) {
-          const hms = partes[1].split(':');
-          if (hms.length >= 2) {
-            return `${partes[0]} às ${hms[0]}:${hms[1]}`; 
-          }
+            if (!res.ok) return;
+
+            const data = await res.json();
+            listaDeReservasGeral.forEach(item => item.teveConflito = false);
+
+            if (data.conflitos && data.conflitos.length > 0) {
+                let htmlEventos = '';
+                let eventosConflitantesOcultos = [];
+                
+                // NOVO: Usamos um Set para guardar os dias/auditórios que precisam de sugestão sem repeti-los
+                let locaisEDiasAfetados = new Set(); 
+                
+                data.conflitos.forEach(c => {
+                    let reqOriginal = c.solicitado;
+                    let obj = listaDeReservasGeral.find(r => r.auditorio === reqOriginal.auditorio && r.dateStr === reqOriginal.dateStr && r.hIni === reqOriginal.hIni);
+                    if(obj) obj.teveConflito = true;
+
+                    // Oculta repetições no HTML para não poluir
+                    const siglaUnica = c.solicitado.auditorio + c.hIniBanco + c.dataBr;
+                    if(!eventosConflitantesOcultos.includes(siglaUnica)) {
+                        htmlEventos += `<li class="alerta-evento-item">• <strong>${escapeHTML(c.conflitoCom)}</strong> [<span class="status-badge status-${escapeHTML(c.statusBanco)}">${escapeHTML(c.statusBanco)}</span>]<br>&nbsp;&nbsp;⏰ ${escapeHTML(c.dataBr)} das ${escapeHTML(c.hIniBanco)} às ${escapeHTML(c.hFimBanco)} | 📍 ${escapeHTML(c.solicitado.auditorio)}</li>`;
+                        eventosConflitantesOcultos.push(siglaUnica);
+                    }
+
+                    // Guarda a combinação de Auditório + Data para calcular a sugestão depois
+                    locaisEDiasAfetados.add(JSON.stringify({ auditorio: c.solicitado.auditorio, dataBr: c.dataBr }));
+                });
+
+                // NOVO: Roda o cálculo de horários livres para CADA dia/auditório afetado
+                let htmlSugestoes = '';
+                locaisEDiasAfetados.forEach(itemJson => {
+                    const afetado = JSON.parse(itemJson);
+                    
+                    // Filtra a agenda completa do dia apenas para aquele auditório específico
+                    const agendaDesteDia = data.agendaCompleta.filter(a => a.dataBr === afetado.dataBr && a.auditorio === afetado.auditorio);
+                    
+                    const sugestaoStr = calcularSugestaoLivre(agendaDesteDia, afetado.dataBr);
+
+                    htmlSugestoes += `
+                        <div class="caixa-sugestao" style="margin-bottom: 10px;">
+                            💡 <strong>Sugestão para ${escapeHTML(afetado.auditorio)} em ${escapeHTML(afetado.dataBr)}:</strong><br>
+                            Utilize o botão "Editar" na sua lista para trocar para: <strong>${escapeHTML(sugestaoStr)}</strong>.
+                        </div>
+                    `;
+                });
+
+                avisoConflito.innerHTML = `
+                    <div class="alerta-conflito-box">
+                        <div class="alerta-conflito-header">⚠️ Conflito de Data/Horário Identificado</div>
+                        <p style="margin:0; font-size: 13px; color: #64748b;">Um ou mais itens da sua lista possuem outra atividade cruzando as datas.</p>
+                        
+                        <p style="margin: 15px 0 5px 0; font-size: 14px; font-weight: bold; color: #1e293b;">📅 Atividades já agendadas nestes períodos:</p>
+                        <ul class="alerta-evento-lista">${htmlEventos}</ul>
+
+                        ${htmlSugestoes}
+
+                        <p style="margin-top: 15px; font-size: 12px; color: #b45309; font-style: italic;">Você pode enviar a solicitação mesmo assim. Ela ficará pendente para análise.</p>
+                    </div>
+                `;
+                avisoConflito.style.display = 'block';
+                renderizarListaGeral(); 
+            } else {
+                avisoConflito.style.display = 'none';
+                renderizarListaGeral();
+            }
+        } catch (err) {
+            console.error("Falha:", err);
         }
-        return dataValor;
-      }
-      return dataValor;
     }
 
-    function formatarHoraInicio(inicioValor) {
-      if (!inicioValor) return '-';
-      if (typeof inicioValor === 'string' && inicioValor.includes('T')) {
-        const [data, hora] = inicioValor.split('T');
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano} às ${hora}`;
-      }
-      return inicioValor;
+    // NOVO ALGORITMO: Retorna todas as janelas de horários disponíveis (Range 07:00 às 21:30)
+    function calcularSugestaoLivre(agendaDoDiaTodo, dataBr) {
+        let inicioDia = "07:00";
+        const fimDia = "21:30";
+
+        if (dataBr) {
+            const partes = dataBr.split('/');
+            const dataObj = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+            const hoje = new Date();
+            if (dataObj.getFullYear() === hoje.getFullYear() && dataObj.getMonth() === hoje.getMonth() && dataObj.getDate() === hoje.getDate()) {
+                const minAtuais = hoje.getHours() * 60 + hoje.getMinutes();
+                const minProxSlot = Math.ceil((minAtuais + 1) / 30) * 30;
+                if (minProxSlot >= 22 * 60) return "N\u00E3o h\u00E1 mais hor\u00E1rios dispon\u00EDveis hoje.";
+                const h = Math.floor(minProxSlot / 60).toString().padStart(2, '0');
+                const m = (minProxSlot % 60).toString().padStart(2, '0');
+                inicioDia = h + ':' + m;
+            }
+        }
+
+        if(agendaDoDiaTodo.length === 0) return `Livre das ${inicioDia} às ${fimDia}`;
+        
+        let ocupados = agendaDoDiaTodo.map(c => ({ini: c.hIniBanco, fim: c.hFimBanco}));
+        ocupados.sort((a,b) => a.ini.localeCompare(b.ini));
+
+        let fundidos = [ocupados[0]];
+        for (let i = 1; i < ocupados.length; i++) {
+            let ultimo = fundidos[fundidos.length - 1];
+            let atual = ocupados[i];
+            if (atual.ini <= ultimo.fim) {
+                if (atual.fim > ultimo.fim) ultimo.fim = atual.fim;
+            } else {
+                fundidos.push(atual);
+            }
+        }
+
+        let livres = [];
+        let cursor = inicioDia;
+
+        for (let i = 0; i < fundidos.length; i++) {
+            let bloco = fundidos[i];
+            if (cursor < bloco.ini) {
+                livres.push(`das ${cursor} às ${bloco.ini}`);
+            }
+            if (bloco.fim > cursor) {
+                cursor = bloco.fim;
+            }
+        }
+
+        if (cursor < fimDia) {
+            livres.push(`das ${cursor} às ${fimDia}`);
+        }
+
+        if (livres.length === 0) {
+            return "A agenda deste auditório encontra-se 100% preenchida. Não há horários livres neste dia.";
+        }
+
+        return livres.join(", ");
     }
+
+    window.removerDaListaGeral = function(index) {
+        listaDeReservasGeral.splice(index, 1);
+        avisoConflito.style.display = 'none';
+        renderizarListaGeral();
+    };
+
+    window.ativarEdicao = function(index) {
+        listaDeReservasGeral[index].isEditing = true;
+        renderizarListaGeral();
+    };
+
+    window.cancelarEdicao = function(index) {
+        listaDeReservasGeral[index].isEditing = false;
+        renderizarListaGeral();
+    };
+
+    window.salvarEdicao = function(index) {
+        // Agora capturamos também o auditório modificado
+        let aud = document.getElementById(`edit_auditorio_${index}`).value;
+        let d = document.getElementById(`edit_date_${index}`).value;
+        let hI = document.getElementById(`edit_hIni_${index}`).value;
+        let hF = document.getElementById(`edit_hFim_${index}`).value;
+
+        if(!aud || !d || !hI || !hF) return alert("Preencha todos os campos para salvar a edição.");
+        if(hI >= hF) return alert("A hora de término deve ser estritamente maior que a hora de início.");
+
+        let item = listaDeReservasGeral[index];
+        
+        // Verifica se essa nova combinação já não existe em outro item da própria lista
+        const duplicado = listaDeReservasGeral.find((r, idx) => idx !== index && r.auditorio === aud && r.dateStr === d && r.hIni === hI);
+        if(duplicado) return alert("Já existe uma reserva na sua lista com este mesmo local, data e hora.");
+
+        // Salva as novas informações
+        item.auditorio = aud;
+        item.dateStr = d;
+        item.hIni = hI;
+        item.hFim = hF;
+        item.isEditing = false;
+        
+        renderizarListaGeral();
+        verificarConflitosDaListaGeral(); // Dispara a crítica para a nova combinação!
+    };
+
+    function renderizarListaGeral() {
+        const container = document.getElementById('lista_reservas_container');
+        if (listaDeReservasGeral.length === 0) {
+            container.innerHTML = '<span style="font-size: 12px; color: #94a3b8; text-align: center; padding: 10px; background: #fff; border-radius: 6px; border: 1px dashed #cbd5e1;">Sua lista está vazia. Adicione os locais e horários acima.</span>';
+            avisoConflito.style.display = 'none';
+            return;
+        }
+
+        listaDeReservasGeral.sort((a, b) => {
+            if (a.auditorio !== b.auditorio) return a.auditorio.localeCompare(b.auditorio);
+            return new Date(a.dateStr + 'T' + a.hIni) - new Date(b.dateStr + 'T' + b.hIni);
+        });
+
+        let html = '';
+        let minS = document.getElementById('data_unico').min;
+        let maxS = document.getElementById('data_unico').max;
+
+        listaDeReservasGeral.forEach((item, index) => {
+            const pData = item.dateStr.split('-');
+            const dFmt = `${pData[2]}/${pData[1]}/${pData[0]}`;
+            const safeAuditorio = escapeHTML(item.auditorio);
+            const alertaTag = item.teveConflito ? '<span style="color:#ef4444; font-size:11px; font-weight:bold; margin-left:5px;">[COM CONFLITO]</span>' : '';
+
+            if (item.isEditing) {
+                // Modo Edição com o SELETOR DE AUDITÓRIO embutido
+                html += `<div style="display: flex; gap: 10px; align-items: center; background-color: #fef3c7; padding: 10px 12px; border-radius: 6px; border: 1px solid #fde68a; flex-wrap: wrap;">
+                    
+                    <select id="edit_auditorio_${index}" style="padding: 6px; border: 1px solid var(--borda-suave); border-radius: 4px; font-size: 12px; font-weight: bold; color: var(--azul-marinho);">
+                        <option value="Auditório A">Auditório A</option>
+                        <option value="Auditório B">Auditório B</option>
+                        <option value="Auditório C">Auditório C</option>
+                        <option value="Auditório D">Auditório D</option>
+                        <option value="Auditório E">Auditório E</option>
+                    </select>
+
+                    <input type="date" id="edit_date_${index}" value="${item.dateStr}" min="${minS}" max="${maxS}" style="padding: 6px; border: 1px solid var(--borda-suave); border-radius: 4px; font-size: 12px; max-width: 130px;">
+                    <select id="edit_hIni_${index}" style="padding: 6px; border: 1px solid var(--borda-suave); border-radius: 4px; font-size: 12px;" onchange="travarHoraFim('edit_hIni_${index}', 'edit_hFim_${index}')">${window.horariosGlobaisHtml}</select>
+                    <span style="font-size: 12px; color: #64748b;">às</span>
+                    <select id="edit_hFim_${index}" style="padding: 6px; border: 1px solid var(--borda-suave); border-radius: 4px; font-size: 12px;">${window.horariosGlobaisHtml}</select>
+                    <div style="margin-left: auto; display: flex; gap: 5px;">
+                        <button type="button" onclick="salvarEdicao(${index})" style="background-color: #10b981; color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: bold;">Salvar</button>
+                        <button type="button" onclick="cancelarEdicao(${index})" style="background-color: #94a3b8; color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: bold;">Cancelar</button>
+                    </div>
+                </div>`;
+                
+                // Preenche os campos com os valores atuais assim que a caixa é desenhada
+                setTimeout(() => {
+                    document.getElementById('edit_auditorio_' + index).value = item.auditorio;
+                    document.getElementById('edit_hIni_' + index).value = item.hIni;
+                    travarHoraFim('edit_hIni_' + index, 'edit_hFim_' + index);
+                    document.getElementById('edit_hFim_' + index).value = item.hFim;
+                }, 0);
+            } else {
+                // Modo Visualização Padrão
+                html += `<div style="display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--borda-suave);">
+                    <div style="font-size: 13px; color: var(--texto-escuro);">
+                        <strong style="color: var(--azul-marinho);">📍 ${safeAuditorio}</strong> &nbsp;|&nbsp; 📅 ${escapeHTML(dFmt)} &nbsp;|&nbsp; ⏰ Das ${escapeHTML(item.hIni)} às ${escapeHTML(item.hFim)} ${alertaTag}
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <button type="button" onclick="ativarEdicao(${index})" style="background-color: #3b82f6; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 11px; font-weight: bold;">Editar</button>
+                        <button type="button" onclick="removerDaListaGeral(${index})" style="background-color: #ef4444; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 11px; font-weight: bold;">Remover</button>
+                    </div>
+                </div>`;
+            }
+        });
+        container.innerHTML = html;
+    }
+
+    function limparEAtualizarUI() {
+        document.getElementById('data_unico').value = '';
+        document.getElementById('hora_ini_unico').value = '';
+        document.getElementById('hora_fim_unico').value = '';
+        avisoConflito.style.display = 'none';
+        renderizarListaGeral();
+    }
+
+    // ==========================================
+    // SUBMISSÃO E INTEGRAÇÃO COM BACKEND API
+    // ==========================================
+    document.getElementById('btnModalCiente').addEventListener('click', () => {
+        document.getElementById('modalSucesso').style.display = 'none';
+        document.getElementById('telaFormulario').style.display = 'none';
+        document.getElementById('telaSucesso').style.display = 'block';
+    });
 
     document.getElementById('formReserva').addEventListener('submit', async function(e) {
       e.preventDefault();
-      console.log("Submit capturado. Iniciando validações...");
 
-      const recaptchaResponse = grecaptcha.getResponse();
-      if (recaptchaResponse.length === 0) {
-        alert("Por favor, marque a caixa 'Não sou um robô' antes de enviar.");
-        return; 
-      }
+      if (listaDeReservasGeral.length === 0) return alert("Adicione pelo menos uma reserva na lista.");
+      const recaptchaToken = grecaptcha.getResponse();
+      if (!recaptchaToken) return alert("Confirme o reCAPTCHA.");
 
-      const btn = document.getElementById('btnSubmit');
-      btn.innerText = 'Comunicando com Firebase...';
-      btn.disabled = true;
+      btnSubmit.innerText = 'Processando e enviando...';
+      btnSubmit.disabled = true;
+
+      const payload = {
+          solicitante: document.getElementById('responsavel').value.trim(),
+          matricula: document.getElementById('matricula').value.trim(),
+          telefone: document.getElementById('telefone').value.trim(),
+          departamento: document.getElementById('departamento').value.trim(),
+          atividade: document.getElementById('atividade').value.trim(),
+          email: document.getElementById('email').value.trim().toLowerCase(),
+          recaptchaToken: recaptchaToken,
+          reservas: listaDeReservasGeral
+      };
 
       try {
-        const formData = new FormData(this);
-        console.log("Valores coletados do form:", Object.fromEntries(formData.entries()));
-        
-        const telefoneDigitado = formData.get('telefone_contato');
-        const telefoneNumerico = telefoneDigitado.replace(/\D/g, ''); 
-        
-        let telefoneFormatadoPadrao = telefoneDigitado;
-        if (telefoneNumerico.length === 11) {
-          telefoneFormatadoPadrao = `(${telefoneNumerico.substring(0,2)}) ${telefoneNumerico.substring(2,7)}-${telefoneNumerico.substring(7,11)}`;
-        } else if (telefoneNumerico.length === 10) {
-          telefoneFormatadoPadrao = `(${telefoneNumerico.substring(0,2)}) ${telefoneNumerico.substring(2,6)}-${telefoneNumerico.substring(6,10)}`;
-        }
-
-        const dataHoraInicioCompleta = formData.get('data_inicio') + 'T' + formData.get('hora_inicio');
-        const dataHoraFimCompleta = formData.get('data_fim') + 'T' + formData.get('hora_fim');
-
-        if (dataHoraFimCompleta <= dataHoraInicioCompleta) {
-          alert("A data/hora de término deve ser posterior à data/hora de início.");
-          btn.innerText = 'Enviar Solicitação de Reserva';
-          btn.disabled = false;
-          return;
-        }
-        
-        console.log("Buscando histórico de reservas...");
-        const reservasRef = collection(db, "reservas");
-        const querySnapshot = await getDocs(reservasRef); 
-        
-        let contagemTickets = {};
-        let historicoGeralTelefone = [];
-
-        querySnapshot.forEach((doc) => {
-          const dados = doc.data();
-          if (dados.Telefone) {
-            const telBancoNumerico = String(dados.Telefone).replace(/\D/g, '');
-            if (telBancoNumerico === telefoneNumerico && telBancoNumerico !== '') {
-              historicoGeralTelefone.push(dados);
-              if (dados.Ticket) {
-                contagemTickets[dados.Ticket] = (contagemTickets[dados.Ticket] || 0) + 1;
-              }
-            }
-          }
+        // =========================================================
+        // COLE AQUI A URL DA SUA FUNÇÃO enviarSolicitacao
+        // =========================================================
+        const response = await fetch('/api/enviarSolicitacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
-        let meuTicket = null;
-        if (Object.keys(contagemTickets).length > 0) {
-          meuTicket = Object.keys(contagemTickets).reduce((a, b) => contagemTickets[a] > contagemTickets[b] ? a : b);
-        } else {
-          meuTicket = gerarTicketMercosul();
+        const dadosRetorno = await response.json();
+
+        if (!response.ok) {
+            throw new Error(dadosRetorno.mensagem || "Erro ao processar sua solicitação no servidor.");
         }
-
-        let historicoFiltrado = historicoGeralTelefone.filter(res => res.Ticket === meuTicket);
-
-        const novaReserva = {
-          Ticket: meuTicket,
-          Auditório: formData.get('auditorio_selecionado'),
-          Solicitante: formData.get('responsavel'), 
-          Matricula: formData.get('matricula'), // Removido o acento desta chave por segurança
-          Telefone: telefoneFormatadoPadrao, 
-          Departamento: formData.get('departamento_centro'),
-          Atividade: formData.get('atividade_realizada'),
-          Início: dataHoraInicioCompleta, 
-          Fim: dataHoraFimCompleta,      
-          Email: formData.get('_replyto'),
-          Data_Solicitacao: new Date().toLocaleString('pt-BR'),
-          timestamp_criacao: serverTimestamp() 
-        };
-
-        console.log("Payload pronto para o Firestore:", novaReserva);
-
-        await addDoc(collection(db, "reservas"), novaReserva);
-        console.log("Inserção no banco confirmada com sucesso!");
         
-        historicoFiltrado.push(novaReserva); 
+        window.dadosReservaAtual = { ticket: dadosRetorno.ticketGerado, responsavel: payload.solicitante };
+        document.getElementById('ticketDisplay').innerText = escapeHTML(dadosRetorno.ticketGerado);
+        document.getElementById('nomeDisplay').innerText = escapeHTML(payload.solicitante);        
 
-        const selectAuditorio = document.getElementById('auditorio');
-        const descricaoAuditorio = selectAuditorio.options[selectAuditorio.selectedIndex].text;
+        const tab = document.getElementById('historicoTabela');
+        tab.innerHTML = '';
+        payload.reservas.forEach(r => {
+            const pData = r.dateStr.split('-');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td><strong>${escapeHTML(r.auditorio)}</strong></td><td>${escapeHTML(`${pData[2]}/${pData[1]}/${pData[0]}`)}</td><td>${escapeHTML(r.hIni)}</td><td>${escapeHTML(r.hFim)}</td>`;
+            tab.appendChild(tr);
+        });
 
-        window.dadosReservaAtual = {
-          ticket: meuTicket,
-          responsavel: formData.get('responsavel'),
-          matricula: formData.get('matricula'),
-          departamento: formData.get('departamento_centro'),
-          atividade: formData.get('atividade_realizada'),
-          auditorio: descricaoAuditorio,
-          inicioFormatado: formatarHoraInicio(dataHoraInicioCompleta),
-          fimFormatado: formatarHoraInicio(dataHoraFimCompleta)
-        };
-
-        document.getElementById('telaFormulario').style.display = 'none';
-        document.getElementById('telaSucesso').style.display = 'block';
-
-        document.getElementById('ticketDisplay').innerText = meuTicket;
-        document.getElementById('nomeDisplay').innerText = `${formData.get('responsavel')} - Matrícula: ${formData.get('matricula')}`;
-        document.getElementById('telefoneDisplay').innerText = telefoneFormatadoPadrao; 
-        document.getElementById('localDisplay').innerText = descricaoAuditorio;
-
-        renderizarHistorico(historicoFiltrado);
+        document.getElementById('modalSucesso').style.display = 'flex';
 
       } catch (erro) {
-        console.error("ERRO CAPTURADO DURANTE A EXECUÇÃO:", erro);
-        alert("Erro ao salvar no banco: " + erro.message);
+        console.error(erro);
+        alert(erro.message);
       } finally {
-        btn.innerText = 'Enviar Solicitação de Reserva';
-        btn.disabled = false;
+        btnSubmit.innerText = 'Enviar Solicitação Completa';
+        btnSubmit.disabled = false;
         grecaptcha.reset();
       }
     });
 
-    function renderizarHistorico(historicoArray) {
-      const tabela = document.getElementById('historicoTabela');
-      tabela.innerHTML = '';
-
-      historicoArray.sort((a, b) => {
-        let tA = a.timestamp_criacao ? (a.timestamp_criacao.seconds || Date.now()) : Date.now();
-        let tB = b.timestamp_criacao ? (b.timestamp_criacao.seconds || Date.now()) : Date.now();
-        return tB - tA; 
-      });
-
-      historicoArray.forEach(reserva => {
-        const tr = document.createElement('tr');
-        
-        let dataSolicitacaoFmt = formatarDataBR(reserva['Data_Solicitacao']);
-        let inicioFmt = formatarHoraInicio(reserva['Início']);
-        
-        tr.innerHTML = `
-          <td>${dataSolicitacaoFmt}</td>
-          <td><strong>${reserva['Auditório'] || '-'}</strong></td>
-          <td>${reserva['Atividade'] || '-'}</td>
-          <td>${inicioFmt}</td>
-        `;
-        tabela.appendChild(tr);
-      });
-    }
-
     window.compartilharWhatsApp = function() {
       if (!window.dadosReservaAtual) return;
       const d = window.dadosReservaAtual;
-      
-      const textoMensagem = 
-        `Olá! 👋 Seguem os dados da minha solicitação de reserva no CCHLA:\n\n` +
-        `🎫 *Ticket:* ${d.ticket}\n` +
-        `👤 *Responsável:* ${d.responsavel}\n` +
-        `🆔 *Matrícula:* ${d.matricula}\n` +
-        `🏢 *Setor:* ${d.departamento}\n` +
-        `🎯 *Atividade:* ${d.atividade}\n` +
-        `📍 *Local:* ${d.auditorio}\n` +
-        `📅 *Início:* ${d.inicioFormatado}\n` +
-        `⏳ *Fim:* ${d.fimFormatado}\n\n` +
-        `Aguardando confirmação da secretaria! 🚀`;
-      
-      const textoCodificado = encodeURIComponent(textoMensagem);
-      const url = `https://api.whatsapp.com/send?text=${textoCodificado}`;
-      
-      window.open(url, '_blank');
+      const t = `Olá! 👋 Acabei de solicitar uma reserva no CCHLA:\n\n🎫 *Ticket:* ${d.ticket}\n👤 *Responsável:* ${d.responsavel}\n\nAguardando confirmação da secretaria! 🚀`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(t)}`, '_blank');
     };
-
-    window.novaSolicitacao = function() {
-      document.getElementById('formReserva').reset();
-      document.getElementById('telaSucesso').style.display = 'none';
-      document.getElementById('telaFormulario').style.display = 'block';
-      document.getElementById('avisoConflito').style.display = 'none';
-      window.dadosReservaAtual = null; 
-    }
   </script>
 </body>
 </html>

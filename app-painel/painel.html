@@ -10,17 +10,52 @@
     body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; color: var(--texto-escuro); }
     .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
     
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--azul-royal); padding-bottom: 20px; margin-bottom: 25px; }
-    .branding { display: flex; align-items: center; gap: 20px; }
-    .branding img { height: 60px; object-fit: contain; }
-    .branding h1 { color: var(--azul-marinho); margin: 0; font-size: 26px; font-weight: 700; }
-    .status-indicador { font-size: 13px; color: #10b981; font-weight: 600; background-color: #d1fae5; padding: 6px 12px; border-radius: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--azul-royal); padding-bottom: 15px; margin-bottom: 25px; flex-wrap: nowrap; gap: 15px; position: relative; z-index: 1000; }
+    .branding { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
+    .branding img { height: 50px; object-fit: contain; }
+    .branding h1 { color: var(--azul-marinho); margin: 0; font-size: 24px; font-weight: 700; white-space: nowrap; }
     
-    .filtros-painel { background-color: #f8fafc; border: 1px solid var(--borda-suave); border-left: 5px solid var(--azul-royal); border-radius: 8px; padding: 20px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; flex-shrink: 0; margin-left: auto; }
+    
+    .user-badge { font-size: 13px; font-weight: 700; background-color: #f1f5f9; color: var(--azul-marinho); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--borda-suave); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .status-indicador { font-size: 13px; color: #10b981; font-weight: 600; background-color: #d1fae5; padding: 6px 12px; border-radius: 20px; white-space: nowrap; }
+    
+    .dropdown { position: relative; display: inline-block; }
+    .dropdown-btn { background: var(--azul-royal); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
+    .dropdown-btn:hover { background-color: #12407a; }
+    .dropdown-content { display: none; position: absolute; background-color: #ffffff; min-width: 220px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 8px; border: 1px solid var(--borda-suave); z-index: 1001; top: 110%; right: 0; overflow: hidden; flex-direction: column; opacity: 0; transition: opacity 0.2s ease; }
+    .dropdown-content a { color: var(--texto-escuro); padding: 12px 18px; text-decoration: none; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
+    .dropdown-content a:last-child { border-bottom: none; }
+    .dropdown-content a:hover { background-color: #f8fafc; color: var(--azul-royal); padding-left: 22px; }
+    .dropdown:hover .dropdown-content { display: flex; opacity: 1; }
+    .dropdown-content.fixo { display: flex !important; opacity: 1 !important; }
+
+    .filtros-painel { background-color: #f8fafc; border: 1px solid var(--borda-suave); border-left: 5px solid var(--azul-royal); border-radius: 8px; padding: 20px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; position: relative; z-index: 1; }
     .filtro-grupo { display: flex; flex-direction: column; gap: 6px; }
     .filtro-grupo label { font-size: 13px; font-weight: 600; color: var(--azul-marinho); }
     .filtro-grupo input, .filtro-grupo select { padding: 10px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; color: var(--texto-escuro); }
     .btn-limpar { background-color: #e2e8f0; border: 1px solid var(--borda-suave); padding: 10px 15px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; height: 40px; }
+    /* Estilo para destacar o campo de Busca Geral em Verde */
+    #buscaGeral {
+        border: 2px solid #10b981; /* Borda verde esmeralda */
+        background-color: #ecfdf5; /* Fundo verde bem clarinho */
+        color: #065f46; /* Texto em verde escuro */
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
+
+    /* Efeito de brilho verde quando a secretária clicar dentro do campo */
+    #buscaGeral:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+
+    /* Deixa o texto de dica (placeholder) verde também */
+    #buscaGeral::placeholder {
+        color: #34d399;
+        font-weight: normal;
+    }
     
     .barra-ferramentas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 35px; padding: 15px; background: #fff; border: 1px dashed var(--borda-suave); border-radius: 8px; }
     .btn-export { display: flex; align-items: center; gap: 8px; background-color: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; color: var(--texto-escuro); }
@@ -35,6 +70,13 @@
     .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
     .reserva-card { background: #ffffff; border: 1px solid var(--borda-suave); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: border-color 0.2s; }
     .reserva-card:hover { border-color: var(--azul-royal); }
+    
+    .card-destaque-feriado { border-color: #f59e0b !important; box-shadow: 0 4px 12px rgba(245,158,11,0.15) !important; }
+    .card-destaque-feriado .card-header { background-color: #fffbeb !important; border-bottom-color: #fcd34d !important; }
+    
+    .card-grupo { border-color: #0ea5e9 !important; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.15) !important; grid-column: 1 / -1; }
+    .card-grupo .card-header { background-color: #f0f9ff !important; border-bottom: 2px solid #38bdf8 !important; }
+
     .card-header { background-color: #f1f5f9; border-bottom: 1px solid var(--borda-suave); padding: 12px 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .card-ticket { font-family: monospace; font-size: 16px; font-weight: 800; color: var(--azul-royal); }
     .card-auditorio { background-color: var(--azul-marinho); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
@@ -53,12 +95,14 @@
     .card-footer { background-color: #f8fafc; padding: 15px 18px; border-top: 1px solid var(--borda-suave); display: flex; flex-direction: column; gap: 15px; }
     .footer-topo { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--texto-claro); }
     
-    .acoes-admin { display: flex; gap: 8px; }
-    .btn-acao { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; }
+    .acoes-admin { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-acao { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; min-width: 80px;}
     .btn-acao:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-aprovar { background-color: #10b981; } .btn-aprovar:hover:not(:disabled) { background-color: #059669; }
     .btn-reprovar { background-color: #ef4444; } .btn-reprovar:hover:not(:disabled) { background-color: #dc2626; }
     .btn-pendente { background-color: #f59e0b; } .btn-pendente:hover:not(:disabled) { background-color: #d97706; }
+    .btn-editar { background-color: #3b82f6; } .btn-editar:hover:not(:disabled) { background-color: #2563eb; }
+    .btn-excluir { background-color: #7f1d1d; flex: 0.5;} .btn-excluir:hover:not(:disabled) { background-color: #450a0a; }
     
     .btn-copiar { background-color: #e2e8f0; color: var(--texto-escuro); border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-copiar:hover { background-color: var(--azul-royal); color: white; }
@@ -69,14 +113,24 @@
     .btn-page.active { background: var(--azul-royal); color: #ffffff; cursor: default; }
     .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ESTILOS DO MODAL DE TIMEOUT */
-    #modalTimeoutOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 22, 56, 0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-    .modal-timeout-box { background: #ffffff; padding: 35px; border-radius: 12px; max-width: 450px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: popup 0.3s ease-out; }
-    .modal-timeout-box h3 { color: var(--azul-marinho); margin-top: 0; font-size: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .modal-timeout-box p { color: var(--texto-escuro); font-size: 16px; line-height: 1.6; margin-bottom: 25px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 22, 56, 0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    .modal-box { background: #ffffff; padding: 35px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: popup 0.3s ease-out; max-height: 90vh; overflow-y: auto;}
+    .modal-box h3 { color: var(--azul-marinho); margin-top: 0; font-size: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .modal-box p { color: var(--texto-escuro); font-size: 16px; line-height: 1.6; margin-bottom: 25px; }
+    
+    .modal-box.reprovacao { text-align: left; }
+    .modal-box.reprovacao h3 { justify-content: flex-start; margin-bottom: 15px; }
+    
     .btn-manter-logado { background-color: #10b981; color: #ffffff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
     .btn-manter-logado:hover { background-color: #059669; transform: translateY(-2px); }
+    
     @keyframes popup { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    @media (max-width: 900px) {
+      .header { flex-direction: column; align-items: flex-start; }
+      .header-actions { margin-left: 0; width: 100%; justify-content: flex-start; }
+      .dropdown-content { right: auto; left: 0; } 
+    }
 
     @media print {
       body { background: white; padding: 0; }
@@ -84,40 +138,137 @@
       .filtros-painel, .barra-ferramentas, .seletor-paginacao, .paginacao-container, .btn-copiar, .acoes-admin { display: none !important; }
       .reserva-card { break-inside: avoid; border: 1px solid #000; box-shadow: none; }
       .header-lista { background-color: transparent; color: black; border-bottom: 2px solid black; }
-      #modalTimeoutOverlay { display: none !important; }
+      .modal-overlay { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <div id="modalTimeoutOverlay">
-    <div class="modal-timeout-box">
+  <!-- MODAL DE TIMEOUT -->
+  <div id="modalTimeoutOverlay" class="modal-overlay">
+    <div class="modal-box">
       <h3>⚠️ Alerta de Inatividade</h3>
       <p>Não notamos sua interação por aqui. Clique se deseja manter-se logado.</p>
       <button class="btn-manter-logado" onclick="manterSessaoAtiva()">Sim, manter logado</button>
     </div>
   </div>
 
+  <!-- MODAL DE EXCLUSÃO -->
+  <div id="modalExclusaoOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3>⚠️ Confirmar Exclusão</h3>
+      <p>Tem certeza que deseja excluir esta solicitação permanentemente? Esta ação não pode ser desfeita.</p>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button onclick="fecharModalExclusao()" style="background: #e2e8f0; color: var(--texto-escuro); border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Cancelar</button>
+        <button onclick="confirmarExclusao()" style="background: #7f1d1d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIÇÃO COMPLETA -->
+  <div id="modalEdicaoOverlay" class="modal-overlay">
+    <div class="modal-box" style="text-align: left;">
+      <h3 style="justify-content: flex-start; margin-bottom: 20px;">✏️ Editar Solicitação <span id="editTicketText" style="color: var(--azul-royal);"></span></h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; font-size: 13px;">
+          <input type="hidden" id="editIdDoc">
+          <div style="grid-column: 1 / -1;">
+              <label style="font-weight: bold; color: var(--azul-marinho);">Solicitante</label>
+              <input type="text" id="editSolicitante" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">E-mail</label>
+              <input type="email" id="editEmail" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Matrícula</label>
+              <input type="text" id="editMatricula" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Auditório</label>
+              <select id="editAuditorio" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+                  <option value="Auditório A">Auditório 'A'</option>
+                  <option value="Auditório B">Auditório 'B'</option>
+                  <option value="Auditório C">Auditório 'C'</option>
+                  <option value="Auditório D">Auditório 'D'</option>
+                  <option value="Auditório E">Auditório 'E'</option>
+              </select>
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Atividade</label>
+              <input type="text" id="editAtividade" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Início</label>
+              <input type="datetime-local" id="editInicio" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Fim</label>
+              <input type="datetime-local" id="editFim" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Departamento</label>
+              <input type="text" id="editDepartamento" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div>
+              <label style="font-weight: bold; color: var(--azul-marinho);">Telefone</label>
+              <input type="text" id="editTelefone" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+          </div>
+          <div style="grid-column: 1 / -1;">
+              <label style="font-weight: bold; color: var(--azul-marinho);">Status</label>
+              <select id="editStatus" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 5px;">
+                  <option value="Pendente">Pendente</option>
+                  <option value="Aprovado">Aprovado</option>
+                  <option value="Reprovado">Reprovado</option>
+              </select>
+          </div>
+      </div>
+      
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button onclick="fecharModalEdicao()" style="background: #e2e8f0; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Cancelar</button>
+        <button onclick="salvarEdicaoTudo()" id="btnSalvarEdicao" style="background: #1653A1; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">💾 Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <datalist id="motivosAnteriores"></datalist>
+  
+  <!-- MODAL DE REPROVAÇÃO -->
+  <div id="modalReprovacaoOverlay" class="modal-overlay">
+    <div class="modal-box reprovacao">
+      <h3>❌ Motivo da Reprovação</h3>
+      <label style="font-size: 13px; font-weight: 600; color: var(--texto-claro);">Informe o motivo para a secretaria/solicitante:</label>
+      <input type="text" id="inputMotivoReprovacao" list="motivosAnteriores" style="width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 25px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 14px; box-sizing: border-box;" placeholder="Ex: Auditório em manutenção, conflito de horários...">
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button onclick="fecharModalReprovacao()" style="background: #e2e8f0; color: var(--texto-escuro); border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">Cancelar</button>
+        <button onclick="confirmarReprovacao()" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Confirmar Reprovação</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
       <div class="header">
       <div class="branding">
-        <img src="cchla-logo.jpg" alt="Logo CCHLA">
+        <img src="cchla-logo.jpg" alt="Logo CCHLA" onerror="this.style.display='none'">
         <h1>Painel de Reservas</h1>
       </div>
-      <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+      <div class="header-actions">
+        <span class="user-badge" id="userBadge" style="display:none;"></span>
         <span class="status-indicador" id="statusSincronizacao">Autenticando...</span>
-        
-        <a href="cad-reservas-secretaria.html" style="background: var(--azul-royal); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; text-decoration: none;">Cadastrar Reserva</a>
-        
-        <a href="feriados.html" style="background: var(--azul-marinho); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; text-decoration: none;">Gestão de Feriados</a>
-        
-        <button onclick="window.sairDoPainel()" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;">Sair</button>
+        <div class="dropdown">
+          <button class="dropdown-btn" onclick="alternarFixarDropdown(event)">⚙️ Funcionalidades ▾</button>
+          <div class="dropdown-content" id="menuFuncionalidades">
+            <a href="cad-reservas-secretaria.html">📝 Cadastrar Reserva</a>
+            <a href="feriados.html">📅 Gestão de Feriados</a>
+          </div>
+        </div>
+        <button onclick="window.sairDoPainel()" style="background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 5px; white-space: nowrap;">Sair 🚪</button>
       </div>
     </div>
     
     <div class="filtros-painel">
       <div class="filtro-grupo">
-        <label>Busca Geral</label>
+        <label><b>Busca Geral</b></label>
         <input type="text" id="buscaGeral" placeholder="Qualquer termo..." onkeyup="resetarEFiltar()">
       </div>
       <div class="filtro-grupo">
@@ -138,6 +289,7 @@
           <option selected value="Pendente">Pendentes</option>
           <option value="Aprovado">Aprovados</option>
           <option value="Reprovado">Reprovados</option>
+          <option value="conflito">Com Conflito ⚠️</option>
         </select>
       </div>
       <div class="filtro-grupo">
@@ -179,68 +331,199 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  // =======================================================================
+    // 1. CAPTURADOR GLOBAL DE ERROS (Evita o congelamento silencioso do ecrã)
+    // =======================================================================
+    window.addEventListener('error', function(e) {
+        console.error("Erro detetado no painel:", e.error);
+        const grid = document.getElementById('gridCards');
+        if (grid) {
+            grid.innerHTML = `
+              <div class="status-msg" style="color:red; font-size:14px; text-align:left; background:#fee2e2; padding:15px; border-radius:8px; border:1px solid #fca5a5; grid-column: 1 / -1;">
+                <strong style="font-size:16px;">❌ Erro de Execução JavaScript</strong><br><br>
+                <code style="display:block; background:#fff; padding:10px; border-radius:4px; font-family:monospace; color:#7f1d1d;">${e.message}</code><br>
+                <small style="color:#64748b;"><b>Ficheiro:</b> ${e.filename.split('/').pop()} | <b>Linha:</b> ${e.lineno}</small>
+              </div>`;
+        }
+    });
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
-      authDomain: "formulario-reservas-cchla.firebaseapp.com",
-      projectId: "formulario-reservas-cchla",
-      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
-      messagingSenderId: "112276491941",
-      appId: "1:112276491941:web:f67cc53ce868764ea6474c",
-      measurementId: "G-4B1J48HDGF"
+    // =======================================================================
+    // 2. CONTROLO DE SESSÃO E VALIDAÇÃO DE ACESSO RESTRETO
+    // =======================================================================
+    const tokenSessao = sessionStorage.getItem('cchla_admin_token');
+    if (!tokenSessao) {
+        window.location.replace('index.html');
+    }
+
+    function decodificarJWT(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(window.atob(base64));
+        } catch(e) { return {}; }
+    }
+
+    // =======================================================================
+    // 3. VARIÁVEIS GLOBAIS NO TOPO (Prevenção de bugs de inicialização)
+    // =======================================================================
+    let emailUsuarioLogado = "";
+    let tempBatchActions = {};
+    let dadosFiltrados = []; 
+    let renderItems = []; 
+    let paginaAtual = 1;        
+    let itensPorPagina = 10;    
+    let dadosBrutos = []; 
+    
+    let timerInatividade, timerLogout;
+    const TEMPO_INATIVIDADE = 30 * 60 * 1000; 
+    const TEMPO_AVISO = 30 * 1000; 
+    let isModalTimeoutAberto = false;
+
+    const chavesExportacao = ['Ticket', 'Status', 'Auditório', 'Atividade', 'Solicitante', 'Departamento', 'Telefone', 'Email', 'Início', 'Fim', 'Data_Solicitacao', 'Motivo_Reprovacao', 'Status_Alterado_Por', 'Status_Alterado_IP', 'Status_Alterado_Data'];
+
+    // =======================================================================
+    // 4. ROTINA DE INICIALIZAÇÃO SEGURA
+    // =======================================================================
+    function inicializarPainel() {
+        const payloadAdmin = decodificarJWT(tokenSessao);
+        emailUsuarioLogado = payloadAdmin.email || "Admin";
+
+        const userBadge = document.getElementById('userBadge');
+        if (userBadge) {
+            userBadge.style.display = 'flex';
+            userBadge.innerHTML = `👤 ${emailUsuarioLogado}`;
+        }
+
+        if (payloadAdmin.nivel === 'root') {
+            const menuFuncionalidades = document.getElementById('menuFuncionalidades');
+            if (menuFuncionalidades) {
+                const linkUsuarios = document.createElement('a');
+                linkUsuarios.href = 'gerir-contas.html';
+                linkUsuarios.innerHTML = '👥 Gerir Usuários';
+                menuFuncionalidades.appendChild(linkUsuarios);
+                
+                const linkCchlaFense = document.createElement('a');
+                linkCchlaFense.href = 'cchlafense.html';
+                linkCchlaFense.innerHTML = '🛡️ CCHLAfense Segurança';
+                menuFuncionalidades.appendChild(linkCchlaFense);
+            }
+        }
+
+        const gridCards = document.getElementById('gridCards');
+        if (gridCards) {
+            gridCards.style.display = 'grid';
+        }
+
+        iniciarRastreamentoInatividade(); 
+        carregarPainelNuvem();
+    }
+
+    // Acionador adaptativo ao ciclo de vida do carregamento do documento
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", inicializarPainel);
+    } else {
+        inicializarPainel();
+    }
+
+    // =======================================================================
+    // 5. INFRAESTRUTURA DE COMUNICAÇÃO COM O BACKEND
+    // =======================================================================
+    async function carregarPainelNuvem(manterPagina = false) {
+      try {
+        // =========================================================================
+        // ATENÇÃO: SUBSTITUA PELA SUA URL DE DEPLOY DA FUNÇÃO adminObterReservas
+        // =========================================================================
+        const urlBusca = '/api/adminObterReservas';
+        
+        const response = await fetch(urlBusca, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + tokenSessao }
+        });
+
+        if (!response.ok) {
+            if(response.status === 401) {
+                alert("🔒 Token de segurança expirado. Por favor, volte a autenticar-se.");
+                return window.sairDoPainel();
+            }
+            if(response.status === 403) {
+                alert("🛑 Bloqueio de Gateway (403): Ative a permissão pública allUsers no Cloud Run.");
+                throw new Error("Acesso rejeitado pela infraestrutura do Google Cloud.");
+            }
+            throw new Error(`O servidor respondeu com erro HTTP: ${response.status}`);
+        }
+
+        dadosBrutos = await response.json();
+        
+        if (!Array.isArray(dadosBrutos)) {
+            throw new Error("O payload devolvido pelo backend não é uma estrutura válida.");
+        }
+        
+        dadosBrutos.forEach(d => { d.Status = d.Status || 'Pendente'; });
+
+        atualizarListaMotivosAnteriores();
+        const agora = new Date();
+        const statusEl = document.getElementById('statusSincronizacao');
+        if (statusEl) {
+            statusEl.innerText = `Sincronizado às ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        window.aplicarFiltros(manterPagina);
+
+      } catch (erro) {
+        console.error("Erro na carga de dados:", erro);
+        document.getElementById('gridCards').innerHTML = `
+          <div class="status-msg" style="color:red; font-size:14px; text-align:left; background:#fee2e2; padding:15px; border-radius:8px; border:1px solid #fca5a5; grid-column: 1 / -1;">
+            <strong style="font-size:16px;">❌ Falha Crítica de Conexão</strong><br><br>
+            <code style="display:block; background:#fff; padding:10px; border-radius:4px; font-family:monospace; color:#7f1d1d;">${erro.message}</code><br>
+            <small style="color:#64748b;">Verifique os logs de rede no painel de inspeção (F12).</small>
+          </div>`;
+        const statusEl = document.getElementById('statusSincronizacao');
+        if (statusEl) {
+            statusEl.innerText = "Erro Offline";
+            statusEl.style.backgroundColor = "#fee2e2";
+            statusEl.style.color = "#ef4444";
+        }
+      }
+    }
+
+    window.sairDoPainel = function() {
+      sessionStorage.removeItem('cchla_admin_token');
+      window.location.replace('index.html');
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    async function obterIP() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        return data.ip;
+      } catch (e) { return 'IP não identificado'; }
+    }
 
-    document.getElementById('gridCards').style.display = 'none';
+    function removerAcentos(texto) {
+      if (!texto) return '';
+      return String(texto).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById('gridCards').style.display = 'grid';
-        carregarFirestore();
-        iniciarRastreamentoInatividade(); // Inicia o timer de segurança ao confirmar login
-      } else {
-        window.location.replace('index.html');
+    window.alternarFixarDropdown = function(event) {
+      event.stopPropagation();
+      document.getElementById('menuFuncionalidades').classList.toggle('fixo');
+    };
+
+    window.addEventListener('click', function(e) {
+      const menu = document.getElementById('menuFuncionalidades');
+      if (menu && menu.classList.contains('fixo') && !e.target.closest('.dropdown')) {
+        menu.classList.remove('fixo');
       }
     });
 
-    window.sairDoPainel = function() {
-      signOut(auth).then(() => {
-        window.location.replace('index.html');
-      });
-    };
-
-    // ==========================================
-    // SISTEMA DE TIMEOUT POR INATIVIDADE (Foco no Painel)
-    // ==========================================
-    let timerInatividade;
-    let timerLogout;
-    const TEMPO_INATIVIDADE = 5 * 60 * 1000; // 5 minutos em milissegundos
-    const TEMPO_AVISO = 30 * 1000; // 30 segundos em milissegundos
-    let isModalTimeoutAberto = false;
-
     function iniciarRastreamentoInatividade() {
-      // Monitora apenas interações reais com os elementos da aplicação.
-      // Removemos 'mousemove' e 'scroll' para evitar zerar o tempo por esbarrões no mouse.
       const eventosAtivos = ['click', 'keydown', 'input', 'change', 'touchstart'];
-      
-      eventosAtivos.forEach(evento => {
-        document.addEventListener(evento, resetarTimerInatividade);
-      });
-      
+      eventosAtivos.forEach(evento => document.addEventListener(evento, resetarTimerInatividade));
       resetarTimerInatividade();
     }
 
     function resetarTimerInatividade() {
-      // Se o modal de aviso já estiver na tela, ignora cliques externos.
-      // O usuário precisará clicar exclusivamente no botão do popup.
       if (isModalTimeoutAberto) return; 
-
       clearTimeout(timerInatividade);
       timerInatividade = setTimeout(exibirAvisoTimeout, TEMPO_INATIVIDADE);
     }
@@ -248,50 +531,53 @@
     function exibirAvisoTimeout() {
       isModalTimeoutAberto = true;
       document.getElementById('modalTimeoutOverlay').style.display = 'flex';
-      
-      // Inicia a contagem regressiva crítica de 30 segundos
-      timerLogout = setTimeout(() => {
-        window.sairDoPainel(); // Encerra a sessão e redireciona para index.html
-      }, TEMPO_AVISO);
+      timerLogout = setTimeout(() => window.sairDoPainel(), TEMPO_AVISO);
     }
 
-    // Vinculado ao botão "Sim, manter logado"
     window.manterSessaoAtiva = function() {
-      clearTimeout(timerLogout); // Cancela a expulsão
+      clearTimeout(timerLogout); 
       document.getElementById('modalTimeoutOverlay').style.display = 'none';
       isModalTimeoutAberto = false;
-      resetarTimerInatividade(); // Devolve os 5 minutos
+      resetarTimerInatividade(); 
     };
-    // ==========================================
 
-    let dadosBrutos = [];       
-    let dadosFiltrados = [];    
-    let paginaAtual = 1;        
-    let itensPorPagina = 10;    
+    function isFeriadoOuFacultativo(r) {
+      let textos = [r.Atividade, r.TipoBloqueio, r.Motivo].map(t => t ? String(t) : '');
+      let tU = textos.join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      return tU.includes('feriado') || tU.includes('facultativo');
+    }
 
-    const chavesExportacao = ['Ticket', 'Status', 'Auditório', 'Atividade', 'Solicitante', 'Departamento', 'Telefone', 'Email', 'Início', 'Fim', 'Data_Solicitacao'];
+    function formataIsoSeguro(dt) {
+      if (!dt) return "";
+      let iso = String(dt).replace(' ', 'T');
+      if (iso.length === 10) return iso + "T00:00";
+      return iso.substring(0, 16);
+    }
 
-    async function carregarFirestore(manterPagina = false) {
+    function formataIsoSeguroFim(dt) {
+      if (!dt) return "";
+      let iso = String(dt).replace(' ', 'T');
+      if (iso.length === 10) return iso + "T23:59";
+      return iso.substring(0, 16);
+    }
+
+    function formatarDataHoraCompleta(timestamp) {
+      if (!timestamp) return '-';
       try {
-        const q = query(collection(db, "reservas"), orderBy("timestamp_criacao", "desc"));
-        const querySnapshot = await getDocs(q);
-        
-        dadosBrutos = [];
-        querySnapshot.forEach((documento) => {
-          let dados = documento.data();
-          dados.id_documento = documento.id; 
-          dados.Status = dados.Status || 'Pendente'; 
-          dadosBrutos.push(dados);
-        });
-
-        const agora = new Date();
-        document.getElementById('statusSincronizacao').innerText = `Atualizado às ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
-        
-        window.aplicarFiltros(manterPagina);
-      } catch (erro) {
-        console.error(erro);
-        document.getElementById('gridCards').innerHTML = `<div class="status-msg" style="color:red;">Erro de Leitura Firebase. Verifique as regras de segurança do Firestore.</div>`;
-      }
+        let data;
+        let secs = timestamp._seconds || timestamp.seconds;
+        if (secs) {
+          data = new Date(secs * 1000);
+        } else {
+          data = new Date(timestamp);
+        }
+        if (isNaN(data.getTime())) return String(timestamp);
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+          timeZone: 'America/Fortaleza'
+        }).format(data).replace(', ', ' às ');
+      } catch (e) { return String(timestamp); }
     }
 
     function formatarDataGMT3(dataString) {
@@ -301,65 +587,163 @@
       return t;
     }
 
-    window.atualizarStatusReserva = async function(idDoc, novoStatus, btnElement) {
-      const botoesContainer = btnElement.parentElement;
-      const botoes = botoesContainer.querySelectorAll('button');
-      
-      botoes.forEach(b => b.disabled = true);
-      const textoOriginal = btnElement.innerText;
-      btnElement.innerText = '⏳ Salvando...';
+    function verificarBloqueioAprovacao(idDocAtual) {
+        const target = dadosBrutos.find(d => d.id_documento === idDocAtual);
+        if (!target) return false;
 
-      try {
-        const docRef = doc(db, "reservas", idDoc);
-        await updateDoc(docRef, { Status: novoStatus });
-        
-        const index = dadosBrutos.findIndex(d => d.id_documento === idDoc);
-        if(index !== -1) dadosBrutos[index].Status = novoStatus;
-        
-        window.aplicarFiltros(true); 
-      } catch (erro) {
-        console.error("Erro ao atualizar status: ", erro);
-        alert("Erro ao alterar o status. Verifique sua conexão ou permissões.");
-        botoes.forEach(b => b.disabled = false);
-        btnElement.innerText = textoOriginal;
-      }
-    };
+        let tIni = formataIsoSeguro(target.Início || target.Inicio || target.data_inicio);
+        let tFim = formataIsoSeguroFim(target.Fim || target.fim || target.data_fim || target.Início);
+        let tAud = removerAcentos(target.Auditório || '');
+
+        for (let r of dadosBrutos) {
+            let isAprovado = String(r.Status || '').toLowerCase() === 'aprovado';
+            let isFeriado = isFeriadoOuFacultativo(r);
+
+            if (r.id_documento !== idDocAtual && (isAprovado || isFeriado)) {
+                let rIni = formataIsoSeguro(r.Início || r.Inicio || r.data_inicio);
+                let rFim = formataIsoSeguroFim(r.Fim || r.fim || r.data_fim || r.Início);
+                let rAud = removerAcentos(r.Auditório || '');
+
+                let tDate = tIni.substring(0, 10); let rDateI = rIni.substring(0, 10); let rDateF = rFim.substring(0, 10);
+                let tIniT = tIni.substring(11, 16) || "00:00"; let tFimT = tFim.substring(11, 16) || "23:59";
+                let rIniT = rIni.substring(11, 16) || "00:00"; let rFimT = rFim.substring(11, 16) || "23:59";
+
+                let sameDate = (tDate >= rDateI && tDate <= rDateF);
+                let timeOverlap = (tIniT < rFimT && tFimT > rIniT);
+
+                if (sameDate && timeOverlap) {
+                    if (isFeriado || rAud === tAud || rAud.includes('todos') || tAud.includes('todos')) {
+                        let nomeConflito = isFeriado ? 'um Feriado/Ponto Facultativo' : `o Ticket ${r.Ticket} (${r.Solicitante})`;
+                        return `A solicitação colide com ${nomeConflito}, que já está APROVADO para o mesmo Auditório, Dia e Hora.`;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    function atualizarListaMotivosAnteriores() {
+      const datalist = document.getElementById('motivosAnteriores');
+      if(!datalist) return;
+      const motivos = dadosBrutos.filter(d => typeof d.Motivo_Reprovacao === 'string' && d.Motivo_Reprovacao.trim() !== '').map(d => d.Motivo_Reprovacao.trim());
+      const motifsUnicos = [...new Set(motivos)];
+      datalist.innerHTML = motifsUnicos.map(m => `<option value="${m}">`).join('');
+    }
 
     window.limparFiltros = function() {
       document.getElementById("buscaGeral").value = "";
       document.getElementById("filtroAuditorio").value = "";
       document.getElementById("filtroSolicitante").value = "";
       document.getElementById("filtroDataAtividade").value = "";
-      document.getElementById("filtroStatus").value = "";
+      document.getElementById("filtroStatus").value = "Pendente"; 
       window.aplicarFiltros(false);
     };
 
     window.resetarEFiltar = function() { window.aplicarFiltros(false); };
 
     window.aplicarFiltros = function(manterPagina) {
-      const fGeral = document.getElementById("buscaGeral").value.toLowerCase();
-      const fAuditorio = document.getElementById("filtroAuditorio").value.toLowerCase();
-      const fSolicitante = document.getElementById("filtroSolicitante").value.toLowerCase();
-      const fStatus = document.getElementById("filtroStatus").value.toLowerCase();
-      const inputDataAtiv = document.getElementById("filtroDataAtividade").value; 
+      try {
+        const fGeral = removerAcentos(document.getElementById("buscaGeral").value);
+        const fAuditorio = removerAcentos(document.getElementById("filtroAuditorio").value);
+        const fSolicitante = removerAcentos(document.getElementById("filtroSolicitante").value);
+        const fStatus = document.getElementById("filtroStatus").value.toLowerCase();
+        const inputDataAtiv = document.getElementById("filtroDataAtividade").value; 
 
-      dadosFiltrados = dadosBrutos.filter(d => {
-        const txtGeral = Object.values(d).join(' ').toLowerCase();
-        const aud = String(d.Auditório || '').toLowerCase();
-        const sol = String(d.Solicitante || '').toLowerCase();
-        const stat = String(d.Status || 'Pendente').toLowerCase();
-        const ativ = String(d.Início || '');
+        dadosFiltrados = dadosBrutos.filter(d => {
+          // CORREÇÃO 1: Extração explícita de todos os campos textuais.
+          // Resolve o bug do [object Object] e assegura que todos os dados sejam varridos.
+          const txtGeral = removerAcentos([
+              d.Ticket, d.Solicitante, d.Matrícula, d.Auditório, d.Atividade, 
+              d.Departamento, d.Status, d.Email, d.Telefone, d.Início, d.Fim, d.Motivo_Reprovacao
+          ].join(' '));
 
-        return (fGeral === "" || txtGeral.includes(fGeral)) &&
-               (fAuditorio === "" || aud.includes(fAuditorio)) &&
-               (fSolicitante === "" || sol.includes(fSolicitante)) &&
-               (fStatus === "" || stat === fStatus) &&
-               (inputDataAtiv === "" || ativ.includes(inputDataAtiv));
-      });
+          const aud = removerAcentos(d.Auditório);
+          const sol = removerAcentos(d.Solicitante);
+          const stat = String(d.Status || 'Pendente').toLowerCase();
+          const ativ = String(d.Início || '');
 
-      if (!manterPagina) paginaAtual = 1;
-      document.getElementById('contadorRegistros').innerText = `${dadosFiltrados.length} encontrado(s)`;
-      renderizarPaginaVisual();
+          let matchStatus = false;
+          
+          if (fStatus === "") {
+              matchStatus = true;
+          } else if (fStatus === "conflito") {
+              let dIni = formataIsoSeguro(d.Início || d.Inicio || d.data_inicio);
+              let dFim = formataIsoSeguroFim(d.Fim || d.fim || d.data_fim || d.Início);
+              let dAud = aud;
+              
+              if (dIni && dFim) {
+                  let dDate = dIni.substring(0, 10);
+                  let dIniT = dIni.substring(11, 16) || "00:00";
+                  let dFimT = dFim.substring(11, 16) || "23:59";
+
+                  for (let r of dadosBrutos) {
+                      let rStat = String(r.Status || 'Pendente').toLowerCase();
+                      if (r.id_documento !== d.id_documento && rStat !== 'reprovado' && rStat !== 'cancelado') {
+                          let rIni = formataIsoSeguro(r.Início || r.Inicio || r.data_inicio); let rFim = formataIsoSeguroFim(r.Fim || r.fim || r.data_fim || r.Início); let rAud = removerAcentos(r.Auditório || '');
+                          let rDateI = rIni.substring(0, 10); let rDateF = rFim.substring(0, 10);
+                          let rIniT = rIni.substring(11, 16) || "00:00"; let rFimT = rFim.substring(11, 16) || "23:59";
+
+                          let sameDate = (dDate >= rDateI && dDate <= rDateF);
+                          let timeOverlap = (dIniT < rFimT && dFimT > rIniT);
+
+                          if (sameDate && timeOverlap) {
+                              if (isFeriadoOuFacultativo(r) || rAud === dAud || rAud.includes('todos') || dAud.includes('todos')) {
+                                  matchStatus = true;
+                                  break;
+                              }
+                          }
+                      }
+                  }
+              }
+          } else { matchStatus = (stat === fStatus); }
+
+          // CORREÇÃO 2: Prioridade Absoluta para a Busca Geral.
+          // Se você digitar algo na Busca Geral, o sistema ignora o filtro de "Status".
+          // Assim, a busca acha o Ticket, Departamento ou Nome independentemente de estar Pendente, Aprovado ou Reprovado.
+          if (fGeral !== "") {
+              return txtGeral.includes(fGeral) && 
+                     (fAuditorio === "" || aud.includes(fAuditorio)) && 
+                     (fSolicitante === "" || sol.includes(fSolicitante)) && 
+                     (inputDataAtiv === "" || ativ.includes(inputDataAtiv));
+          }
+
+          // Se a Busca Geral estiver vazia, aplicamos as regras normais dos menus suspensos.
+          return (fAuditorio === "" || aud.includes(fAuditorio)) && 
+                 (fSolicitante === "" || sol.includes(fSolicitante)) && 
+                 matchStatus && 
+                 (inputDataAtiv === "" || ativ.includes(inputDataAtiv));
+        });
+
+        // Daqui em diante a lógica de renderização se mantém intacta
+        renderItems = [];
+        let pendentesMap = {};
+
+        dadosFiltrados.forEach(d => {
+          if ((d.Status || 'Pendente').toLowerCase() === 'pendente' && (fStatus === 'pendente' || fStatus === '')) {
+              let key = (d.Solicitante || 'Desconhecido').trim();
+              if (!pendentesMap[key]) pendentesMap[key] = [];
+              pendentesMap[key].push(d);
+          } else { renderItems.push({ tipo: 'individual', data: d, timestamp: d.timestamp_criacao }); }
+        });
+
+        for (let sol in pendentesMap) {
+            let maxTs = pendentesMap[sol].reduce((max, item) => {
+                let secs = item.timestamp_criacao ? (item.timestamp_criacao._seconds || item.timestamp_criacao.seconds || 0) : 0;
+                return Math.max(max, secs);
+            }, 0);
+            renderItems.push({ tipo: 'grupo_pendente', solicitante: sol, itens: pendentesMap[sol], timestamp_ordem: maxTs });
+        }
+
+        renderItems.sort((a, b) => {
+            let tA = a.tipo === 'grupo_pendente' ? a.timestamp_ordem : (a.timestamp ? (a.timestamp._seconds || a.timestamp.seconds || 0) : 0);
+            let tB = b.tipo === 'grupo_pendente' ? b.timestamp_ordem : (b.timestamp ? (b.timestamp._seconds || b.timestamp.seconds || 0) : 0);
+            return tB - tA;
+        });
+
+        if (!manterPagina) paginaAtual = 1;
+        document.getElementById('contadorRegistros').innerText = `${dadosFiltrados.length} registros encontrados`;
+        renderizarPaginaVisual();
+      } catch (err) { console.error("Erro na filtragem:", err); }
     };
 
     window.mudarItensPorPagina = function() {
@@ -375,93 +759,566 @@
       renderizarPaginaVisual();
     };
 
-    function renderizarPaginaVisual() {
-      const grid = document.getElementById('gridCards');
-      grid.innerHTML = '';
+    window.toggleMotivoLote = function(idDoc) {
+      const radios = document.getElementsByName(`acao_${idDoc}`);
+      const inputMotivo = document.getElementById(`motivo_lote_${idDoc}`);
+      let statusSelecionado = 'Pendente';
+      for(let r of radios) { if (r.checked) statusSelecionado = r.value; }
+      
+      if(!tempBatchActions[idDoc]) tempBatchActions[idDoc] = {};
+      tempBatchActions[idDoc].status = statusSelecionado;
+      
+      if(statusSelecionado === 'Reprovado') {
+         if(inputMotivo) inputMotivo.style.display = 'block';
+      } else {
+         if(inputMotivo) { inputMotivo.style.display = 'none'; inputMotivo.value = ''; }
+         tempBatchActions[idDoc].motivo = '';
+      }
+    };
 
-      if (dadosFiltrados.length === 0) {
-        grid.innerHTML = '<div class="status-msg">Nenhum resultado corresponde à busca.</div>';
-        desenharPaginacao();
-        return;
+    window.atualizarMotivoCache = function(idDoc, texto) {
+      if(!tempBatchActions[idDoc]) tempBatchActions[idDoc] = {};
+      tempBatchActions[idDoc].motivo = texto;
+    };
+
+    window.limparSelecaoLote = function(idGrupo) {
+      const groupElement = document.getElementById(idGrupo);
+      const linhas = groupElement.querySelectorAll('.linha-avaliacao');
+      linhas.forEach(linha => {
+         const idDoc = linha.getAttribute('data-id');
+         if(tempBatchActions[idDoc]) delete tempBatchActions[idDoc];
+         const radioPendente = groupElement.querySelector(`input[name="acao_${idDoc}"][value="Pendente"]`);
+         if(radioPendente) radioPendente.checked = true;
+         window.toggleMotivoLote(idDoc);
+      });
+    };
+
+    window.processarLote = async function(idGrupo, btnConfirmar) {
+      const groupElement = document.getElementById(idGrupo);
+      const linhas = groupElement.querySelectorAll('.linha-avaliacao');
+      let updates = [];
+      let hasError = false;
+
+      linhas.forEach(linha => {
+          if (hasError) return;
+          const idDoc = linha.getAttribute('data-id');
+          const radios = linha.querySelectorAll(`input[name="acao_${idDoc}"]`);
+          let statusSelecionado = 'Pendente';
+          radios.forEach(r => { if(r.checked) statusSelecionado = r.value; });
+
+          if (statusSelecionado !== 'Pendente') {
+              if (statusSelecionado === 'Aprovado') {
+                  let msgBloqueio = verificarBloqueioAprovacao(idDoc);
+                  if (msgBloqueio) {
+                      alert(`⛔ BLOQUEIO no Ticket ${linha.getAttribute('data-ticket')}\n\n${msgBloqueio}`);
+                      hasError = true; return;
+                  }
+              }
+
+              const motivoEl = document.getElementById(`motivo_lote_${idDoc}`);
+              const motivo = motivoEl ? motivoEl.value.trim() : '';
+
+              if (statusSelecionado === 'Reprovado' && !motivo) {
+                  alert(`Informe o motivo para reprovar o Ticket ${linha.getAttribute('data-ticket')}.`);
+                  hasError = true; return;
+              }
+              updates.push({ idDoc, status: statusSelecionado, motivo });
+          }
+      });
+
+      if (hasError) return;
+      if (updates.length === 0) return alert("Selecione ações antes de confirmar.");
+
+      const textoOriginal = btnConfirmar.innerText;
+      btnConfirmar.innerText = '⏳ Processando...';
+      btnConfirmar.disabled = true;
+
+      const ipAtuacao = await obterIP();
+      const dataHoraAtuacao = new Date().toISOString();
+
+      try {
+          // =========================================================================
+          // DEPLOY URL: COLE SUA URL DE adminAtualizarDocumento AQUI DENTRO
+          // =========================================================================
+          const urlUpdate = '/api/adminAtualizarDocumento';
+
+          const promises = updates.map(async (upd) => {
+              const dadosAtualizacao = { Status: upd.status, Status_Alterado_IP: ipAtuacao, Status_Alterado_Data: dataHoraAtuacao };
+              if (upd.status === 'Reprovado') dadosAtualizacao.Motivo_Reprovacao = upd.motivo;
+
+              await fetch(urlUpdate, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+                  body: JSON.stringify({ idDoc: upd.idDoc, dadosAtualizacao: dadosAtualizacao })
+              });
+
+              const index = dadosBrutos.findIndex(d => d.id_documento === upd.idDoc);
+              if (index !== -1) {
+                  dadosBrutos[index].Status = upd.status;
+                  dadosBrutos[index].Status_Alterado_Por = emailUsuarioLogado;
+                  dadosBrutos[index].Status_Alterado_IP = ipAtuacao;
+                  dadosBrutos[index].Status_Alterado_Data = dataHoraAtuacao;
+                  if (upd.status === 'Reprovado') dadosBrutos[index].Motivo_Reprovacao = upd.motivo;
+              }
+              delete tempBatchActions[upd.idDoc]; 
+          });
+
+          await Promise.all(promises);
+          updates.forEach(upd => {
+            const idx = dadosBrutos.findIndex(d => d.id_documento === upd.idDoc);
+            if (idx !== -1) enviarNotificacaoStatus(dadosBrutos[idx]);
+          });
+          atualizarListaMotivosAnteriores();
+          window.aplicarFiltros(true); 
+
+      } catch (erro) {
+          alert("Erro ao salvar lote na nuvem.");
+      } finally {
+          btnConfirmar.innerText = textoOriginal;
+          btnConfirmar.disabled = false;
+      }
+    };
+
+    let idDocReprovacaoAtual = null; let btnReprovacaoAtual = null;
+
+    window.abrirModalReprovacao = function(idDoc, btnElement) {
+      idDocReprovacaoAtual = idDoc; btnReprovacaoAtual = btnElement;
+      document.getElementById('inputMotivoReprovacao').value = '';
+      document.getElementById('modalReprovacaoOverlay').style.display = 'flex';
+      document.getElementById('inputMotivoReprovacao').focus();
+    };
+
+    window.fecharModalReprovacao = function() { document.getElementById('modalReprovacaoOverlay').style.display = 'none'; };
+
+    window.confirmarReprovacao = async function() {
+      const motivo = document.getElementById('inputMotivoReprovacao').value.trim();
+      if (!motivo) return alert("Digite o motivo.");
+      window.fecharModalReprovacao();
+      await atualizarStatusNoFirebase(idDocReprovacaoAtual, 'Reprovado', btnReprovacaoAtual, motivo);
+    };
+
+    window.abrirModalEdicao = function(idDoc) {
+      const d = dadosBrutos.find(x => x.id_documento === idDoc);
+      if(!d) return;
+      
+      document.getElementById('editIdDoc').value = idDoc;
+      document.getElementById('editTicketText').innerText = d.Ticket || '';
+      document.getElementById('editAuditorio').value = d.Auditório || 'Auditório A';
+      document.getElementById('editAtividade').value = d.Atividade || '';
+      document.getElementById('editInicio').value = formataIsoSeguro(d.Início || d.Inicio);
+      document.getElementById('editFim').value = formataIsoSeguro(d.Fim || d.fim || d.Início);
+      document.getElementById('editSolicitante').value = d.Solicitante || '';
+      document.getElementById('editDepartamento').value = d.Departamento || '';
+      document.getElementById('editTelefone').value = d.Telefone || '';
+      document.getElementById('editStatus').value = d.Status || 'Pendente';
+      document.getElementById('editEmail').value = d.Email || '';
+      document.getElementById('editMatricula').value = d.Matricula || d.Matrícula || '';
+      
+      document.getElementById('modalEdicaoOverlay').style.display = 'flex';
+    };
+
+    window.fecharModalEdicao = function() { document.getElementById('modalEdicaoOverlay').style.display = 'none'; };
+
+    window.salvarEdicaoTudo = async function() {
+      const btn = document.getElementById('btnSalvarEdicao');
+      btn.innerHTML = '⏳ Salvando...'; btn.disabled = true;
+      
+      const idDoc = document.getElementById('editIdDoc').value;
+      const dadosUpdate = {
+          Auditório: document.getElementById('editAuditorio').value,
+          Atividade: document.getElementById('editAtividade').value,
+          Início: document.getElementById('editInicio').value,
+          Fim: document.getElementById('editFim').value,
+          Solicitante: document.getElementById('editSolicitante').value,
+          Departamento: document.getElementById('editDepartamento').value,
+          Telefone: document.getElementById('editTelefone').value,
+          Status: document.getElementById('editStatus').value,
+          Email: document.getElementById('editEmail').value,
+          Matricula: document.getElementById('editMatricula').value,
+          Data_Atualizacao_Dados: new Date().toISOString()
+      };
+      
+      try {
+          // =========================================================================
+          // DEPLOY URL: COLE SUA URL DE adminAtualizarDocumento AQUI DENTRO
+          // =========================================================================
+          const urlUpdate = '/api/adminAtualizarDocumento';
+
+          await fetch(urlUpdate, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+              body: JSON.stringify({ idDoc: idDoc, dadosAtualizacao: dadosUpdate })
+          });
+          
+          const index = dadosBrutos.findIndex(x => x.id_documento === idDoc);
+          if(index > -1) {
+            const statusAntigo = dadosBrutos[index].Status;
+            Object.assign(dadosBrutos[index], dadosUpdate);
+            if (dadosBrutos[index].Status !== statusAntigo) {
+              enviarNotificacaoStatus(dadosBrutos[index]);
+            }
+          }
+          
+          fecharModalEdicao();
+          window.aplicarFiltros(true);
+      } catch(e) {
+          alert("Erro na nuvem: " + e.message);
+      } finally {
+          btn.innerHTML = '💾 Salvar Alterações'; btn.disabled = false;
+      }
+    };
+
+    window.habilitarEdicaoLinha = function(idDoc) {
+      const d = dadosBrutos.find(x => x.id_documento === idDoc);
+      if(!d) return;
+      
+      const spanAud = document.getElementById(`txt_aud_${idDoc}`);
+      const spanAtiv = document.getElementById(`txt_ativ_${idDoc}`);
+      const spanIni = document.getElementById(`txt_ini_${idDoc}`);
+      const spanFim = document.getElementById(`txt_fim_${idDoc}`);
+      const btnEdit = document.getElementById(`btn_edit_linha_${idDoc}`);
+      
+      spanAud.innerHTML = `<select id="input_aud_${idDoc}" style="padding:4px; font-size:12px; border-radius:4px; border: 1px solid var(--borda-suave);">
+          <option value="Auditório A" ${d.Auditório==='Auditório A'?'selected':''}>Auditório 'A'</option>
+          <option value="Auditório B" ${d.Auditório==='Auditório B'?'selected':''}>Auditório 'B'</option>
+          <option value="Auditório C" ${d.Auditório==='Auditório C'?'selected':''}>Auditório 'C'</option>
+          <option value="Auditório D" ${d.Auditório==='Auditório D'?'selected':''}>Auditório 'D'</option>
+          <option value="Auditório E" ${d.Auditório==='Auditório E'?'selected':''}>Auditório 'E'</option>
+      </select>`;
+      
+      spanAtiv.innerHTML = `<input type="text" id="input_ativ_${idDoc}" value="${(d.Atividade || '').replace(/"/g, '&quot;')}" style="padding:2px; width:95%; font-size:11px; border: 1px solid var(--borda-suave); border-radius: 4px; box-sizing: border-box;">`;
+      spanIni.innerHTML = `<input type="datetime-local" id="input_ini_${idDoc}" value="${formataIsoSeguro(d.Início || d.Inicio)}" style="padding:2px; font-size:11px; border: 1px solid var(--borda-suave); border-radius: 4px;">`;
+      spanFim.innerHTML = `<input type="datetime-local" id="input_fim_${idDoc}" value="${formataIsoSeguro(d.Fim || d.fim || d.Início)}" style="padding:2px; font-size:11px; border: 1px solid var(--borda-suave); border-radius: 4px;">`;
+      
+      btnEdit.innerHTML = '💾 Salvar'; btnEdit.style.background = '#10b981';
+      btnEdit.onclick = () => salvarEdicaoLinha(idDoc);
+    };
+    
+    window.salvarEdicaoLinha = async function(idDoc) {
+      const btnEdit = document.getElementById(`btn_edit_linha_${idDoc}`);
+      btnEdit.innerHTML = '⏳...'; btnEdit.disabled = true;
+      
+      const dadosUpdate = {
+          Auditório: document.getElementById(`input_aud_${idDoc}`).value,
+          Atividade: document.getElementById(`input_ativ_${idDoc}`).value,
+          Início: document.getElementById(`input_ini_${idDoc}`).value,
+          Fim: document.getElementById(`input_fim_${idDoc}`).value,
+          Data_Atualizacao_Dados: new Date().toISOString()
+      };
+      
+      try {
+          // =========================================================================
+          // DEPLOY URL: COLE SUA URL DE adminAtualizarDocumento AQUI DENTRO
+          // =========================================================================
+          const urlUpdate = '/api/adminAtualizarDocumento';
+
+          await fetch(urlUpdate, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+              body: JSON.stringify({ idDoc: idDoc, dadosAtualizacao: dadosUpdate })
+          });
+          
+          const index = dadosBrutos.findIndex(x => x.id_documento === idDoc);
+          if(index > -1) Object.assign(dadosBrutos[index], dadosUpdate);
+          
+          window.aplicarFiltros(true);
+      } catch(e) {
+          alert("Erro: " + e.message);
+          btnEdit.innerHTML = '💾 Salvar'; btnEdit.disabled = false;
+      }
+    };
+
+    async function enviarNotificacaoStatus(doc) {
+      const dataInicio = formatarDataGMT3(doc.Início || doc.data_inicio || '');
+      const dataFim = formatarDataGMT3(doc.Fim || doc.data_fim || '');
+      const periodo = dataInicio !== '-' ? `${dataInicio} — ${dataFim}` : '';
+      try {
+        await fetch('/api/notificar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+          body: JSON.stringify({
+            tipo: 'status_update',
+            email: doc.Email || '',
+            ticket: doc.Ticket || '',
+            solicitante: doc.Solicitante || '',
+            status: doc.Status || '',
+            auditorio: doc.Auditório || '',
+            atividade: doc.Atividade || '',
+            data_inicio: periodo,
+            motivo: doc.Motivo_Reprovacao || ''
+          })
+        });
+      } catch (e) {}
+    }
+
+    window.atualizarStatusReserva = async function(idDoc, novoStatus, btnElement) {
+      await atualizarStatusNoFirebase(idDoc, novoStatus, btnElement, null);
+    };
+
+    async function atualizarStatusNoFirebase(idDoc, novoStatus, btnElement, motivo = null) {
+      if (!idDoc) return;
+      const botoesContainer = btnElement ? btnElement.parentElement : null;
+      const botoes = botoesContainer ? botoesContainer.querySelectorAll('button') : [];
+      const textoOriginal = btnElement ? btnElement.innerText : '';
+
+      if (novoStatus === 'Aprovado') {
+          let msgBloqueio = verificarBloqueioAprovacao(idDoc);
+          if (msgBloqueio) {
+              alert("⛔ BLOQUEIO DE SEGURANÇA\n\nNão é possível aprovar.\n" + msgBloqueio);
+              if (btnElement) btnElement.innerText = textoOriginal;
+              return;
+          }
       }
 
-      let dadosDaPag = itensPorPagina === 'todos' ? dadosFiltrados : dadosFiltrados.slice((paginaAtual - 1) * itensPorPagina, paginaAtual * itensPorPagina);
+      if (botoes.length > 0 && btnElement) {
+        botoes.forEach(b => b.disabled = true);
+        btnElement.innerText = '⏳ Salvando...';
+      }
 
-      dadosDaPag.forEach(d => {
-        let classeStatus = 'status-pendente';
-        if(d.Status === 'Aprovado') classeStatus = 'status-aprovado';
-        if(d.Status === 'Reprovado') classeStatus = 'status-reprovado';
+      try {
+        // =========================================================================
+        // DEPLOY URL: COLE SUA URL DE adminAtualizarDocumento AQUI DENTRO
+        // =========================================================================
+        const urlUpdate = '/api/adminAtualizarDocumento';
 
-        const card = document.createElement('div');
-        card.className = 'reserva-card';
-        card.innerHTML = `
-          <div class="card-header">
-            <span class="card-ticket">🎟️ ${d.Ticket || '-'}</span>
-            <span class="card-auditorio">${d.Auditório || '-'}</span>
-            <span class="badge-status ${classeStatus}">${d.Status}</span>
-          </div>
-          <div class="card-body">
-            <div class="info-bloco"><span class="info-label">Atividade</span><span class="info-valor" style="font-weight:700; color:var(--azul-marinho);">${d.Atividade || '-'}</span></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <div class="info-bloco"><span class="info-label">Solicitante</span><span class="info-valor">${d.Solicitante || '-'}</span></div>
-              <div class="info-bloco"><span class="info-label">Depto</span><span class="info-valor">${d.Departamento || '-'}</span></div>
-            </div>
-            <div class="card-datas">
-              <div class="info-bloco"><span class="info-label" style="color:#10b981;">▶ Início</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Início)}</span></div>
-              <div class="info-bloco" style="text-align:right;"><span class="info-label" style="color:#ef4444;">⏹ Fim</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Fim)}</span></div>
-            </div>
-          </div>
-          <div class="card-footer">
-            <div class="footer-topo">
-              <span>📞 ${d.Telefone || '-'}</span>
-              <button class="btn-copiar">📋 Copiar Dados</button>
-            </div>
-            
-            <div class="acoes-admin">
-              ${d.Status !== 'Aprovado' ? `<button class="btn-acao btn-aprovar" onclick="atualizarStatusReserva('${d.id_documento}', 'Aprovado', this)">Aprovar</button>` : ''}
-              ${d.Status !== 'Reprovado' ? `<button class="btn-acao btn-reprovar" onclick="atualizarStatusReserva('${d.id_documento}', 'Reprovado', this)">Reprovar</button>` : ''}
-              ${d.Status !== 'Pendente' ? `<button class="btn-acao btn-pendente" onclick="atualizarStatusReserva('${d.id_documento}', 'Pendente', this)">Marcar Pendente</button>` : ''}
-            </div>
-          </div>
-        `;
+        const ipAtuacao = await obterIP();
+        const dataHora = new Date().toISOString();
+        const dadosAtualizacao = { Status: novoStatus, Status_Alterado_IP: ipAtuacao, Status_Alterado_Data: dataHora };
+        if (novoStatus === 'Reprovado' && motivo) dadosAtualizacao.Motivo_Reprovacao = motivo;
+
+        await fetch(urlUpdate, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+            body: JSON.stringify({ idDoc: idDoc, dadosAtualizacao: dadosAtualizacao })
+        });
+
+        const index = dadosBrutos.findIndex(d => d.id_documento === idDoc);
+        if(index !== -1) {
+          Object.assign(dadosBrutos[index], dadosAtualizacao);
+          dadosBrutos[index].Status_Alterado_Por = emailUsuarioLogado;
+          enviarNotificacaoStatus(dadosBrutos[index]);
+        }
+        window.aplicarFiltros(true); 
+      } catch (erro) { 
+        alert("Falha ao processar atualização.");
+        if (botoes.length > 0 && btnElement) botoes.forEach(b => b.disabled = false);
+      }
+    }
+
+    let idDocExclusaoAtual = null; let btnExclusaoAtual = null;
+    window.abrirModalExclusao = function(idDoc, btnElement) {
+      idDocExclusaoAtual = idDoc; btnExclusaoAtual = btnElement;
+      document.getElementById('modalExclusaoOverlay').style.display = 'flex';
+    };
+    window.fecharModalExclusao = function() { document.getElementById('modalExclusaoOverlay').style.display = 'none'; };
+    
+    window.confirmarExclusao = async function() {
+      window.fecharModalExclusao();
+      try {
+        // =========================================================================
+        // DEPLOY URL: COLE SUA URL DE adminexcluirdocumento AQUI DENTRO
+        // =========================================================================
+        const urlDelete = '/api/adminExcluirDocumento';
+
+        const res = await fetch(urlDelete, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+            body: JSON.stringify({ idDoc: idDocExclusaoAtual })
+        });
+
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            throw new Error(errBody.mensagem || "Exclusão rejeitada pelo servidor.");
+        }
         
-        const btnCopiar = card.querySelector('.btn-copiar');
-        btnCopiar.onclick = () => {
-          const textoFormatado = `Ticket: ${d.Ticket || '-'}\nStatus: ${d.Status}\nAuditório: ${d.Auditório || '-'}\nAtividade: ${d.Atividade || '-'}\nData Início: ${formatarDataGMT3(d.Início)}\nData Fim: ${formatarDataGMT3(d.Fim)}\nSolicitante: ${d.Solicitante || '-'}\nDepto/Centro: ${d.Departamento || '-'}\nTelefone: ${d.Telefone || '-'}\nE-mail: ${d.Email || '-'}`;
-          
-          navigator.clipboard.writeText(textoFormatado).then(() => {
-            const originalText = btnCopiar.innerHTML;
-            btnCopiar.innerHTML = '✅ Copiado!';
-            btnCopiar.style.backgroundColor = '#10b981';
-            btnCopiar.style.color = '#fff';
-            setTimeout(() => {
-              btnCopiar.innerHTML = originalText;
-              btnCopiar.style.backgroundColor = '';
-              btnCopiar.style.color = '';
-            }, 2000);
-          });
-        };
+        dadosBrutos = dadosBrutos.filter(d => d.id_documento !== idDocExclusaoAtual);
+        window.aplicarFiltros(true);
+      } catch (e) { alert(e.message); }
+    };
 
-        grid.appendChild(card);
+    function renderizarPaginaVisual() {
+      const grid = document.getElementById('gridCards');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (renderItems.length === 0) {
+        grid.innerHTML = '<div class="status-msg">Nenhum resultado corresponde à busca.</div>';
+        desenharPaginacao(); return;
+      }
+
+      let itensDaPag = itensPorPagina === 'todos' ? renderItems : renderItems.slice((paginaAtual - 1) * itensPorPagina, paginaAtual * itensPorPagina);
+
+      itensDaPag.forEach((itemRenderizavel, indiceBase) => {
+        if (itemRenderizavel.tipo === 'grupo_pendente') {
+            const idGrupo = `grupo_${paginaAtual}_${indiceBase}`;
+            const cardGrupo = document.createElement('div'); cardGrupo.className = 'reserva-card card-grupo'; cardGrupo.id = idGrupo;
+            let htmlTabelaLinhas = "";
+
+            itemRenderizavel.itens.forEach(d => {
+                let isEsteItemFeriado = isFeriadoOuFacultativo(d);
+                let colisoesGerais = [];
+
+                if (!isEsteItemFeriado) {
+                    let dIni = formataIsoSeguro(d.Início || d.Inicio || d.data_inicio); let dFim = formataIsoSeguroFim(d.Fim || d.fim || d.data_fim || d.Início); let dAud = removerAcentos(d.Auditório || '');
+                    if (dIni && dFim) {
+                        let dDate = dIni.substring(0, 10); let dIniT = dIni.substring(11, 16) || "00:00"; let dFimT = dFim.substring(11, 16) || "23:59";
+                        dadosBrutos.forEach(r => {
+                            let rStat = String(r.Status || 'Pendente').toLowerCase();
+                            if (r.id_documento !== d.id_documento && rStat !== 'reprovado' && rStat !== 'cancelado') {
+                                let rIni = formataIsoSeguro(r.Início || r.Inicio || r.data_inicio); let rFim = formataIsoSeguroFim(r.Fim || r.fim || r.data_fim || r.Início); let rAud = removerAcentos(r.Auditório || '');
+                                let rDateI = rIni.substring(0, 10); let rDateF = rFim.substring(0, 10); let rIniT = rIni.substring(11, 16) || "00:00"; let rFimT = rFim.substring(11, 16) || "23:59";
+                                let sameDate = (dDate >= rDateI && dDate <= rDateF); let timeOverlap = (dIniT < rFimT && dFimT > rIniT);
+                                if (sameDate && timeOverlap) {
+                                    if (isFeriadoOuFacultativo(r)) {
+                                        let nomeFeriado = r.Atividade || r.TipoBloqueio || r.Motivo || 'Feriado / Ponto Facultativo';
+                                        if (!colisoesGerais.includes("Feriado: " + nomeFeriado)) colisoesGerais.push("Feriado: " + nomeFeriado);
+                                    } else if (rAud === dAud || rAud.includes('todos') || dAud.includes('todos')) {
+                                        let msg = `Ticket ${r.Ticket || 'S/N'} [${r.Status || 'Pendente'}] de ${r.Solicitante || 'Desconhecido'} (${rDateI.split('-').reverse().join('/')} das ${rIniT} às ${rFimT})`;
+                                        if (!colisoesGerais.includes(msg)) colisoesGerais.push(msg);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+
+                let estiloLinha = "border-bottom: 1px solid #e2e8f0;" + ((colisoesGerais.length > 0 || isEsteItemFeriado) ? " background-color: #fffbeb;" : "");
+                let estadoSalvo = tempBatchActions[d.id_documento] || { status: 'Pendente', motivo: '' };
+                let displayMotivo = estadoSalvo.status === 'Reprovado' ? 'block' : 'none';
+
+                htmlTabelaLinhas += `
+                  <tr style="${estiloLinha}" class="linha-avaliacao" data-id="${d.id_documento}" data-ticket="${d.Ticket || '-'}">
+                      <td style="padding: 12px 10px; vertical-align: top;">
+                          <strong>🎟️ ${d.Ticket || '-'}</strong><br>
+                          <span id="txt_aud_${d.id_documento}" style="color: var(--azul-marinho); font-weight: 600;">${d.Auditório || '-'}</span><br>
+                          <span id="txt_ativ_${d.id_documento}" style="font-size: 11px; color: #64748b; display: block; margin-top: 3px;">${d.Atividade || '-'}</span>
+                          <span style="font-size: 11px; color: var(--azul-royal); font-weight: 500; display: block; margin-top: 3px;">🕒 Solicitado em: ${formatarDataHoraCompleta(d.timestamp_criacao || d.Data_Solicitacao)}</span>
+                      </td>
+                      <td style="padding: 12px 10px; vertical-align: top;">
+                          <span style="color:#10b981; font-weight:500;">▶ <span id="txt_ini_${d.id_documento}">${formatarDataGMT3(d.Início)}</span></span><br>
+                          <span style="color:#ef4444; font-weight:500;">⏹ <span id="txt_fim_${d.id_documento}">${formatarDataGMT3(d.Fim)}</span></span>
+                          ${colisoesGerais.length > 0 ? `<div style="margin-top: 5px; font-size: 11px; color: #92400e; font-weight: 600; line-height: 1.4;">⚠️ Conflito:<br>${colisoesGerais.join('<br>')}</div>` : ''}
+                      </td>
+                      <td style="padding: 12px 10px; vertical-align: top;">
+                          <div style="display: flex; gap: 15px; margin-bottom: 8px;">
+                              <label style="cursor: pointer;"><input type="radio" name="acao_${d.id_documento}" value="Pendente" ${estadoSalvo.status === 'Pendente' ? 'checked' : ''} onchange="toggleMotivoLote('${d.id_documento}')"> Pendente</label>
+                              <label style="color:#10b981; font-weight:700;"><input type="radio" name="acao_${d.id_documento}" value="Aprovado" ${estadoSalvo.status === 'Aprovado' ? 'checked' : ''} onchange="toggleMotivoLote('${d.id_documento}')"> Aprovar</label>
+                              <label style="color:#ef4444; font-weight:700;"><input type="radio" name="acao_${d.id_documento}" value="Reprovado" ${estadoSalvo.status === 'Reprovado' ? 'checked' : ''} onchange="toggleMotivoLote('${d.id_documento}')"> Reprovar</label>
+                          </div>
+                          <input type="text" id="motivo_lote_${d.id_documento}" list="motivosAnteriores" value="${estadoSalvo.motivo || ''}" oninput="atualizarMotivoCache('${d.id_documento}', this.value)" placeholder="Digite o motivo da reprovação..." style="display:${displayMotivo}; width: 100%; padding: 8px; font-size: 13px; border: 1px solid var(--borda-suave); border-radius: 4px; background: #fff;">
+                          <div style="display:flex; gap:6px; margin-top:8px;">
+                            <button class="btn-acao btn-editar" style="background:#0ea5e9; font-size: 10px; padding: 4px;" onclick="habilitarEdicaoLinha('${d.id_documento}')" id="btn_edit_linha_${d.id_documento}">✏️ Editar Linha</button>
+                            <button class="btn-acao btn-editar" style="background:#6366f1; font-size: 10px; padding: 4px;" onclick="abrirModalEdicao('${d.id_documento}')">✏️ Editar Completo</button>
+                          </div>
+                      </td>
+                  </tr>`;
+            });
+
+            cardGrupo.innerHTML = `
+              <div class="card-header" style="background-color: #f0f9ff; border-bottom: 2px solid #38bdf8;">
+                  <span style="font-size: 16px; font-weight: 800; color: var(--azul-marinho);">👤 Solicitante: ${itemRenderizavel.solicitante}</span>
+                  <span class="badge-status status-pendente" style="background-color: #38bdf8; color: white; border: none; font-size: 12px;">${itemRenderizavel.itens.length} PENDENTES</span>
+              </div>
+              <div class="card-body" style="padding: 0;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                      <thead style="background-color: #f1f5f9;">
+                          <tr><th style="padding: 10px; text-align: left;">Local / Atividade / Solicitação</th><th style="padding: 10px; text-align: left;">Período Reservado</th><th style="padding: 10px; text-align: left;">Ação da Secretaria</th></tr>
+                      </thead>
+                      <tbody>${htmlTabelaLinhas}</tbody>
+                  </table>
+              </div>
+              <div class="card-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+                  <button class="btn-acao" style="background-color: #e2e8f0; color: var(--texto-escuro); flex: none; padding: 10px 20px;" onclick="limparSelecaoLote('${idGrupo}')">🧹 Limpar</button>
+                  <button class="btn-acao btn-aprovar" style="flex: none; padding: 10px 20px;" onclick="processarLote('${idGrupo}', this)">✅ Confirmar Avaliações</button>
+              </div>`;
+            grid.appendChild(cardGrupo);
+        } 
+        
+        else if (itemRenderizavel.tipo === 'individual') {
+            const d = itemRenderizavel.data;
+            let isEsteItemFeriado = isFeriadoOuFacultativo(d);
+            let colisoesGerais = [];
+
+            if (!isEsteItemFeriado) {
+              let dIni = formataIsoSeguro(d.Início || d.Inicio || d.data_inicio); let dFim = formataIsoSeguroFim(d.Fim || d.fim || d.data_fim || d.Início); let dAud = removerAcentos(d.Auditório || '');
+              if (dIni && dFim) {
+                let dDate = dIni.substring(0, 10); let dIniT = dIni.substring(11, 16) || "00:00"; let dFimT = dFim.substring(11, 16) || "23:59";
+                dadosBrutos.forEach(r => {
+                  let rStat = String(r.Status || 'Pendente').toLowerCase();
+                  if (r.id_documento !== d.id_documento && rStat !== 'reprovado' && rStat !== 'cancelado') {
+                    let rIni = formataIsoSeguro(r.Início || r.Inicio || r.data_inicio); let rFim = formataIsoSeguroFim(r.Fim || r.fim || r.data_fim || r.Início); let rAud = removerAcentos(r.Auditório || '');
+                    let rDateI = rIni.substring(0, 10); let rDateF = rFim.substring(0, 10); let rIniT = rIni.substring(11, 16) || "00:00"; let rFimT = rFim.substring(11, 16) || "23:59";
+                    let sameDate = (dDate >= rDateI && dDate <= rDateF); let timeOverlap = (dIniT < rFimT && dFimT > rIniT);
+                    if (sameDate && timeOverlap) {
+                        if (isFeriadoOuFacultativo(r)) {
+                            let nomeFeriado = r.Atividade || r.TipoBloqueio || r.Motivo || 'Feriado / Ponto Facultativo';
+                            if (!colisoesGerais.includes("Feriado: " + nomeFeriado)) colisoesGerais.push("Feriado: " + nomeFeriado);
+                        } else if (rAud === dAud || rAud.includes('todos') || dAud.includes('todos')) {
+                            let msg = `Ticket ${r.Ticket || 'S/N'} [${r.Status || 'Pendente'}] de ${r.Solicitante || 'Desconhecido'} (Data: ${rDateI.split('-').reverse().join('/')} das ${rIniT} às ${rFimT})`;
+                            if (!colisoesGerais.includes(msg)) colisoesGerais.push(msg);
+                        }
+                    }
+                  }
+                });
+              }
+            }
+
+            let classeStatus = d.Status === 'Aprovado' ? 'status-aprovado' : (d.Status === 'Pendente' ? 'status-pendente' : 'status-reprovado');
+            const card = document.createElement('div');
+            card.className = 'reserva-card' + ((isEsteItemFeriado || colisoesGerais.length > 0) ? ' card-destaque-feriado' : '');
+            
+            card.innerHTML = `
+              <div class="card-header"><span class="card-ticket">🎟️ ${d.Ticket || '-'}</span><span class="card-auditorio">${d.Auditório || '-'}</span><span class="badge-status ${classeStatus}">${d.Status}</span></div>
+              <div class="card-body">
+                <div class="info-bloco"><span class="info-label">Atividade</span><span class="info-valor" style="font-weight:700; color:var(--azul-marinho);">${d.Atividade || '-'}</span></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                  <div class="info-bloco"><span class="info-label">Solicitante</span><span class="info-valor">${d.Solicitante || '-'}</span></div>
+                  <div class="info-bloco"><span class="info-label">Depto</span><span class="info-valor">${d.Departamento || '-'}</span></div>
+                </div>
+                <div class="info-bloco"><span class="info-label">📅 Solicitado em</span><span class="info-valor" style="font-size: 13px; color: var(--texto-escuro); font-weight: 500;">${formatarDataHoraCompleta(d.timestamp_criacao || d.Data_Solicitacao)}</span></div>
+                ${colisoesGerais.length > 0 ? `<div class="info-bloco" style="background:#fffbeb; padding:10px; border-radius:6px; border:1px dashed #fcd34d; margin-top:5px;"><span class="info-label" style="color:#b45309;">⚠️ Alerta de Conflito de Agendamento</span><span class="info-valor" style="color:#92400e; font-size:12px; line-height:1.5;">Esta solicitação coincide com:<br><strong>${colisoesGerais.join('<br>')}</strong></span></div>` : ''}
+                ${isEsteItemFeriado ? `<div class="info-bloco" style="background:#fef3c7; padding:10px; border-radius:6px; border:1px dashed #f59e0b; margin-top:5px;"><span class="info-label" style="color:#b45309;">📌 Registro Institucional</span><span class="info-valor" style="color:#92400e; font-size:13px; font-weight:bold;">Feriado / Ponto Facultativo</span></div>` : ''}
+                ${d.Status === 'Reprovado' && d.Motivo_Reprovacao ? `<div class="info-bloco" style="background:#fee2e2; padding:10px; border-radius:6px; border:1px dashed #fecaca; margin-top:5px;"><span class="info-label" style="color:#991b1b;">Motivo da Reprovação</span><span class="info-valor" style="color:#7f1d1d; font-size:13px;">${d.Motivo_Reprovacao}</span></div>` : ''}
+                ${d.Status_Alterado_Por ? `<div class="info-bloco" style="background: #f1f5f9; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; margin-top: 5px;"><span class="info-label" style="color: var(--azul-royal);">🛡️ Registro de Auditoria</span><span class="info-valor" style="font-size: 12px; color: var(--texto-escuro);">Mudou para <strong>${d.Status}</strong> por 👤 ${d.Status_Alterado_Por}<br>🌐 IP: ${d.Status_Alterado_IP} em 🕒 ${formatarDataHoraCompleta(d.Status_Alterado_Data)}</span></div>` : ''}
+                <div class="card-datas">
+                  <div class="info-bloco"><span class="info-label" style="color:#10b981;">▶ Início</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Início)}</span></div>
+                  <div class="info-bloco" style="text-align:right;"><span class="info-label" style="color:#ef4444;">⏹ Fim</span><span class="info-valor" style="font-size:13px;">${formatarDataGMT3(d.Fim)}</span></div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="footer-topo"><span>📞 ${d.Telefone || '-'}</span><button class="btn-copiar">📋 Copiar Dados</button></div>
+                <div class="acoes-admin">
+                  <button class="btn-acao btn-editar" onclick="abrirModalEdicao('${d.id_documento}')">✏️ Editar</button>
+                  ${d.Status !== 'Aprovado' ? `<button class="btn-acao btn-aprovar" onclick="atualizarStatusReserva('${d.id_documento}', 'Aprovado', this)">Aprovar</button>` : ''}
+                  ${d.Status !== 'Reprovado' ? `<button class="btn-acao btn-reprovar" onclick="abrirModalReprovacao('${d.id_documento}', this)">Reprovar</button>` : ''}
+                  ${d.Status !== 'Pendente' ? `<button class="btn-acao btn-pendente" onclick="atualizarStatusReserva('${d.id_documento}', 'Pendente', this)">Pendente</button>` : ''}
+                  ${emailUsuarioLogado === 'tobias.rocha@ufrn.br' ? `<button class="btn-acao btn-excluir" onclick="abrirModalExclusao('${d.id_documento}', this)">🗑️ Excluir</button>` : ''}
+                </div>
+              </div>`;
+            
+            const btnCopiar = card.querySelector('.btn-copiar');
+            if (btnCopiar) {
+                btnCopiar.onclick = () => {
+                  let t = `Ticket: ${d.Ticket || '-'}\nStatus: ${d.Status}\nSolicitado em: ${formatarDataHoraCompleta(d.timestamp_criacao || d.Data_Solicitacao)}\nAuditório: ${d.Auditório}\nAtividade: ${d.Atividade}\nData Início: ${formatarDataGMT3(d.Início)}\nSolicitante: ${d.Solicitante}`;
+                  navigator.clipboard.writeText(t).then(() => { btnCopiar.innerHTML = '✅ Copiado!'; setTimeout(() => btnCopiar.innerHTML = '📋 Copiar Dados', 2000); });
+                };
+            }
+            grid.appendChild(card);
+        }
       });
       desenharPaginacao();
     }
 
     function desenharPaginacao() {
-      const c = document.getElementById('paginacao');
-      c.innerHTML = '';
-      if (itensPorPagina === 'todos') return; 
-      const total = Math.ceil(dadosFiltrados.length / itensPorPagina);
-      if (total <= 1) return; 
-
+      const c = document.getElementById('paginacao'); if(!c) return; c.innerHTML = '';
+      if (itensPorPagina === 'todos' || renderItems.length <= itensPorPagina) return; 
+      const total = Math.ceil(renderItems.length / itensPorPagina);
       const bP = document.createElement('button'); bP.className = 'btn-page'; bP.innerText = '«'; bP.disabled = (paginaAtual === 1);
       bP.onclick = () => window.irParaPagina(paginaAtual - 1); c.appendChild(bP);
-
       for (let p = Math.max(1, paginaAtual - 2); p <= Math.min(total, paginaAtual + 2); p++) {
         const b = document.createElement('button'); b.className = 'btn-page'; b.innerText = p; if(p === paginaAtual) b.classList.add('active');
         b.onclick = () => window.irParaPagina(p); c.appendChild(b);
       }
-
       const bN = document.createElement('button'); bN.className = 'btn-page'; bN.innerText = '»'; bN.disabled = (paginaAtual === total);
       bN.onclick = () => window.irParaPagina(paginaAtual + 1); c.appendChild(bN);
     }
@@ -469,75 +1326,41 @@
     function baixarArquivo(conteudo, nomeArquivo, mimeType) {
       const blob = new Blob([conteudo], { type: mimeType });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = nomeArquivo;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const a = document.createElement('a'); a.href = url; a.download = nomeArquivo;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
     window.exportarCSV = function() {
-      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
+      if(dadosFiltrados.length === 0) return alert('Não há dados.');
       let csv = chavesExportacao.join(';') + '\n';
-      dadosFiltrados.forEach(d => {
-        let linha = chavesExportacao.map(col => `"${String(d[col] || '').replace(/"/g, '""')}"`);
-        csv += linha.join(';') + '\n';
-      });
+      dadosFiltrados.forEach(d => { csv += chavesExportacao.map(col => `"${String(d[col] || '').replace(/"/g, '""')}"`).join(';') + '\n'; });
       baixarArquivo('\uFEFF' + csv, 'reservas_cchla.csv', 'text/csv;charset=utf-8;');
     };
 
     window.exportarJSON = function() {
-      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
-      const dadosLimpos = dadosFiltrados.map(d => {
-        let obj = {};
-        chavesExportacao.forEach(k => obj[k] = d[k] || '');
-        return obj;
-      });
-      baixarArquivo(JSON.stringify(dadosLimpos, null, 2), 'reservas_cchla.json', 'application/json');
+      if(dadosFiltrados.length === 0) return alert('Não há dados.');
+      const dClean = dadosFiltrados.map(d => { let o = {}; chavesExportacao.forEach(k => o[k] = d[k] || ''); return o; });
+      baixarArquivo(JSON.stringify(dClean, null, 2), 'reservas_cchla.json', 'application/json');
     };
 
     window.exportarXML = function() {
-      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
+      if(dadosFiltrados.length === 0) return alert('Não há dados.');
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<reservas>\n';
-      dadosFiltrados.forEach(d => {
-        xml += '  <reserva>\n';
-        chavesExportacao.forEach(k => {
-          let tag = k.replace(/ /g, '_').replace(/[^\w-]/g, ''); 
-          let valor = String(d[k] || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          xml += `    <${tag}>${valor}</${tag}>\n`;
-        });
-        xml += '  </reserva>\n';
-      });
-      xml += '</reservas>';
-      baixarArquivo(xml, 'reservas_cchla.xml', 'application/xml');
+      dadosFiltrados.forEach(d => { xml += '  <reserva>\n'; chavesExportacao.forEach(k => { xml += `    <${k}>${String(d[k] || '')}</${k}>\n`; }); xml += '  </reserva>\n'; });
+      xml += '</reservas>'; baixarArquivo(xml, 'reservas_cchla.xml', 'application/xml');
     };
 
     window.exportarICS = function() {
-      if(dadosFiltrados.length === 0) return alert('Não há dados para exportar.');
-      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Painel_CCHLA//Reservas//PT\n";
-      
+      if(dadosFiltrados.length === 0) return alert('Não há dados.');
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\n";
       dadosFiltrados.forEach(d => {
-        let dtInicio = (d.Início || "").replace(/[-:]/g, "") + "00";
-        let dtFim = (d.Fim || "").replace(/[-:]/g, "") + "00";
-        
-        if(dtInicio.length >= 15 && dtFim.length >= 15) {
-          ics += "BEGIN:VEVENT\n";
-          ics += `SUMMARY:[${d.Status}] ${d.Atividade} - ${d.Auditório}\n`;
-          ics += `DTSTART;TZID=America/Fortaleza:${dtInicio}\n`; 
-          ics += `DTEND;TZID=America/Fortaleza:${dtFim}\n`;
-          ics += `LOCATION:${d.Auditório}\n`;
-          ics += `DESCRIPTION:Status: ${d.Status}\\nSolicitante: ${d.Solicitante}\\nDepto: ${d.Departamento}\\nTelefone: ${d.Telefone}\\nTicket: ${d.Ticket}\n`;
-          ics += "END:VEVENT\n";
-        }
+        let dtI = (d.Início || "").replace(/[-:]/g, "") + "00"; let dtF = (d.Fim || "").replace(/[-:]/g, "") + "00";
+        if(dtI.length >= 15) ics += `BEGIN:VEVENT\nSUMMARY:${d.Atividade}\nDTSTART:${dtI}\nDTEND:${dtF}\nEND:VEVENT\n`;
       });
-      
-      ics += "END:VCALENDAR";
-      baixarArquivo(ics, 'reservas_cchla.ics', 'text/calendar');
+      ics += "END:VCALENDAR"; baixarArquivo(ics, 'reservas_cchla.ics', 'text/calendar');
     };
 
-    setInterval(() => carregarFirestore(true), 30000); 
+    setInterval(() => carregarPainelNuvem(true), 30000);
   </script>
 </body>
 </html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Versionamento Git - CCHLA UFRN</title>
+    <style>
+        :root {
+            --git-dark: #24292f;
+            --git-blue: #0969da;
+            --git-green: #2da44e;
+            --git-purple: #8250df;
+            --fundo: #f6f8fa;
+            --texto: #24292f;
+            --borda: #d0d7de;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--texto);
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #ffffff;
+        }
+        .capa {
+            text-align: center;
+            padding: 50px 20px;
+            border-bottom: 4px solid var(--git-dark);
+            margin-bottom: 40px;
+            background-color: var(--fundo);
+            border-radius: 8px;
+        }
+        .capa h1 { color: var(--git-dark); font-size: 32px; margin-bottom: 10px; }
+        .capa p { font-size: 16px; color: #57606a; }
+        h2 { color: var(--git-blue); font-size: 24px; border-bottom: 2px solid var(--borda); padding-bottom: 8px; margin-top: 40px; }
+        h3 { color: var(--git-dark); font-size: 18px; margin-top: 30px; }
+        p, li { font-size: 15px; margin-bottom: 12px; }
+        ul, ol { padding-left: 25px; margin-bottom: 20px; }
+        .branch-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 2em;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: monospace;
+            color: #fff;
+            margin-right: 5px;
+        }
+        .badge-main { background-color: var(--git-blue); }
+        .badge-release { background-color: var(--git-purple); }
+        .badge-dev { background-color: var(--git-green); }
+        
+        pre {
+            background-color: var(--git-dark);
+            color: #f6f8fa;
+            padding: 18px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            border: 1px solid #1b1f24;
+        }
+        code { font-family: "SFMono-Regular", Consolas, monospace; color: var(--git-blue); background: var(--fundo); padding: 2px 5px; border-radius: 4px; font-weight: bold; }
+        pre code { color: inherit; background: transparent; padding: 0; font-weight: normal; }
+        
+        .box-info {
+            background-color: #ddf4ff;
+            border-left: 4px solid var(--git-blue);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #0969da;
+        }
+
+        @media print {
+            body { margin: 0; padding: 0; font-size: 11pt; }
+            .capa { page-break-after: always; padding-top: 80px; }
+            h2 { page-break-before: always; }
+            pre, .box-info { page-break-inside: avoid; }
+            .branch-badge { border: 1px solid #000; color: #000; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="capa">
+        <h1>Manual de Versionamento e GitFlow</h1>
+        <p>Repositório: <strong>redes-cchla-ufrn/formulario-reservas-cchla</strong></p>
+        <p>Estratégia de Ramificação (Branching): Main, Release e Dev</p>
+    </div>
+
+    <h2>1. Arquitetura de Branches (O Modelo GitFlow Simplificado)</h2>
+    <p>Para garantir a estabilidade do sistema que roda na infraestrutura do CCHLA, dividiremos o fluxo de trabalho em três esteiras principais. O objetivo é criar um "funil de qualidade" onde o código só chega à produção após ser validado.</p>
+    
+    <ul>
+        <li><span class="branch-badge badge-main">main</span> <strong>(Produção):</strong> É o código sagrado. Representa exatamente o que está rodando no servidor oficial (a sua VM Ubuntu). Ninguém nunca commita diretamente aqui. O código só chega na main após aprovação.</li>
+        <li><span class="branch-badge badge-release">release</span> <strong>(Homologação/Testes):</strong> É o ambiente de "pré-produção". Quando a branch <code>dev</code> atinge um estado maduro, ela é mesclada na <code>release</code>. Este código é enviado para testes. Se bugs forem encontrados aqui, são corrigidos antes de ir para a main.</li>
+        <li><span class="branch-badge badge-dev">dev</span> <strong>(Desenvolvimento):</strong> É o coração do trabalho diário. Todas as novas funcionalidades, correções e experimentos são integrados nesta branch.</li>
+    </ul>
+
+    <h2>2. Passo a Passo: Reestruturando o Repositório Atual</h2>
+    <p>Atualmente, todo o seu código está na <code>main</code>. Siga os passos abaixo no terminal da sua máquina (onde o projeto está clonado) para criar e publicar as novas ramificações no GitHub.</p>
+
+    <h3>Passo 2.1: Sincronizar a máquina local com o GitHub</h3>
+    <p>Certifique-se de que sua ramificação <code>main</code> local está 100% atualizada com o repositório remoto.</p>
+<pre><code>git checkout main
+git pull origin main</code></pre>
+
+    <h3>Passo 2.2: Criar e publicar a branch DEV</h3>
+    <p>Nós criamos a branch <code>dev</code> a partir do estado atual da <code>main</code> e a enviamos para o GitHub.</p>
+<pre><code># Cria a branch dev e já muda para ela
+git checkout -b dev
+
+# Envia a nova branch para o GitHub (-u cria o vínculo upstream)
+git push -u origin dev</code></pre>
+
+    <h3>Passo 2.3: Criar e publicar a branch RELEASE</h3>
+    <p>Da mesma forma, criaremos a branch <code>release</code> a partir da <code>dev</code>.</p>
+<pre><code># Cria a branch release a partir da dev
+git checkout -b release
+
+# Envia a branch release para o GitHub
+git push -u origin release</code></pre>
+
+    <div class="box-info">
+        <strong>Ajuste Obrigatório no GitHub Web:</strong><br>
+        Após enviar as branches, vá ao site do GitHub (github.com/redes-cchla-ufrn/formulario-reservas-cchla). Clique em <strong>Settings</strong> > <strong>Default branch</strong>. Mude a branch padrão de <code>main</code> para <code>dev</code>. Assim, todos os futuros <i>Pull Requests</i> apontarão automaticamente para a esteira de desenvolvimento, protegendo a produção.
+    </div>
+
+    <h2>3. O Fluxo de Trabalho Diário (Como trabalhar daqui para frente)</h2>
+    <p>Agora que a arquitetura está montada, este será o seu fluxo operacional como administrador do sistema. Você não programará mais diretamente na <code>main</code>.</p>
+
+    <h3>Cenário 1: Você vai criar uma nova funcionalidade (ex: Tela de Relatórios)</h3>
+    <ol>
+        <li>Volte para a branch de desenvolvimento e atualize-a:<br>
+            <code>git checkout dev</code><br>
+            <code>git pull origin dev</code>
+        </li>
+        <li>Crie uma branch temporária para a sua tarefa (Feature Branch):<br>
+            <code>git checkout -b feature/tela-relatorios</code>
+        </li>
+        <li>Trabalhe no código. Adicione os arquivos e faça o commit:<br>
+            <code>git add .</code><br>
+            <code>git commit -m "feat: adicionada nova tela de relatorios em pdf"</code>
+        </li>
+        <li>Envie para o GitHub:<br>
+            <code>git push origin feature/tela-relatorios</code>
+        </li>
+        <li>Vá ao GitHub e abra um <strong>Pull Request (PR)</strong> da branch <code>feature/tela-relatorios</code> para a branch <code>dev</code>. Aprovação e Merge.</li>
+    </ol>
+
+    <h3>Cenário 2: Fechar uma versão e preparar para Produção (Lançamento)</h3>
+    <p>A branch <code>dev</code> está cheia de recursos novos e você quer colocar no ar no servidor da UFRN.</p>
+    <ol>
+        <li>Vá ao GitHub e abra um <strong>Pull Request</strong> da branch <code>dev</code> para a branch <code>release</code>.</li>
+        <li>Aprove o PR. A branch <code>release</code> agora contém as novidades.</li>
+        <li>Faça o deploy da branch <code>release</code> em um ambiente de testes local ou servidor de homologação. Faça a auditoria. Tudo certo?</li>
+        <li>No GitHub, abra o <strong>Pull Request Final</strong> da branch <code>release</code> para a branch <code>main</code>.</li>
+        <li>Aprove o PR. Vá ao servidor Ubuntu da UFRN e puxe o código oficial:<br>
+            <code>git checkout main</code><br>
+            <code>git pull origin main</code><br>
+            <code>docker compose restart</code> (ou o seu comando de deploy)
+        </li>
+    </ol>
+
+    <h3>Cenário 3: Emergência no Servidor! (Hotfix)</h3>
+    <p>Há um bug crítico no formulário público que não pode esperar a esteira inteira de <code>dev</code> e <code>release</code>.</p>
+    <ol>
+        <li>Puxe uma branch diretamente da produção:<br>
+            <code>git checkout main</code><br>
+            <code>git checkout -b hotfix/erro-formulario</code>
+        </li>
+        <li>Conserte o erro, faça o commit e o push.<br>
+            <code>git add . && git commit -m "fix: correção de erro critico no form"</code><br>
+            <code>git push origin hotfix/erro-formulario</code>
+        </li>
+        <li>No GitHub, abra um PR da <code>hotfix/erro-formulario</code> direto para a <code>main</code> e lance no servidor.</li>
+        <li><strong>Importante:</strong> Não esqueça de fazer o merge deste hotfix também para a <code>dev</code>, senão o erro voltará no próximo lançamento comum!</li>
+    </ol>
+
+    <h2>4. Resumo de Proteção de Ramificação (Branch Protection Rules)</h2>
+    <p>Para garantir que esse manual seja seguido mesmo se outros técnicos do CCHLA entrarem no projeto, configure as proteções no GitHub:</p>
+    <ul>
+        <li>Acesse <strong>Settings</strong> > <strong>Branches</strong> > <strong>Add branch ruleset</strong>.</li>
+        <li>Alvo: <code>main</code>.</li>
+        <li>Ative: <strong>Require a pull request before merging</strong> (Não permite commit direto na main).</li>
+        <li>Ative: <strong>Require approvals</strong> (Exige que pelo menos uma pessoa revise o código).</li>
+        <li>Faça a mesma regra de proteção para a branch <code>release</code>.</li>
+    </ul>
+
+</body>
+</html>

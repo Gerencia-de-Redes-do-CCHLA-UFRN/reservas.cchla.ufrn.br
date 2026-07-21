@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
   <title>Calendário de Reservas - CCHLA</title>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
@@ -47,24 +49,26 @@
     .btn-view:hover { background-color: #1a252f; }
     .btn-view.active { background-color: #1a252f; box-shadow: inset 0 3px 5px rgba(0,0,0,0.125); }
 
-    /* Estilos do Calendário */
     #calendar { max-width: 100%; background: #fff; padding: 0 10px 10px 10px; border-radius: 8px; flex-grow: 1; margin-top: 10px; }
-    .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 12px; border: none !important; font-weight: 600; }
+    .fc-event { cursor: pointer !important; font-size: 11.5px; }
+    .fc-daygrid-event { background: transparent !important; border: none !important; margin-bottom: 4px !important; padding: 0 !important; cursor: pointer !important; }
+    .fc-daygrid-event-dot { display: none !important; }
 
-    /* LEGENDA E FILTROS INFERIORES */
+    .evento-especial:hover { opacity: 0.85 !important; }
+    .evento-normal-inner { transition: background-color 0.2s ease, border-radius 0.2s ease; }
+    .evento-normal:hover .evento-normal-inner { background-color: #eef2f6 !important; border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+
     .calendario-legenda { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 20px; padding: 15px; background: #e2e8f0; border-radius: 8px; border: 1px solid var(--borda-suave); }
     .legenda-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; color: var(--texto-escuro); border: 2px solid transparent; }
     .legenda-item:hover { background-color: #cbd5e1; transform: translateY(-1px); }
     .legenda-item.ativo { background-color: #ffffff; border-color: var(--texto-escuro); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .legenda-cor { width: 16px; height: 16px; display: inline-block; }
 
-    /* Tooltip Flutuante */
     #tooltipDetalhes { display: none; position: absolute; background: #ffffff; padding: 15px; border-radius: 8px; width: 280px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); border: 1px solid var(--borda-suave); z-index: 9999; pointer-events: none; transition: top 0.05s ease, left 0.05s ease; }
     .tooltip-titulo { color: var(--azul-marinho); margin: 0 0 8px 0; border-bottom: 1px solid var(--borda-suave); padding-bottom: 6px; font-size: 15px; font-weight: 700; }
     .tooltip-dado { margin-bottom: 6px; font-size: 12px; line-height: 1.4; }
     .tooltip-dado strong { color: var(--azul-marinho); }
 
-    /* Modal de Detalhes */
     #modalDetalhes { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
     .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); position: relative; }
     .fechar-modal { position: absolute; top: 15px; right: 15px; background: #e2e8f0; border: none; font-size: 16px; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-weight: bold; }
@@ -98,17 +102,16 @@
           Solicitações de Reservas ▼
         </button>
         <div class="dropdown-menu" id="menuDropdownOpcoes">
-          <a href="https://formulario-reservas-cchla.web.app" target="_blank" class="dropdown-item">Solicite uma Reserva de Auditório</a>
-          <a href="https://acompanhamento-reservas-cchla.web.app" target="_blank" class="dropdown-item">Acompanhe a sua Solicitação</a>
-          <a href="https://painel-reservas-cchla.web.app" target="_blank" class="dropdown-item">Gestão das Solicitações - Secretaria do CCHLA</a>
+          <a href="/formulario" target="_blank" class="dropdown-item">Solicite uma Reserva de Auditório</a>
+          <a href="/acompanhamento" target="_blank" class="dropdown-item">Acompanhe a sua Solicitação</a>
+          <a href="/admin" target="_blank" class="dropdown-item">Gestão das Solicitações - Secretaria do CCHLA</a>
         </div>
       </div>
     </div>
 
     <div class="barra-navegacao-custom no-print">
       <div class="nav-esquerda">
-        <select id="selectMesesDropdown" class="select-meses-custom">
-          </select>
+        <select id="selectMesesDropdown" class="select-meses-custom"></select>
       </div>
       
       <div class="nav-centro">
@@ -146,7 +149,7 @@
         <span class="legenda-cor" style="background:#4682B4;"></span>Auditório 'E'
       </div>
       <div class="legenda-item" id="leg-Feriado" onclick="filtrarCalendario('FERIADO', 'Feriado')">
-        <span class="legenda-cor" style="background:#FF8C00;"></span>FERIADO
+        <span class="legenda-cor" style="background:#FF8C00;"></span>Feriado / Manutenção
       </div>
       <div class="legenda-item ativo" id="leg-TODOS" onclick="filtrarCalendario('TODOS', 'TODOS')">
         <span class="legenda-cor" style="background:#cbd5e1;"></span>Todas Categorias ...
@@ -156,7 +159,7 @@
   </div>
 
   <div class="footer">
-    Gerência de Redes do CCHLA/UFRN - (84) 3342 2243 | Copyright © 2026 - UFRN
+    Gerência de Redes do CCHLA/UFRN - (84) 3342-2243 R112 ou (84) 99484-6847 (WhatsApp) | Copyright © 2026 - UFRN
   </div>
 
   <div id="tooltipDetalhes">
@@ -166,7 +169,6 @@
     <div class="tooltip-dado"><strong>Fim:</strong> <span id="t-fim"></span></div>
     <div class="tooltip-dado"><strong>Solicitante:</strong> <span id="t-solicitante"></span></div>
     <div class="tooltip-dado"><strong>Departamento:</strong> <span id="t-depto"></span></div>
-    <div class="tooltip-dado"><strong>Ticket:</strong> <span id="t-ticket"></span></div>
   </div>
 
   <div id="modalDetalhes">
@@ -178,50 +180,47 @@
       <div class="modal-dado"><strong>Fim:</strong> <span id="m-fim"></span></div>
       <div class="modal-dado"><strong>Solicitante:</strong> <span id="m-solicitante"></span></div>
       <div class="modal-dado"><strong>Departamento:</strong> <span id="m-depto"></span></div>
-      <div class="modal-dado"><strong>Ticket:</strong> <span id="m-ticket"></span></div>
     </div>
   </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
-      authDomain: "formulario-reservas-cchla.firebaseapp.com",
-      projectId: "formulario-reservas-cchla",
-      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
-      messagingSenderId: "112276491941",
-      appId: "1:112276491941:web:ac2760c6d65a50bfa6474c",
-      measurementId: "G-9E2QF7JHSX"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  <script>
     let calendarInstance = null;
     let todosEventosGlobais = []; 
 
-    function formatarData(dataISO) {
-      if(!dataISO) return '-';
-      let data = new Date(dataISO);
-      return data.toLocaleDateString('pt-BR') + ' às ' + data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+    // CORREÇÃO 1: Função blindada contra Fuso Horário (Não usa new Date para parse)
+    function formatarDataCustom(isoStr) {
+      if(!isoStr) return '-';
+      let partes = isoStr.split('T');
+      let dataFormatada = partes[0].split('-').reverse().join('/');
+      
+      // Se for um evento com horário específico (diferente de 00:00 e 23:59) exibe a hora
+      if (partes.length > 1) {
+          let hora = partes[1].substring(0, 5);
+          if (hora !== "00:00" && hora !== "23:59") {
+              return `${dataFormatada} às ${hora}`;
+          }
+      }
+      // Se for feriado ou dia todo, exibe só a data limpa
+      return dataFormatada;
     }
 
-    // Identificador de Cores Baseado na Imagem
-    function getCorAuditorio(nomeAuditorio) {
-      if(!nomeAuditorio) return { bg: "#cbd5e1", text: "#000" };
+    function getCorAuditorio(nomeAuditorio, nomeAtividade) {
+      let n = (nomeAuditorio || "").toUpperCase();
+      let ativ = (nomeAtividade || "").toUpperCase();
       
-      let n = nomeAuditorio.toUpperCase();
+      if(n.includes("FERIADO") || ativ.includes("FERIADO") || ativ.includes("FACULTATIVO") || n.includes("FACULTATIVO")) {
+        return { bg: "#FF8C00", text: "#ffffff", especial: true };
+      }
+      if(n.includes("MANUTENÇÃO") || n.includes("MANUTENCAO") || ativ.includes("MANUTENÇÃO") || ativ.includes("MANUTENCAO")) {
+        return { bg: "#991b1b", text: "#ffffff", especial: true }; 
+      }
+
+      if(n === "AUDITORIO A" || n === "AUDITÓRIO A") return { bg: "#ff0000", text: "#000000", especial: false };
+      if(n === "AUDITORIO B" || n === "AUDITÓRIO B") return { bg: "#000080", text: "#000000", especial: false };
+      if(n === "AUDITORIO C" || n === "AUDITÓRIO C") return { bg: "#ffff00", text: "#000000", especial: false };
+      if(n === "AUDITORIO D" || n === "AUDITÓRIO D") return { bg: "#008000", text: "#000000", especial: false };
+      if(n === "AUDITORIO E" || n === "AUDITÓRIO E") return { bg: "#4682B4", text: "#000000", especial: false };
       
-      if(n === "AUDITORIO A" || n === "AUDITÓRIO A") return { bg: "#ff0000", text: "#fff" };
-      if(n === "AUDITORIO B" || n === "AUDITÓRIO B") return { bg: "#000080", text: "#fff" };
-      if(n === "AUDITORIO C" || n === "AUDITÓRIO C") return { bg: "#ffff00", text: "#000" };
-      if(n === "AUDITORIO D" || n === "AUDITÓRIO D") return { bg: "#008000", text: "#fff" };
-      if(n === "AUDITORIO E" || n === "AUDITÓRIO E") return { bg: "#4682B4", text: "#fff" };
-      if(n.includes("FERIADO")) return { bg: "#FF8C00", text: "#fff" };
-      
-      return { bg: "#cbd5e1", text: "#000" };
+      return { bg: "#cbd5e1", text: "#000000", especial: false };
     }
 
     function popularDropdownMeses() {
@@ -248,90 +247,47 @@
 
     async function carregarEventos() {
       try {
-        const querySnapshot = await getDocs(collection(db, "reservas"));
+        // =========================================================================
+        // ATENÇÃO: MANTENHA A SUA URL DA FUNÇÃO obterEventosCalendario AQUI!
+        // =========================================================================
+        const urlAPI = '/api/obterEventosCalendario';
+        
+        document.getElementById('txtIdentificadorCalendario').innerText = 'Baixando eventos do servidor...';
+
+        const resposta = await fetch(urlAPI);
+        if (!resposta.ok) throw new Error("Falha na comunicação com o servidor");
+        
+        const dadosBanco = await resposta.json();
         const eventos = [];
 
-        querySnapshot.forEach((doc) => {
-          const d = doc.data();
-          let statusBD = d.Status || 'Pendente';
-          
-          if (statusBD === 'Aprovado' || statusBD === 'Aprovada') {
-            if(d.Início && d.Fim) {
-              
-              let cores = getCorAuditorio(d.Auditório);
-              let tituloExibicao = `${d.Auditório} - ${d.Atividade}`;
-              
-              if (d.Auditório && d.Auditório.toUpperCase() === 'FERIADO') {
-                tituloExibicao = d.Atividade;
+        dadosBanco.forEach((d) => {
+            let corInfo = getCorAuditorio(d.Auditório, d.Atividade);
+
+            // CORREÇÃO 2: Separa rigorosamente Feriado (allDay) de Manutenção (com hora)
+            let isDiaInteiro = (d.Auditório === "FERIADO") || (d.Início && d.Início.includes("T00:00"));
+
+            eventos.push({
+              title: d.Atividade, 
+              start: d.Início,
+              end: d.Fim,
+              allDay: isDiaInteiro, 
+              backgroundColor: corInfo.bg,
+              borderColor: corInfo.bg,
+              textColor: corInfo.text,
+              classNames: corInfo.especial ? ['evento-especial'] : ['evento-normal'],
+              extendedProps: {
+                corFundo: corInfo.bg,
+                corTexto: corInfo.text,
+                especial: corInfo.especial,
+                auditorio: d.Auditório,
+                atividade: d.Atividade,
+                solicitante: d.Solicitante,
+                departamento: d.Departamento,
+                // Salvamos a string original exata que veio do banco de dados
+                inicioOriginal: d.Início,
+                fimOriginal: d.Fim
               }
-
-              // ==========================================
-              // NOVA LÓGICA: DIVISÃO DE EVENTOS "MULTIDAY"
-              // ==========================================
-              let startPart = d.Início.split('T');
-              let endPart = d.Fim.split('T');
-
-              // Verifica se o formato é válido e possui data e hora (Ex: 2027-01-01T08:00)
-              if (startPart.length === 2 && endPart.length === 2) {
-                // Separa ano, mes e dia para criar a data com segurança, ignorando timezone automático
-                let [anoIni, mesIni, diaIni] = startPart[0].split('-');
-                let [anoFim, mesFim, diaFim] = endPart[0].split('-');
-
-                let dataCorrente = new Date(anoIni, mesIni - 1, diaIni);
-                let dataLimite = new Date(anoFim, mesFim - 1, diaFim);
-
-                let horaInicio = startPart[1];
-                let horaFim = endPart[1];
-
-                // Loop passando por cada dia entre a Data de Início e a Data de Fim
-                if (dataLimite >= dataCorrente) {
-                  while (dataCorrente <= dataLimite) {
-                    let ano = dataCorrente.getFullYear();
-                    let mes = String(dataCorrente.getMonth() + 1).padStart(2, '0');
-                    let dia = String(dataCorrente.getDate()).padStart(2, '0');
-                    let dataStr = `${ano}-${mes}-${dia}`; // Remonta a string do dia iterado
-
-                    // Injeta a mesma faixa de horário para cada dia percorrido
-                    eventos.push({
-                      title: tituloExibicao, 
-                      start: `${dataStr}T${horaInicio}`,
-                      end: `${dataStr}T${horaFim}`,
-                      backgroundColor: cores.bg,
-                      textColor: cores.text,
-                      borderColor: cores.bg,
-                      extendedProps: {
-                        auditorio: d.Auditório,
-                        atividade: d.Atividade,
-                        solicitante: d.Solicitante,
-                        departamento: d.Departamento,
-                        ticket: d.Ticket
-                      }
-                    });
-
-                    // Avança 1 dia para o próximo ciclo do laço
-                    dataCorrente.setDate(dataCorrente.getDate() + 1);
-                  }
-                }
-              } else {
-                // Caso alguma data antiga do banco não tenha a letra "T" delimitando, exibe no formato original
-                eventos.push({
-                  title: tituloExibicao, 
-                  start: d.Início,
-                  end: d.Fim,
-                  backgroundColor: cores.bg,
-                  textColor: cores.text,
-                  borderColor: cores.bg,
-                  extendedProps: {
-                    auditorio: d.Auditório,
-                    atividade: d.Atividade,
-                    solicitante: d.Solicitante,
-                    departamento: d.Departamento,
-                    ticket: d.Ticket
-                  }
-                });
-              }
-            }
-          }
+            });
         });
 
         todosEventosGlobais = eventos;
@@ -339,7 +295,8 @@
 
       } catch (error) {
         console.error("Erro ao carregar reservas:", error);
-        alert("Erro ao conectar com o banco de dados.");
+        document.getElementById('txtIdentificadorCalendario').innerText = 'Erro ao carregar';
+        alert("Erro ao conectar com a API para buscar as reservas aprovadas.");
       }
     }
 
@@ -351,19 +308,54 @@
         initialView: 'dayGridMonth',
         locale: 'pt-br',
         headerToolbar: false,
+        displayEventTime: true, 
+        displayEventEnd: false, 
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
         events: eventosMapeados,
         
+        eventContent: function(arg) {
+          let p = arg.event.extendedProps;
+          let timeText = '';
+          
+          // Desenha a hora no bloquinho do calendário apenas se não for dia inteiro
+          if (!arg.event.allDay && arg.event.start) {
+             let h = String(arg.event.start.getHours()).padStart(2, '0');
+             let m = String(arg.event.start.getMinutes()).padStart(2, '0');
+             // Ajusta a cor da hora baseada no tipo de evento para dar contraste
+             let corHora = p.especial ? p.corTexto : '#051638';
+             timeText = `<b style="color: ${corHora}; margin-right: 4px;">${h}:${m}</b>`;
+          }
+          
+          if (p.especial) {
+             return {
+                html: `<div style="cursor: pointer; background-color: ${p.corFundo}; color: ${p.corTexto}; padding: 3px 5px; border-radius: 3px; font-size: 11.5px; font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3;">
+                         ${timeText}${arg.event.title}
+                       </div>`
+             };
+          } else {
+             return {
+                html: `<div class="evento-normal-inner" style="cursor: pointer; border-left: 5px solid ${p.corFundo}; padding: 3px 5px 3px 6px; font-size: 11.5px; color: #334155; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3;">
+                         ${timeText}<span style="font-weight: 600;">${arg.event.title}</span>
+                       </div>`
+             };
+          }
+        },
+
         eventClick: function(info) {
           const p = info.event.extendedProps;
           tooltip.style.display = 'none';
 
           document.getElementById('m-atividade').innerText = p.atividade || '-';
           document.getElementById('m-auditorio').innerText = p.auditorio || '-';
-          document.getElementById('m-inicio').innerText = formatarData(info.event.startStr);
-          document.getElementById('m-fim').innerText = formatarData(info.event.endStr);
+          // Usa a nova função que lê a string original para montar o modal
+          document.getElementById('m-inicio').innerText = formatarDataCustom(p.inicioOriginal);
+          document.getElementById('m-fim').innerText = formatarDataCustom(p.fimOriginal);
           document.getElementById('m-solicitante').innerText = p.solicitante || '-';
           document.getElementById('m-depto').innerText = p.departamento || '-';
-          document.getElementById('m-ticket').innerText = p.ticket || '-';
 
           document.getElementById('modalDetalhes').style.display = 'flex';
         },
@@ -373,11 +365,11 @@
           
           document.getElementById('t-atividade').innerText = p.atividade || '-';
           document.getElementById('t-auditorio').innerText = p.auditorio || '-';
-          document.getElementById('t-inicio').innerText = formatarData(info.event.startStr);
-          document.getElementById('t-fim').innerText = formatarData(info.event.endStr);
+          // Usa a nova função que lê a string original para montar o tooltip
+          document.getElementById('t-inicio').innerText = formatarDataCustom(p.inicioOriginal);
+          document.getElementById('t-fim').innerText = formatarDataCustom(p.fimOriginal);
           document.getElementById('t-solicitante').innerText = p.solicitante || '-';
           document.getElementById('t-depto').innerText = p.departamento || '-';
-          document.getElementById('t-ticket').innerText = p.ticket || '-';
 
           tooltip.style.display = 'block';
 
@@ -457,7 +449,6 @@
       document.getElementById('btnViewLista').onclick = () => alterarVisualizacao('listWeek', 'btnViewLista');
     }
 
-    // Sistema de Filtro por Clique na Legenda
     window.filtrarCalendario = function(categoriaBusca, idBotaoLegenda) {
       document.querySelectorAll('.legenda-item').forEach(el => el.classList.remove('ativo'));
       document.getElementById('leg-' + idBotaoLegenda).classList.add('ativo');
@@ -467,10 +458,7 @@
       if (categoriaBusca === 'TODOS') {
         eventosFiltrados = todosEventosGlobais; 
       } else if (categoriaBusca === 'FERIADO') {
-        eventosFiltrados = todosEventosGlobais.filter(e => {
-          let aud = (e.extendedProps.auditorio || "").toUpperCase();
-          return aud.includes('FERIADO');
-        });
+        eventosFiltrados = todosEventosGlobais.filter(e => e.extendedProps.especial === true);
       } else {
         eventosFiltrados = todosEventosGlobais.filter(e => {
           let aud = e.extendedProps.auditorio || "";
@@ -484,24 +472,25 @@
       }
     };
 
-    // Script do Menu Suspenso (Dropdown)
-    const btnToggle = document.getElementById('btnToggleDropdown');
-    const menuOpcoes = document.getElementById('menuDropdownOpcoes');
-    btnToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      menuOpcoes.classList.toggle('show');
-    });
-    window.addEventListener('click', function(e) {
-      if (!document.getElementById('meuDropdownContainer').contains(e.target)) {
-        menuOpcoes.classList.remove('show');
-      }
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnToggle = document.getElementById('btnToggleDropdown');
+        const menuOpcoes = document.getElementById('menuDropdownOpcoes');
+        
+        btnToggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          menuOpcoes.classList.toggle('show');
+        });
+        
+        window.addEventListener('click', function(e) {
+          if (!document.getElementById('meuDropdownContainer').contains(e.target)) {
+            menuOpcoes.classList.remove('show');
+          }
+        });
+
+        popularDropdownMeses();
+        carregarEventos(); 
     });
 
-    // Inicia os processos na abertura da tela
-    popularDropdownMeses();
-    carregarEventos();
-
-    // Controle Modal de Clique
     window.fecharModal = () => document.getElementById('modalDetalhes').style.display = 'none';
     window.onclick = (e) => {
       const modal = document.getElementById('modalDetalhes');

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerir Usuários - Painel de Reservas</title>
+    <style>
+        :root {
+            --azul-marinho: #051638;
+            --azul-royal: #1653A1;
+            --fundo-pagina: #f4f7fb;
+            --borda-suave: #cbd5e1;
+            --texto-escuro: #334155;
+            --verde-sucesso: #10b981;
+            --vermelho-erro: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--fundo-pagina);
+            margin: 0;
+            padding: 20px;
+            color: var(--texto-escuro);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--borda-suave);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--azul-marinho);
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            background-color: var(--azul-royal);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .btn:hover { background-color: var(--azul-marinho); }
+        .btn-danger { background-color: var(--vermelho-erro); }
+        .btn-danger:hover { background-color: #b91c1c; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--borda-suave);
+        }
+
+        th { background-color: #f8fafc; color: var(--azul-marinho); }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 8px; border: 1px solid var(--borda-suave); border-radius: 4px; box-sizing: border-box;
+        }
+
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .btn-cancel { background-color: #94a3b8; }
+        .btn-cancel:hover { background-color: #64748b; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>👥 Gerir Usuários do Sistema</h1>
+        <div>
+            <button class="btn" onclick="abrirModal()">+ Novo Usuário</button>
+            <a href="painel.html" class="btn btn-cancel" style="margin-left: 10px;">Voltar</a>
+        </div>
+    </div>
+
+    <table id="tabelaUsuarios">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Nível</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="4" style="text-align:center;">Carregando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Criar/Editar -->
+<div class="modal" id="modalUsuario">
+    <div class="modal-content">
+        <h2 id="modalTitle">Novo Usuário</h2>
+        <input type="hidden" id="userId">
+        
+        <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="userNome" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="userEmail" placeholder="usuario@ufrn.br">
+        </div>
+        <div class="form-group">
+            <label>Nível de Acesso</label>
+            <select id="userNivel">
+                <option value="admin">Admin (Comum)</option>
+                <option value="root">Root (Acesso Total)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="userSenha" placeholder="Digite para alterar/criar">
+            <small id="senhaHelp" style="color: #64748b; display: none;">Deixe em branco para manter a senha atual.</small>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+            <button class="btn" onclick="salvarUsuario()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = sessionStorage.getItem('cchla_admin_token');
+    if (!token) window.location.href = 'index.html';
+
+    let usuariosData = [];
+
+    async function carregarUsuarios() {
+        try {
+            const res = await fetch('/api/adminListarUsuarios', { headers: { 'Authorization': 'Bearer ' + token } });
+            const data = await res.json();
+            if (data.sucesso) {
+                usuariosData = data.usuarios;
+                renderTabela();
+            } else {
+                alert(data.mensagem);
+                if (data.mensagem.includes("negado")) window.location.href = 'painel.html';
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erro ao carregar usuários.");
+        }
+    }
+
+    function renderTabela() {
+        const tbody = document.querySelector('#tabelaUsuarios tbody');
+        tbody.innerHTML = '';
+        usuariosData.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${u.nome || 'N/A'}</td>
+                <td>${u.email}</td>
+                <td><span style="background:${u.nivel === 'root' ? '#ef4444' : '#3b82f6'};color:white;padding:3px 8px;border-radius:12px;font-size:12px;">${u.nivel}</span></td>
+                <td>
+                    <button class="btn" style="padding:4px 8px;font-size:12px;" onclick="editarUsuario('${u._id}')">Editar</button>
+                    <button class="btn btn-danger" style="padding:4px 8px;font-size:12px;" onclick="excluirUsuario('${u._id}')">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function abrirModal() {
+        document.getElementById('userId').value = '';
+        document.getElementById('userNome').value = '';
+        document.getElementById('userEmail').value = '';
+        document.getElementById('userNivel').value = 'admin';
+        document.getElementById('userSenha').value = '';
+        document.getElementById('senhaHelp').style.display = 'none';
+        document.getElementById('modalTitle').innerText = 'Novo Usuário';
+        document.getElementById('modalUsuario').style.display = 'flex';
+    }
+
+    function editarUsuario(id) {
+        const u = usuariosData.find(x => x._id === id);
+        if (!u) return;
+        document.getElementById('userId').value = u._id;
+        document.getElementById('userNome').value = u.nome || '';
+        document.getElementById('userEmail').value = u.email;
+        document.getElementById('userNivel').value = u.nivel;
+        document.getElementById('userSenha').value = '';
+        document.getElementById('senhaHelp').style.display = 'block';
+        document.getElementById('modalTitle').innerText = 'Editar Usuário';
+        document.getElementById('modalUsuario').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        document.getElementById('modalUsuario').style.display = 'none';
+    }
+
+    async function salvarUsuario() {
+        const id = document.getElementById('userId').value;
+        const nome = document.getElementById('userNome').value;
+        const email = document.getElementById('userEmail').value;
+        const nivel = document.getElementById('userNivel').value;
+        const senha = document.getElementById('userSenha').value;
+
+        if (!email) return alert("E-mail é obrigatório.");
+        if (!id && !senha) return alert("Senha é obrigatória para novos usuários.");
+
+        const url = id ? '/api/adminAtualizarUsuario' : '/api/adminCriarUsuario';
+        const payload = { email, nivel, nome };
+        if (id) payload.id = id;
+        if (senha) payload.senha = senha;
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.sucesso) {
+                fecharModal();
+                carregarUsuarios();
+            } else {
+                alert(data.mensagem);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erro ao salvar.");
+        }
+    }
+
+    async function excluirUsuario(id) {
+        if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+        try {
+            const res = await fetch('/api/adminExcluirUsuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ id })
+            });
+            const data = await res.json();
+            if (data.sucesso) {
+                carregarUsuarios();
+            } else {
+                alert(data.mensagem);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erro ao excluir.");
+        }
+    }
+
+    carregarUsuarios();
+</script>
+</body>
+</html>

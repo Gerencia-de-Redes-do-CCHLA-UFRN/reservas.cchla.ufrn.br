@@ -67,3 +67,15 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Service account keys (CRITICAL - never commit)
+backend/scripts/serviceAccountKey.json
+
+# Generated URLs and internal endpoints
+URLs-geradas-Cloud-Run.txt
+
+# Migration docs with hardcoded credentials
+docs/migracao-completa-google-ufrn.html
+docs/migracao-google-ufrn-vs1.html
+docs/migracao-google-ufrn-vs2.html
+docs/antes-das-alteracoes-seguranca-index.js

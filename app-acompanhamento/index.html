@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acompanhamento de Solicitações - CCHLA</title>
   
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
     :root { --azul-marinho: #051638; --azul-royal: #1653A1; --fundo-pagina: #f4f7fb; --borda-suave: #cbd5e1; --texto-escuro: #334155; }
     body { background-color: var(--fundo-pagina); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--texto-escuro); margin: 0; padding: 20px; }
@@ -16,32 +18,57 @@
     .search-section { background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid var(--borda-suave); margin-bottom: 30px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
     .search-group { flex: 1; min-width: 250px; }
     .search-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--azul-marinho); }
-    .search-group input { width: 100%; padding: 12px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+    .search-group input { width: 100%; padding: 12px; border: 1px solid var(--borda-suave); border-radius: 6px; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
     
-    .btn-buscar { background-color: var(--azul-royal); color: #ffffff; padding: 0 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; height: 45px; display: flex; align-items: center; justify-content: center; }
+    .btn-buscar { background-color: var(--azul-royal); color: #ffffff; padding: 0 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; height: 45px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .btn-buscar:hover { background-color: var(--azul-marinho); }
+    .btn-buscar:disabled { background-color: #94a3b8; cursor: not-allowed; }
     
     .btn-nova { background-color: #10b981; color: #ffffff; padding: 0 20px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; height: 45px; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; white-space: nowrap; }
     .btn-nova:hover { background-color: #059669; }
 
     #areaResultados { display: none; }
     .dados-solicitante { display: flex; justify-content: space-between; align-items: center; background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px 20px; border-radius: 6px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .dados-solicitante p { margin: 5px 0; font-size: 14px; }
     .ticket-badge { background-color: var(--azul-marinho); color: white; padding: 8px 15px; border-radius: 20px; font-family: monospace; font-size: 20px; font-weight: bold; letter-spacing: 2px; }
+    
+    .acoes-tabela { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .btn-acao-tabela { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; color: white; }
+    .btn-imprimir { background-color: #475569; }
+    .btn-imprimir:hover { background-color: #334155; }
+    
+    .btn-secretaria { background-color: #25D366; text-decoration: none; }
+    .btn-secretaria:hover { background-color: #128C7E; }
+
     .table-responsive { overflow-x: auto; border: 1px solid var(--borda-suave); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
     th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
     th { background-color: #f1f5f9; color: var(--azul-marinho); font-weight: 700; }
     .status-msg { text-align: center; color: #ef4444; font-weight: 600; margin-top: 15px; display: none; }
-    .btn-imprimir { background-color: #475569; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
 
     .badge-status { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; white-space: nowrap; }
     .status-pendente { background-color: #fef08a; color: #854d0e; border: 1px solid #fde047; }
     .status-aprovada { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .status-nao-atendida { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-nao-atendida { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; cursor: help; }
+
+    .linha-reprovada { transition: background-color 0.2s ease; }
+    .linha-reprovada:hover { background-color: #fef2f2; }
+
+    .paginacao { display: flex; justify-content: center; gap: 5px; margin-top: 20px; }
+    .btn-page { background: #ffffff; border: 1px solid var(--borda-suave); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--texto-escuro); transition: 0.2s; }
+    .btn-page:hover:not(:disabled):not(.active) { background-color: #f1f5f9; }
+    .btn-page.active { background: var(--azul-royal); color: #ffffff; border-color: var(--azul-royal); cursor: default; }
+    .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #tooltipMotivo {
+      position: absolute; background-color: #1e293b; color: #ffffff; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: 500; pointer-events: none; z-index: 9999; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); max-width: 300px; text-align: center; transform: translate(-50%, -100%); margin-top: -15px;
+    }
+    #tooltipMotivo::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: #1e293b transparent transparent transparent; }
 
     @media print {
       body { background-color: #ffffff; padding: 0; }
       .container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
-      .search-section, .btn-imprimir, .status-msg { display: none !important; }
+      .search-section, .acoes-tabela, .paginacao, .status-msg, #tooltipMotivo { display: none !important; }
       .header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
       .dados-solicitante { border: 1px solid #000; border-left: 4px solid #000; }
       table, th, td { border: 1px solid #000; }
@@ -51,31 +78,41 @@
 </head>
 <body>
 
+  <div id="tooltipMotivo"></div>
+
   <div class="container">
     <div class="header">
-      <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN">
+      <img src="cchla-logo.jpg" alt="Logo CCHLA UFRN" onerror="this.style.display='none'">
       <h2>Acompanhamento de Reservas</h2>
     </div>
 
     <div class="search-section no-print">
       <div class="search-group">
-        <label>Digite seu Ticket (Ex: ABC1D23) ou Telefone (Ex: 84987654321):</label>
-        <input type="text" id="inputBusca" placeholder="Ticket ou Telefone..." onkeypress="if(event.key === 'Enter') window.buscarSolicitacao()">
+        <label>Digite seu Ticket (Ex: ABC1D23):</label>
+        <input type="text" id="inputBusca" placeholder="Apenas o Ticket..." onkeypress="if(event.key === 'Enter') window.buscarSolicitacao()">
       </div>
       <button class="btn-buscar" id="btnBuscar" onclick="window.buscarSolicitacao()">Consultar</button>
       
-      <a href="https://formulario-reservas-cchla.web.app" target="_self" class="btn-nova">Nova Solicitação de Reserva</a>
+      <a href="/formulario" target="_self" class="btn-nova">Nova Solicitação de Reserva</a>
     </div>
 
-    <div id="mensagemErro" class="status-msg">Nenhum registro encontrado.</div>
+    <div id="mensagemErro" class="status-msg">Nenhum registro encontrado. Verifique o ticket informado.</div>
 
     <div id="areaResultados">
       <div class="dados-solicitante">
         <div>
           <p><strong>Solicitante:</strong> <span id="resNome"></span></p>
+          <p><strong>Matrícula:</strong> <span id="resMatricula"></span></p>
+          <p><strong>Departamento:</strong> <span id="resDepartamento"></span></p>
           <p><strong>Telefone:</strong> <span id="resTelefone"></span></p>
+          <p><strong>E-mail:</strong> <span id="resEmail"></span></p>
         </div>
         <div><div class="ticket-badge" id="resTicket"></div></div>
+      </div>
+
+      <div class="acoes-tabela no-print">
+        <button class="btn-acao-tabela btn-imprimir" onclick="window.print()">🖨️ Imprimir Comprovante</button>
+        <a id="btnSecretaria" href="#" target="_blank" class="btn-acao-tabela btn-secretaria">📱 Contacte a Secretaria do CCHLA</a>
       </div>
 
       <div class="table-responsive">
@@ -92,40 +129,63 @@
           <tbody id="corpoTabelaResultados"></tbody>
         </table>
       </div>
-      <button class="btn-imprimir no-print" onclick="window.print()">🖨️ Imprimir Comprovante</button>
+      
+      <div id="paginacaoAcompanhamento" class="paginacao no-print"></div>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <script>
+    let resultadosGlobais = [];
+    let paginaAtual = 1;
+    const itensPorPagina = 10;
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
-      authDomain: "formulario-reservas-cchla.firebaseapp.com",
-      projectId: "formulario-reservas-cchla",
-      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
-      messagingSenderId: "112276491941",
-      appId: "1:112276491941:web:ec9d6c66ededaa37a6474c",
-      measurementId: "G-8JVTMVDYTJ"
+    // --- CONTROLE DE INATIVIDADE (Frontend Ocioso) ---
+    let tempoInatividade;
+    const TEMPO_LIMITE_MILISSEGUNDOS = 30 * 60 * 1000; 
+
+    function recarregarPagina() { window.location.reload(); }
+
+    function resetarTimer() {
+        clearTimeout(tempoInatividade);
+        tempoInatividade = setTimeout(recarregarPagina, TEMPO_LIMITE_MILISSEGUNDOS);
+    }
+
+    window.addEventListener('load', resetarTimer, true);
+    document.addEventListener('mousemove', resetarTimer, true);
+    document.addEventListener('mousedown', resetarTimer, true);
+    document.addEventListener('keypress', resetarTimer, true);
+    document.addEventListener('scroll', resetarTimer, true);
+    document.addEventListener('touchstart', resetarTimer, true);
+
+    const tooltip = document.getElementById('tooltipMotivo');
+
+    window.mostrarMotivo = function(event, motivo) {
+      if(!motivo || motivo === 'undefined') motivo = "Motivo não especificado pela secretaria.";
+      tooltip.innerHTML = `<strong>Motivo da Reprovação:</strong><br>${motivo}`;
+      tooltip.style.display = 'block';
+      window.moverTooltip(event);
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    window.moverTooltip = function(event) {
+      tooltip.style.left = event.pageX + 'px';
+      tooltip.style.top = event.pageY + 'px';
+    };
 
-    // --- FUNÇÕES DE FORMATAÇÃO ---
-    function formatarDataBR(dataValor) {
-      if (!dataValor) return '-';
+    window.esconderMotivo = function() {
+      tooltip.style.display = 'none';
+    };
+
+    function formatarDataHoraCompleta(timestamp) {
+      if (!timestamp) return '-';
       try {
-        if (typeof dataValor === 'string' && dataValor.includes('-') && !dataValor.includes('T')) {
-          const [ano, mes, dia] = dataValor.split('-');
-          return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`;
-        }
-        const data = dataValor.seconds ? new Date(dataValor.seconds * 1000) : new Date(dataValor);
-        return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(data);
-      } catch (e) {
-        return dataValor;
-      }
+        let secs = timestamp._seconds || timestamp.seconds;
+        const data = secs ? new Date(secs * 1000) : new Date(timestamp);
+        if (isNaN(data.getTime())) return timestamp;
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }).format(data).replace(', ', ' às ');
+      } catch (e) { return timestamp; }
     }
 
     function formatarHoraInicio(inicioValor) {
@@ -140,138 +200,211 @@
             return `${dia}/${mes}/${ano} às ${horaMinuto}`;
           }
         }
-        const data = inicioValor.seconds ? new Date(inicioValor.seconds * 1000) : new Date(inicioValor);
+        let secs = inicioValor._seconds || inicioValor.seconds;
+        const data = secs ? new Date(secs * 1000) : new Date(inicioValor);
         return new Intl.DateTimeFormat('pt-BR', {
           day: '2-digit', month: '2-digit', year: 'numeric',
           hour: '2-digit', minute: '2-digit'
         }).format(data).replace(', ', ' às ');
-      } catch (e) {
-        return inicioValor;
-      }
+      } catch (e) { return inicioValor; }
     }
 
-    // --- ALGORITMO DE NORMALIZAÇÃO DE TELEFONE (À PROVA DE BALAS) ---
-    function telefonesSaoCompativeis(t1, t2) {
-      if (!t1 || !t2) return false;
-      if (t1.length < 8 || t2.length < 8) return false;
-      
-      // Extrai os 8 dígitos principais (a raiz do número)
-      const core1 = t1.slice(-8);
-      const core2 = t2.slice(-8);
-      if (core1 !== core2) return false;
-
-      // Extrai o prefixo (Tudo o que vem antes dos 8 dígitos finais)
-      let p1 = t1.slice(0, -8);
-      let p2 = t2.slice(0, -8);
-
-      // Se o prefixo termina com '9' (o nono dígito do Brasil), remove para comparar só o DDD
-      if (p1.endsWith('9')) p1 = p1.slice(0, -1);
-      if (p2.endsWith('9')) p2 = p2.slice(0, -1);
-
-      // Se um não tiver DDD preenchido, perdoa a validação e considera compatível
-      if (p1 === '' || p2 === '') return true;
-      
-      // Se ambos tiverem DDD preenchido, eles precisam ser iguais
-      return p1 === p2;
+    function obterTempoAbsoluto(r) {
+      if (r.timestamp_criacao) {
+        const t = new Date(r.timestamp_criacao).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (r.Data_Solicitacao) {
+        try {
+          const str = String(r.Data_Solicitacao);
+          const num = str.replace(/\D/g, ''); 
+          if (num.length >= 8) {
+            const dia = parseInt(num.substring(0, 2)); const mes = parseInt(num.substring(2, 4)); const ano = parseInt(num.substring(4, 8));
+            const hora = num.length >= 10 ? parseInt(num.substring(8, 10)) : 0;
+            const min = num.length >= 12 ? parseInt(num.substring(10, 12)) : 0;
+            const seg = num.length >= 14 ? parseInt(num.substring(12, 14)) : 0;
+            const d = new Date(ano, mes - 1, dia, hora, min, seg);
+            if (!isNaN(d.getTime())) return d.getTime();
+          }
+        } catch (e) {}
+      }
+      return 0; 
     }
 
     window.buscarSolicitacao = async function() {
       const termoBuscaRaw = document.getElementById('inputBusca').value.trim();
-      if (!termoBuscaRaw) return alert("Digite um Ticket ou Telefone.");
+      const btnBuscar = document.getElementById('btnBuscar');
+      
+      if (!termoBuscaRaw) {
+        Swal.fire('Atenção', 'Digite um Ticket válido.', 'warning');
+        return;
+      }
 
-      document.getElementById('btnBuscar').innerText = "Buscando...";
+      btnBuscar.innerText = "Consultando...";
+      btnBuscar.disabled = true;
       document.getElementById('mensagemErro').style.display = 'none';
       document.getElementById('areaResultados').style.display = 'none';
 
       try {
-        const reservasRef = collection(db, "reservas");
-        let resultados = [];
-
-        // Verifica se a busca é um TICKET (Ex: ABC1D23)
         const termoUpper = termoBuscaRaw.toUpperCase();
-        const isTicket = /[A-Z]/.test(termoUpper) && termoUpper.length === 7;
-        
-        // Extrai apenas os números para a busca de TELEFONE
-        const termoNumerico = termoBuscaRaw.replace(/\D/g, '');
-
-        if (isTicket) {
-          // Busca rápida direta pelo Ticket
-          const qTicket = query(reservasRef, where("Ticket", "==", termoUpper));
-          const snapT = await getDocs(qTicket);
-          snapT.forEach(doc => resultados.push(doc.data()));
-        } 
-        else if (termoNumerico.length >= 8) {
-          // Busca Híbrida: Traz o banco e filtra o Telefone formatado no Cliente
-          const snapAll = await getDocs(reservasRef);
-          snapAll.forEach(doc => {
-            const dados = doc.data();
-            if (dados.Telefone) {
-              const telBD = dados.Telefone.replace(/\D/g, '');
-              if (telefonesSaoCompativeis(termoNumerico, telBD)) {
-                // Impede duplicações acidentais caso o banco retorne a mesma reserva
-                if (!resultados.some(r => r.Ticket === dados.Ticket && r.Início === dados.Início)) {
-                    resultados.push(dados);
-                }
-              }
-            }
-          });
+        if (!/[A-Z0-9]/.test(termoUpper) || termoUpper.length < 5) {
+            Swal.fire('Atenção', 'Formato de Ticket inválido.', 'warning');
+            return;
         }
 
-        if (resultados.length === 0) {
+        // =========================================================================
+        // ATENÇÃO: COLE AQUI A URL DE DEPLOY DA SUA FUNÇÃO consultarTicket
+        // =========================================================================
+        const urlAPI = '/api/consultarTicket';
+
+        const resposta = await fetch(urlAPI, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: termoUpper })
+        });
+
+        if (!resposta.ok) throw new Error("Falha na comunicação com o servidor.");
+
+        const resultadosTemp = await resposta.json();
+
+        if (resultadosTemp.length === 0) {
           document.getElementById('mensagemErro').style.display = 'block';
           return;
         }
 
-        resultados.sort((a, b) => {
-          let tA = a.timestamp_criacao ? (a.timestamp_criacao.seconds || 0) : 0;
-          let tB = b.timestamp_criacao ? (b.timestamp_criacao.seconds || 0) : 0;
-          return tB - tA; 
-        });
+        resultadosTemp.sort((a, b) => obterTempoAbsoluto(b) - obterTempoAbsoluto(a));
+        resultadosGlobais = resultadosTemp;
+        paginaAtual = 1;
 
-        const rRecente = resultados[0];
-        document.getElementById('resNome').innerText = rRecente.Solicitante || '-';
-        document.getElementById('resTelefone').innerText = rRecente.Telefone || '-';
-        document.getElementById('resTicket').innerText = rRecente.Ticket || '-';
+        let rOriginal = resultadosGlobais[0];
+        let menorTempoEncontrado = obterTempoAbsoluto(rOriginal);
 
-        const cuerpo = document.getElementById('corpoTabelaResultados');
-        cuerpo.innerHTML = '';
+        for (let i = 1; i < resultadosGlobais.length; i++) {
+            let tempoLinhaAtual = obterTempoAbsoluto(resultadosGlobais[i]);
+            if (tempoLinhaAtual < menorTempoEncontrado) {
+                menorTempoEncontrado = tempoLinhaAtual;
+                rOriginal = resultadosGlobais[i];
+            }
+        }
         
-        resultados.forEach(r => {
-          let dataSolicitacaoFmt = formatarDataBR(r.Data_Solicitacao);
-          let inicioFmt = formatarHoraInicio(r['Início']);
-          
-          let statusBD = r.Status || 'Pendente';
-          let classeStatus = 'status-pendente';
-          let textoStatus = 'Pendente';
+        document.getElementById('resNome').innerText = rOriginal.Solicitante || '-';
+        document.getElementById('resMatricula').innerText = rOriginal.Matrícula || rOriginal.Matricula || '-';
+        document.getElementById('resDepartamento').innerText = rOriginal.Departamento || '-';
+        document.getElementById('resTelefone').innerText = rOriginal.Telefone || '-';
+        document.getElementById('resEmail').innerText = rOriginal.Email || rOriginal['E-mail'] || rOriginal.email || '-';
+        document.getElementById('resTicket').innerText = rOriginal.Ticket || '-';
 
-          if (statusBD === 'Aprovado' || statusBD === 'Aprovada') {
-            classeStatus = 'status-aprovada';
-            textoStatus = 'Aprovada';
-          } else if (statusBD === 'Reprovado' || statusBD === 'Reprovada' || statusBD === 'Não atendida') {
-            classeStatus = 'status-nao-atendida';
-            textoStatus = 'Não Atendida';
-          }
+        const linkAcompanhamento = `${window.location.origin}${window.location.pathname}?ticket=${rOriginal.Ticket}`;
+        const msgSecretaria = encodeURIComponent(`Olá! Gostaria de falar sobre a minha solicitação de reserva no CCHLA. Meu Ticket é o *${rOriginal.Ticket}*. Segue o meu link de acompanhamento: ${linkAcompanhamento}`);
+        document.getElementById('btnSecretaria').href = `https://wa.me/5584991936154?text=${msgSecretaria}`;
 
-          cuerpo.innerHTML += `
-            <tr>
-              <td>${dataSolicitacaoFmt}</td>
-              <td><span class="badge-status ${classeStatus}">${textoStatus}</span></td>
-              <td><strong>${r.Auditório || '-'}</strong></td>
-              <td>${r.Atividade || '-'}</td>
-              <td>${inicioFmt}</td>
-            </tr>
-          `;
-        });
-
+        renderizarTabela();
         document.getElementById('areaResultados').style.display = 'block';
+
       } catch (e) {
         console.error(e);
-        document.getElementById('mensagemErro').innerText = "Erro ao acessar o banco. Verifique as regras do Firebase.";
+        document.getElementById('mensagemErro').innerText = "Erro ao conectar com o banco. Verifique sua conexão de rede.";
         document.getElementById('mensagemErro').style.display = 'block';
       } finally {
-        document.getElementById('btnBuscar').innerText = "Consultar";
+        btnBuscar.innerText = "Consultar";
+        btnBuscar.disabled = false;
       }
     };
+
+    function renderizarTabela() {
+      const cuerpo = document.getElementById('corpoTabelaResultados');
+      cuerpo.innerHTML = '';
+
+      const inicio = (paginaAtual - 1) * itensPorPagina;
+      const fim = inicio + itensPorPagina;
+      const dadosDaPagina = resultadosGlobais.slice(inicio, fim);
+
+      dadosDaPagina.forEach(r => {
+        let dataSolicitacaoFmt = formatarDataHoraCompleta(r.timestamp_criacao || r.Data_Solicitacao);
+        let inicioFmt = formatarHoraInicio(r['Início'] || r.Inicio);
+        
+        let statusBD = r.Status || 'Pendente';
+        let classeStatus = 'status-pendente';
+        let textoStatus = 'Pendente';
+        let trEventos = ''; 
+        let classLinha = ''; 
+
+        if (statusBD === 'Aprovado' || statusBD === 'Aprovada') {
+          classeStatus = 'status-aprovada';
+          textoStatus = 'Aprovada';
+        } else if (statusBD === 'Reprovado' || statusBD === 'Reprovada' || statusBD === 'Não atendida') {
+          classeStatus = 'status-nao-atendida';
+          textoStatus = 'Não Atendida';
+          classLinha = 'linha-reprovada';
+          
+          const motivoSeguro = encodeURIComponent(r.Motivo_Reprovacao || '');
+          trEventos = `onmouseenter="window.mostrarMotivo(event, decodeURIComponent('${motivoSeguro}'))" onmousemove="window.moverTooltip(event)" onmouseleave="window.esconderMotivo()"`;
+        }
+
+        cuerpo.innerHTML += `
+          <tr class="${classLinha}" ${trEventos}>
+            <td>${dataSolicitacaoFmt}</td>
+            <td><span class="badge-status ${classeStatus}">${textoStatus}</span></td>
+            <td><strong>${r.Auditório || '-'}</strong></td>
+            <td>${r.Atividade || '-'}</td>
+            <td>${inicioFmt}</td>
+          </tr>
+        `;
+      });
+
+      desenharPaginacao();
+    }
+
+    window.mudarPagina = function(novaPagina) {
+      paginaAtual = novaPagina;
+      renderizarTabela();
+    };
+
+    function desenharPaginacao() {
+      const containerPag = document.getElementById('paginacaoAcompanhamento');
+      containerPag.innerHTML = '';
+      
+      const totalPaginas = Math.ceil(resultadosGlobais.length / itensPorPagina);
+      if (totalPaginas <= 1) return; 
+
+      const btnAnt = document.createElement('button');
+      btnAnt.className = 'btn-page';
+      btnAnt.innerText = '«';
+      btnAnt.disabled = (paginaAtual === 1);
+      btnAnt.onclick = () => window.mudarPagina(paginaAtual - 1);
+      containerPag.appendChild(btnAnt);
+
+      for (let p = Math.max(1, paginaAtual - 2); p <= Math.min(totalPaginas, paginaAtual + 2); p++) {
+        const btnNum = document.createElement('button');
+        btnNum.className = 'btn-page';
+        btnNum.innerText = p;
+        if (p === paginaAtual) btnNum.classList.add('active');
+        btnNum.onclick = () => window.mudarPagina(p);
+        containerPag.appendChild(btnNum);
+      }
+
+      const btnProx = document.createElement('button');
+      btnProx.className = 'btn-page';
+      btnProx.innerText = '»';
+      btnProx.disabled = (paginaAtual === totalPaginas);
+      btnProx.onclick = () => window.mudarPagina(paginaAtual + 1);
+      containerPag.appendChild(btnProx);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketParam = urlParams.get('ticket');
+        
+        if (ticketParam) {
+            const inputBusca = document.getElementById('inputBusca');
+            if (inputBusca) {
+                inputBusca.value = ticketParam.toUpperCase();
+                setTimeout(() => {
+                    window.buscarSolicitacao();
+                }, 500);
+            }
+        }
+    });
   </script>
 </body>
 </html>

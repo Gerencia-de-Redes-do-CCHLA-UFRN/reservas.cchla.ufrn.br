@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automação CI/CD com GitHub Actions - CCHLA</title>
+    <style>
+        :root {
+            --git-dark: #24292f;
+            --git-blue: #0969da;
+            --git-green: #2da44e;
+            --git-purple: #8250df;
+            --fundo: #f6f8fa;
+            --texto: #24292f;
+            --borda: #d0d7de;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--texto);
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #ffffff;
+        }
+        .capa {
+            text-align: center;
+            padding: 50px 20px;
+            border-bottom: 4px solid var(--git-dark);
+            margin-bottom: 40px;
+            background-color: var(--fundo);
+            border-radius: 8px;
+        }
+        .capa h1 { color: var(--git-dark); font-size: 32px; margin-bottom: 10px; }
+        .capa p { font-size: 16px; color: #57606a; }
+        h2 { color: var(--git-blue); font-size: 24px; border-bottom: 2px solid var(--borda); padding-bottom: 8px; margin-top: 40px; }
+        h3 { color: var(--git-dark); font-size: 18px; margin-top: 30px; }
+        p, li { font-size: 15px; margin-bottom: 12px; }
+        ul, ol { padding-left: 25px; margin-bottom: 20px; }
+        
+        pre {
+            background-color: var(--git-dark);
+            color: #f6f8fa;
+            padding: 18px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13.5px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            border: 1px solid #1b1f24;
+        }
+        code { font-family: "SFMono-Regular", Consolas, monospace; color: var(--git-blue); background: var(--fundo); padding: 2px 5px; border-radius: 4px; font-weight: bold; }
+        pre code { color: inherit; background: transparent; padding: 0; font-weight: normal; }
+        
+        .box-info {
+            background-color: #ddf4ff;
+            border-left: 4px solid var(--git-blue);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #0969da;
+        }
+        .box-warning {
+            background-color: #fff8c5;
+            border-left: 4px solid #d4a72c;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #9a6700;
+        }
+
+        @media print {
+            body { margin: 0; padding: 0; font-size: 11pt; }
+            .capa { page-break-after: always; padding-top: 80px; }
+            h2 { page-break-before: always; }
+            pre, .box-info, .box-warning { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="capa">
+        <h1>Automação de Deploy (CI/CD)</h1>
+        <p>Integração do <strong>GitHub Actions</strong> com a VM Ubuntu (On-Premise UFRN)</p>
+        <p>Estratégia: Self-Hosted Runner (Bypass Seguro de Firewall Institucional)</p>
+    </div>
+
+    <div class="box-warning">
+        <strong>Porquê um Self-Hosted Runner?</strong><br>
+        Servidores universitários (como os da UFRN) possuem regras estritas de firewall de entrada (Inbound). Se os servidores externos do GitHub tentarem conectar-se via SSH à sua VM, a ligação será bloqueada. O <strong>Self-Hosted Runner</strong> é um pequeno serviço instalado na sua VM que comunica com o GitHub de "dentro para fora" (Outbound), contornando o bloqueio de forma totalmente segura e aprovada por equipas de infraestrutura.
+    </div>
+
+    <h2>1. Instalar o Agente (Runner) na VM da UFRN</h2>
+    <p>O primeiro passo é registar a sua Máquina Virtual no GitHub. Aceda ao repositório no seu navegador (github.com/redes-cchla-ufrn/formulario-reservas-cchla) e vá a:</p>
+    <ul>
+        <li><strong>Settings</strong> (Configurações) > <strong>Actions</strong> > <strong>Runners</strong></li>
+        <li>Clique no botão verde <strong>New self-hosted runner</strong>.</li>
+        <li>Selecione <strong>Linux</strong> e a arquitetura <strong>x64</strong>.</li>
+    </ul>
+
+    <p>O GitHub irá fornecer-lhe uma série de comandos exatos. Abra o terminal SSH da sua VM Ubuntu e execute-os. Serão algo muito parecido com isto:</p>
+
+<pre><code># Criar uma pasta para o agente (Não executar como root!)
+mkdir actions-runner && cd actions-runner
+
+# Descarregar o pacote de instalação
+curl -o actions-runner-linux-x64-2.316.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.316.1/actions-runner-linux-x64-2.316.1.tar.gz
+
+# Extrair
+tar xzf ./actions-runner-linux-x64-2.316.1.tar.gz
+
+# Configurar o agente (cole a chave exata fornecida no site do GitHub)
+./config.sh --url https://github.com/redes-cchla-ufrn/formulario-reservas-cchla --token SEU_TOKEN_GERADO_PELO_GITHUB</code></pre>
+
+    <h3>1.1. Instalar o Agente como Serviço de Background</h3>
+    <p>Para garantir que o agente inicia automaticamente se a VM for reiniciada, instale-o como um serviço do sistema (systemd):</p>
+<pre><code>sudo ./svc.sh install
+sudo ./svc.sh start
+sudo ./svc.sh status</code></pre>
+
+    <h2>2. Configurar Permissões do Docker na VM</h2>
+    <p>O agente do GitHub corre sob um utilizador próprio no Ubuntu e precisará de permissões para executar o comando <code>docker compose</code> sem pedir senha de administrador (sudo).</p>
+    <p>No terminal da sua VM, execute:</p>
+<pre><code># Assumindo que o utilizador do seu runner se chama "ubuntu" ou "tobias"
+sudo usermod -aG docker $USER
+
+# Se o runner criar um utilizador específico chamado "runner", execute:
+# sudo usermod -aG docker runner
+
+# Reinicie o serviço do Docker para aplicar
+sudo systemctl restart docker</code></pre>
+
+
+    <h2>3. Criar os Ficheiros de Workflow no Código</h2>
+    <p>Agora vamos ensinar ao GitHub o que fazer quando aprovar um Pull Request para a <code>main</code> (Produção) ou <code>release</code> (Homologação). Na pasta do seu projeto local (no seu computador), crie um diretório chamado exato <code>.github/workflows/</code>.</p>
+
+    <h3>3.1. Workflow de Produção (Deploy da branch MAIN)</h3>
+    <p>Crie um ficheiro chamado <code>deploy-producao.yml</code> dentro da pasta <code>.github/workflows/</code>.</p>
+
+<pre><code>name: Deploy Produção (UFRN)
+
+on:
+  push:
+    branches:
+      - main # O gatilho dispara sempre que houver um merge para a main
+
+jobs:
+  deploy:
+    # A diretiva self-hosted diz ao GitHub para procurar a VM da UFRN
+    runs-on: self-hosted
+
+    steps:
+      - name: 📥 Fazer o Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: 🚀 Sincronizar e Reiniciar Docker Compose
+        run: |
+          # Navega para a pasta do sistema em produção
+          cd /opt/sistema-reservas
+          
+          # Puxa o código mais recente do GitHub
+          git pull origin main
+          
+          # Reconstrói as imagens e reinicia os contentores sem tempo de inatividade
+          docker compose up -d --build
+          
+          # Limpa imagens antigas órfãs para poupar espaço em disco na VM
+          docker image prune -f
+</code></pre>
+
+    <h3>3.2. Workflow de Homologação (Deploy da branch RELEASE)</h3>
+    <p>É uma excelente prática ter uma cópia exata do sistema a correr noutra porta (ex: porta 8080) para testar novidades antes de afetar os utilizadores reais. Se tiver uma pasta <code>/opt/sistema-reservas-homolog</code>, crie o ficheiro <code>deploy-homologacao.yml</code>:</p>
+
+<pre><code>name: Deploy Homologação
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: 📥 Fazer o Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: 🧪 Atualizar Ambiente de Homologação
+        run: |
+          cd /opt/sistema-reservas-homolog
+          git pull origin release
+          docker compose up -d --build
+</code></pre>
+
+    <h2>4. O Ciclo de Vida Automatizado (Como tudo funciona agora)</h2>
+    <p>A partir deste momento, o seu trabalho manual no servidor Ubuntu acabou. O fluxo será o seguinte:</p>
+    <ol>
+        <li>Trabalha tranquilamente na branch <code>dev</code> no seu computador.</li>
+        <li>Quando estiver pronto para testar, abre um <strong>Pull Request</strong> de <code>dev</code> para <code>release</code> no GitHub e clica em Merge.</li>
+        <li>O <strong>GitHub Actions</strong> acorda instantaneamente, avisa o agente instalado na VM da UFRN, o agente entra na pasta de homologação, puxa o código e constrói o Docker sozinho.</li>
+        <li>Depois de testar na homologação e confirmar que não há bugs, abre o último <strong>Pull Request</strong> de <code>release</code> para <code>main</code>.</li>
+        <li>No segundo em que aprovar o Pull Request, o servidor da UFRN puxará o código e reiniciará o Nginx e a API do Node.js automaticamente. A nova versão estará em produção (Live) em menos de 10 segundos.</li>
+    </ol>
+
+    <div class="box-info">
+        <strong>Monitorização e Logs:</strong><br>
+        Pode acompanhar a execução do deploy em tempo real no site do GitHub. Basta clicar no separador <strong>"Actions"</strong> no topo do seu repositório. Ocorreu um erro na compilação do Docker? O GitHub mostrará o log exato do terminal do Ubuntu diretamente no seu ecrã, dispensando a necessidade de aceder via SSH para descobrir o problema.
+    </div>
+
+</body>
+</html>

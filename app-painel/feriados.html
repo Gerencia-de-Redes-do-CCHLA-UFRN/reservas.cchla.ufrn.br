@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
   <title>Gestão de Eventos Coletivos e Manutenções - Painel CCHLA</title>
   
   <style>
@@ -57,9 +59,26 @@
     .btn-remover:hover { background-color: #dc2626; }
     
     .status-msg { text-align: center; color: var(--texto-claro); padding: 20px; font-weight: 600; }
+
+    /* Estilos do Modal de Inatividade */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 22, 56, 0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    .modal-box { background: #ffffff; padding: 35px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: popup 0.3s ease-out; }
+    .modal-box h3 { color: var(--azul-marinho); margin-top: 0; font-size: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .modal-box p { color: var(--texto-escuro); font-size: 16px; line-height: 1.6; margin-bottom: 25px; }
+    .btn-manter-logado { background-color: #10b981; color: #ffffff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
+    .btn-manter-logado:hover { background-color: #059669; transform: translateY(-2px); }
+    @keyframes popup { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
+
+  <div id="modalTimeoutOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3>⚠️ Alerta de Inatividade</h3>
+      <p>Não notamos sua interação por aqui. Clique se deseja manter-se logado.</p>
+      <button class="btn-manter-logado" onclick="manterSessaoAtiva()">Sim, manter logado</button>
+    </div>
+  </div>
 
   <div class="container" id="appContainer" style="display: none;">
     <div class="header">
@@ -68,8 +87,8 @@
         <h1>Calendário Administrativo</h1>
       </div>
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <span class="status-indicador">Usuário Autenticado</span>
-        <button onclick="window.history.back()" class="btn-voltar">⬅ Voltar ao Painel</button>
+        <span class="status-indicador" id="userBadge">Usuário Autenticado</span>
+        <button onclick="window.location.href='painel.html'" class="btn-voltar">⬅ Voltar ao Painel</button>
         <button class="btn-sair" onclick="sairDoSistema()">Sair</button>
       </div>
     </div>
@@ -165,47 +184,110 @@
 
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
-      authDomain: "formulario-reservas-cchla.firebaseapp.com",
-      projectId: "formulario-reservas-cchla",
-      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
-      messagingSenderId: "112276491941",
-      appId: "1:112276491941:web:f67cc53ce868764ea6474c",
-      measurementId: "G-4B1J48HDGF"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let registrosGlobais = [];
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById('appContainer').style.display = 'block';
-        popularSelectsHoraManutencao();
-        carregarRegistros();
-      } else {
-        window.location.replace('index.html'); 
-      }
+  <script>
+    // =======================================================================
+    // 1. CAPTURADOR GLOBAL DE ERROS (Evita o congelamento silencioso do ecrã)
+    // =======================================================================
+    window.addEventListener('error', function(e) {
+        console.error("Erro detetado:", e.error);
+        const tbody = document.getElementById('tabelaCorpo');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4" class="status-msg" style="color:red; text-align:left;"><b>❌ Erro Crítico:</b> ${e.message}</td></tr>`;
+        }
     });
 
+    // =======================================================================
+    // 2. CONTROLO DE SESSÃO E VALIDAÇÃO DE ACESSO RESTRETO
+    // =======================================================================
+    const tokenSessao = sessionStorage.getItem('cchla_admin_token');
+    if (!tokenSessao) {
+        window.location.replace('index.html');
+    }
+
+    function decodificarJWT(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(window.atob(base64));
+        } catch(e) { return {}; }
+    }
+
+    // =======================================================================
+    // 3. VARIÁVEIS GLOBAIS NO TOPO
+    // =======================================================================
+    let emailUsuarioLogado = "";
+    let registrosGlobais = [];
+    
+    let timerInatividade, timerLogout;
+    const TEMPO_INATIVIDADE = 30 * 60 * 1000; 
+    const TEMPO_AVISO = 30 * 1000; 
+    let isModalTimeoutAberto = false;
+
+    // =======================================================================
+    // 4. ROTINA DE INICIALIZAÇÃO SEGURA
+    // =======================================================================
+    function inicializarFeriados() {
+        const payloadAdmin = decodificarJWT(tokenSessao);
+        emailUsuarioLogado = payloadAdmin.email || "Admin";
+
+        const userBadge = document.getElementById('userBadge');
+        if (userBadge) {
+            userBadge.innerHTML = `👤 ${emailUsuarioLogado}`;
+        }
+
+        document.getElementById('appContainer').style.display = 'block';
+        popularSelectsHoraManutencao();
+        iniciarRastreamentoInatividade(); 
+        carregarRegistros();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", inicializarFeriados);
+    } else {
+        inicializarFeriados();
+    }
+
+    // =======================================================================
+    // 5. FUNÇÕES DE INFRAESTRUTURA E TIMEOUT
+    // =======================================================================
     window.sairDoSistema = function() {
-      signOut(auth).then(() => window.location.replace('index.html'));
+      sessionStorage.removeItem('cchla_admin_token');
+      window.location.replace('index.html');
     };
 
-    // Alimenta os horários das 06:00 às 23:00 para as manutenções
+    function iniciarRastreamentoInatividade() {
+      const eventosAtivos = ['click', 'keydown', 'input', 'change', 'touchstart'];
+      eventosAtivos.forEach(evento => document.addEventListener(evento, resetarTimerInatividade));
+      resetarTimerInatividade();
+    }
+
+    function resetarTimerInatividade() {
+      if (isModalTimeoutAberto) return; 
+      clearTimeout(timerInatividade);
+      timerInatividade = setTimeout(exibirAvisoTimeout, TEMPO_INATIVIDADE);
+    }
+
+    function exibirAvisoTimeout() {
+      isModalTimeoutAberto = true;
+      document.getElementById('modalTimeoutOverlay').style.display = 'flex';
+      timerLogout = setTimeout(() => window.sairDoSistema(), TEMPO_AVISO);
+    }
+
+    window.manterSessaoAtiva = function() {
+      clearTimeout(timerLogout); 
+      document.getElementById('modalTimeoutOverlay').style.display = 'none';
+      isModalTimeoutAberto = false;
+      resetarTimerInatividade(); 
+    };
+
+    // =======================================================================
+    // 6. LÓGICA DE NEGÓCIO E APIs (REST)
+    // =======================================================================
     function popularSelectsHoraManutencao() {
       const selectIn = document.getElementById('horaInicio');
       const selectOut = document.getElementById('horaFim');
       let html = '<option value="" disabled selected>Hora</option>';
-      for (let h = 6; h <= 23; h++) {
+      for (let h = 7; h <= 21; h++) {
         let hStr = h.toString().padStart(2, '0');
         html += `<option value="${hStr}:00">${hStr}:00</option>`;
         html += `<option value="${hStr}:30">${hStr}:30</option>`;
@@ -214,7 +296,6 @@
       selectOut.innerHTML = html;
     }
 
-    // Gerencia dinamicamente o formulário baseado no tipo selecionado
     window.ajustarFormularioPorTipo = function() {
       const tipo = document.getElementById('tipoBloqueio').value;
       const grupoAuditorio = document.getElementById('grupoAuditorio');
@@ -233,27 +314,18 @@
         selectHoraOut.required = true;
         labelMotivo.innerText = "Título da Manutenção";
         
-        if(!idEditando) {
-          document.getElementById('tituloFormulario').innerText = '🔧 Agendar Manutenção de Auditório';
-        }
+        if(!idEditando) { document.getElementById('tituloFormulario').innerText = '🔧 Agendar Manutenção de Auditório'; }
       } else {
-        // Feriado ou Ponto Facultativo
         grupoAuditorio.style.display = "none";
-        selectAuditorio.required = false;
-        selectAuditorio.value = "";
-        selectHoraIn.style.display = "none";
-        selectHoraIn.required = false;
-        selectHoraOut.style.display = "none";
-        selectHoraOut.required = false;
+        selectAuditorio.required = false; selectAuditorio.value = "";
+        selectHoraIn.style.display = "none"; selectHoraIn.required = false;
+        selectHoraOut.style.display = "none"; selectHoraOut.required = false;
         labelMotivo.innerText = "Motivo do Evento Coletivo";
         
-        if(!idEditando) {
-          document.getElementById('tituloFormulario').innerText = '📅 Inserir Feriado ou Ponto Facultativo';
-        }
+        if(!idEditando) { document.getElementById('tituloFormulario').innerText = '📅 Inserir Feriado ou Ponto Facultativo'; }
       }
     };
 
-    // Envio do formulário
     document.getElementById('formFeriado').addEventListener('submit', async function(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSalvar');
@@ -270,11 +342,9 @@
         const horaIn = document.getElementById('horaInicio').value;
         const horaOut = document.getElementById('horaFim').value;
         localDestino = document.getElementById('auditorioManutencao').value;
-        
         dtInicioFull = dataIn + 'T' + horaIn;
         dtFimFull = dataOut + 'T' + horaOut;
       } else {
-        // Dias inteiros para Feriado/Ponto Facultativo
         localDestino = "FERIADO";
         dtInicioFull = dataIn + 'T00:00';
         dtFimFull = dataOut + 'T23:59';
@@ -300,17 +370,35 @@
           Início: dtInicioFull,
           Fim: dtFimFull,
           Status: "Aprovado",
-          Data_Solicitacao: new Date().toLocaleString('pt-BR')
+          Data_Solicitacao: new Date().toISOString()
         };
 
         if (idEditando) {
-          await updateDoc(doc(db, "reservas", idEditando), payload);
-          alert("Lançamento alterado com sucesso!");
+            // =========================================================================
+            // DEPLOY URL: COLE AQUI A SUA URL DA FUNÇÃO adminAtualizarDocumento
+            // =========================================================================
+            const urlUpdate = '/api/adminAtualizarDocumento';
+            
+            await fetch(urlUpdate, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+                body: JSON.stringify({ idDoc: idEditando, dadosAtualizacao: payload })
+            });
+            alert("Lançamento alterado com sucesso!");
         } else {
-          payload.Ticket = "SYS-" + Math.floor(1000 + Math.random() * 9000);
-          payload.timestamp_criacao = serverTimestamp();
-          await addDoc(collection(db, "reservas"), payload);
-          alert("Lançamento cadastrado com sucesso!");
+            // =========================================================================
+            // DEPLOY URL: COLE AQUI A SUA URL DA FUNÇÃO adminCadastrarDocumento
+            // =========================================================================
+            const urlAdd = '/api/adminCadastrarDocumento';
+            
+            payload.Ticket = "SYS-" + Math.floor(1000 + Math.random() * 9000);
+            
+            await fetch(urlAdd, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+                body: JSON.stringify({ payload: payload })
+            });
+            alert("Lançamento cadastrado com sucesso!");
         }
         
         window.cancelarEdicao();
@@ -318,7 +406,7 @@
 
       } catch (error) {
         console.error(error);
-        alert("Erro ao salvar dados.");
+        alert("Erro de comunicação com o servidor ao salvar os dados.");
       } finally {
         btn.disabled = false;
         window.ajustarFormularioPorTipo();
@@ -335,14 +423,24 @@
 
     async function carregarRegistros() {
       try {
-        const snapshot = await getDocs(collection(db, "reservas"));
+        // =========================================================================
+        // DEPLOY URL: COLE AQUI A SUA URL DA FUNÇÃO adminObterReservas
+        // =========================================================================
+        const urlBusca = '/api/adminObterReservas';
+        
+        const response = await fetch(urlBusca, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + tokenSessao }
+        });
+
+        if (!response.ok) throw new Error("Acesso negado ou erro no servidor");
+
+        const snapshot = await response.json();
         registrosGlobais = [];
         
-        snapshot.forEach(doc => {
-          let data = doc.data();
-          // Filtra apenas o que for do escopo desta página administratriva (Feriados ou Manutenções)
+        snapshot.forEach(data => {
           if(data.Auditório === "FERIADO" || data.TipoBloqueio === "Manutenção") {
-            data.id = doc.id;
+            data.id = data.id_documento; // Normalização para compatibilidade
             registrosGlobais.push(data);
           }
         });
@@ -352,7 +450,7 @@
 
       } catch (error) {
         console.error(error);
-        document.getElementById('tabelaCorpo').innerHTML = `<tr><td colspan="4" class="status-msg" style="color:red;">Erro ao carregar dados.</td></tr>`;
+        document.getElementById('tabelaCorpo').innerHTML = `<tr><td colspan="4" class="status-msg" style="color:red;">Erro ao carregar dados do servidor.</td></tr>`;
       }
     }
 
@@ -408,7 +506,6 @@
       document.getElementById('idEditando').value = reg.id;
       document.getElementById('tipoBloqueio').value = reg.TipoBloqueio || "Feriado";
       
-      // Carrega dependências visuais baseadas no tipo antes de preencher os valores
       window.ajustarFormularioPorTipo();
 
       if (reg.TipoBloqueio === "Manutenção") {
@@ -432,7 +529,17 @@
       if(!confirm("Tem certeza que deseja remover este lançamento? Ele sairá do sistema imediatamente.")) return;
 
       try {
-        await deleteDoc(doc(db, "reservas", idDoc));
+        // =========================================================================
+        // DEPLOY URL: COLE AQUI A SUA URL DA FUNÇÃO adminExcluirDocumento
+        // =========================================================================
+        const urlDelete = '/api/adminExcluirDocumento';
+        
+        await fetch(urlDelete, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+            body: JSON.stringify({ idDoc: idDoc })
+        });
+        
         alert("Removido com sucesso.");
         if(document.getElementById('idEditando').value === idDoc) {
             window.cancelarEdicao();

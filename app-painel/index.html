@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
   <title>Login - Administração CCHLA</title>
   
   <style>
@@ -54,27 +56,11 @@
     </form>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB6sIfRwITVYmBqdaYzoiqIGxTBfPEvw4Q",
-      authDomain: "formulario-reservas-cchla.firebaseapp.com",
-      projectId: "formulario-reservas-cchla",
-      storageBucket: "formulario-reservas-cchla.firebasestorage.app",
-      messagingSenderId: "112276491941",
-      appId: "1:112276491941:web:f67cc53ce868764ea6474c",
-      measurementId: "G-4B1J48HDGF"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
+  <script>
     document.getElementById('formLogin').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const senha = document.getElementById('senha').value;
       const btn = document.getElementById('btnEntrar');
       const msgErro = document.getElementById('mensagemErro');
@@ -84,13 +70,32 @@
       msgErro.style.display = 'none';
 
       try {
-        await signInWithEmailAndPassword(auth, email, senha);
-        // Login com sucesso, redireciona para o painel
+        // =========================================================
+        // COLE AQUI A URL DA SUA NOVA FUNÇÃO (fazerLogin)
+        // =========================================================
+        const response = await fetch('/api/fazerLogin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, senha })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.erro) {
+            throw new Error(data.mensagem || "Erro de infraestrutura ao validar credenciais.");
+        }
+
+        // Autenticado com sucesso!
+        // Guarda o token de sessão para a página painel.html utilizar nas próximas requisições
+        sessionStorage.setItem('cchla_admin_token', data.token);
+        
+        // Redireciona
         window.location.href = 'painel.html';
+
       } catch (error) {
-        console.error(error);
-        msgErro.innerText = 'E-mail ou senha incorretos. Acesso negado.';
+        msgErro.innerText = error.message;
         msgErro.style.display = 'block';
+      } finally {
         btn.innerText = 'Entrar no Painel';
         btn.disabled = false;
       }

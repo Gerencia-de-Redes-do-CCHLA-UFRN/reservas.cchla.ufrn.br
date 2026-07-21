@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="/favicon.ico" sizes="any">
+  <title>Painel de Portaria - Ocupação de Auditórios CCHLA</title>
+  
+  <style>
+    :root {
+      --bg-principal: #030712;
+      --bg-card: #1f2937;
+      --azul-royal: #1653A1;
+      --azul-marinho: #051638;
+      --texto-claro: #f9fafb;
+      --texto-muto: #9ca3af;
+      --cor-preparacao: #3b82f6;
+      --cor-execucao: #10b981;
+      --cor-encerrado: #4b5563;
+    }
+
+    body {
+      background-color: var(--bg-principal);
+      color: var(--texto-claro);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    /* Topo do Painel Compacto */
+    .topo-painel {
+      background-color: var(--azul-marinho);
+      border-bottom: 3px solid var(--azul-royal);
+      padding: 8px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .topo-esq {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-cchla {
+      height: 46px;
+      object-fit: contain;
+      background-color: white;
+      padding: 1px;
+      border-radius: 1px;
+    }
+
+    .topo-titulo h1 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .topo-titulo p {
+      margin: 2px 0 0 0;
+      font-size: 12px;
+      color: var(--texto-muto);
+    }
+
+    .relogio-container {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    #relogio {
+      font-size: 26px;
+      font-weight: 900;
+      font-family: monospace;
+      color: #38bdf8;
+      margin: 0;
+      line-height: 1;
+    }
+
+    #data-atual {
+      font-size: 13px;
+      color: var(--texto-muto);
+      margin: 0;
+      text-transform: capitalize;
+    }
+
+    .controles-painel {
+      display: flex;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    /* Estilo dos Seletores */
+    .seletor-dark {
+      background-color: rgba(0, 0, 0, 0.4);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .seletor-dark:hover, .seletor-dark:focus {
+      border-color: #38bdf8;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .seletor-dark option {
+      background-color: var(--bg-card);
+      color: var(--texto-claro);
+    }
+
+    /* Quadro Kanban Expandido */
+    .quadro-colunas {
+      display: flex;
+      flex: 1;
+      gap: 20px;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .coluna {
+      flex: 1;
+      background-color: rgba(31, 41, 55, 0.4);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    /* Borda Reforçada ao Redor de Cada Quadro de Status */
+    #col-preparacao { border: 2px solid var(--cor-preparacao); }
+    #col-andamento { border: 2px solid var(--cor-execucao); }
+    #col-encerrado { border: 2px solid var(--cor-encerrado); }
+
+    .coluna-header {
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      border-bottom: 3px solid var(--texto-muto);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .coluna-header .contador {
+      font-family: monospace;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    #col-preparacao .coluna-header { border-color: var(--cor-preparacao); color: #60a5fa; }
+    #col-andamento .coluna-header { border-color: var(--cor-execucao); color: #34d399; }
+    #col-encerrado .coluna-header { border-color: var(--cor-encerrado); color: var(--texto-muto); }
+
+    .lista-cards {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding-right: 5px;
+    }
+
+    .lista-cards::-webkit-scrollbar { width: 6px; }
+    .lista-cards::-webkit-scrollbar-track { background: transparent; }
+    .lista-cards::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+    /* Estilização dos Cards com as duas Bordas Iguais (Auditório) */
+    .card-atividade {
+      background-color: var(--bg-card);
+      border-radius: 8px;
+      padding: 16px;
+      box-sizing: border-box;
+      border-left: 6px solid transparent; 
+      border-right: 6px solid transparent; 
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+
+    .card-auditorio {
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-nome-atividade {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      line-height: 1.3;
+      color: var(--texto-claro);
+    }
+
+    .card-meta {
+      font-size: 13px;
+      color: var(--texto-muto);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-horario {
+      font-weight: 700;
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--texto-claro);
+    }
+
+    /* Destaque Pulsante para Atividades em Execução */
+    #col-andamento .card-atividade {
+      background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+      animation: pulseGlow 3s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.08); }
+      100% { box-shadow: 0 0 18px rgba(16, 185, 129, 0.25); }
+    }
+
+    .timeline-container {
+      margin-top: 12px;
+      background-color: rgba(0, 0, 0, 0.3);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .timeline-barra {
+      height: 100%;
+      background-color: var(--cor-execucao);
+      width: 0%;
+      transition: width 1s linear;
+    }
+
+    #col-encerrado .card-atividade {
+      opacity: 0.4;
+    }
+    #col-encerrado .card-nome-atividade {
+      text-decoration: line-through;
+      color: var(--texto-muto);
+    }
+
+    .sem-atividades {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--texto-muto);
+      font-size: 14px;
+      font-style: italic;
+      border: 2px dashed rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topo-painel">
+    <div class="topo-esq">
+      <img src="cchla-logo.jpg" alt="Logo CCHLA" class="logo-cchla" onerror="this.style.display='none'">
+      <div class="topo-titulo">
+        <h1>Ocupação dos Auditórios</h1>
+        <p>Painel Informativo de Portaria — CCHLA</p>
+      </div>
+    </div>
+    
+    <div class="relogio-container">
+      <div id="relogio">00:00:00</div>
+      <div id="data-atual">Carregando data...</div>
+      <div class="controles-painel">
+        <select id="seletor-data" class="seletor-dark"></select>
+        <select id="seletor-auditorio" class="seletor-dark">
+          <option value="TODOS" selected>Todos os Auditórios</option>
+          <option value="AUDITÓRIO A">Auditório A</option>
+          <option value="AUDITÓRIO B">Auditório B</option>
+          <option value="AUDITÓRIO C">Auditório C</option>
+          <option value="AUDITÓRIO D">Auditório D</option>
+          <option value="AUDITÓRIO E">Auditório E</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="quadro-colunas">
+    
+    <div class="coluna" id="col-preparacao">
+      <div class="coluna-header">
+        <span id="titulo-iniciar">A Iniciar hoje</span>
+        <span class="contador" id="count-preparacao">0</span>
+      </div>
+      <div class="lista-cards" id="lista-preparacao"></div>
+    </div>
+
+    <div class="coluna" id="col-andamento">
+      <div class="coluna-header">
+        <span>Em Execução</span>
+        <span class="contador" id="count-andamento">0</span>
+      </div>
+      <div class="lista-cards" id="lista-andamento"></div>
+    </div>
+
+    <div class="coluna" id="col-encerrado">
+      <div class="coluna-header">
+        <span>Encerradas</span>
+        <span class="contador" id="count-encerrado">0</span>
+      </div>
+      <div class="lista-cards" id="lista-encerrado"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_URL = '/api/obterEventosCalendario';
+    let cacheEventosGlobais = [];
+
+    // Matriz de Cores sintonizada com o calendário público geral do CCHLA
+    function obterCorAuditorio(nomeAuditorio, nomeAtividade) {
+      let n = (nomeAuditorio || "").toUpperCase();
+      let ativ = (nomeAtividade || "").toUpperCase();
+      
+      if(n.includes("MANUTENÇÃO") || n.includes("MANUTENCAO") || ativ.includes("MANUTENÇÃO") || ativ.includes("MANUTENCAO")) {
+        return "#991b1b"; // Vermelho escuro de manutenção operacional
+      }
+      if(n === "AUDITORIO A" || n === "AUDITÓRIO A") return "#ff0000"; 
+      if(n === "AUDITORIO B" || n === "AUDITÓRIO B") return "#000080"; 
+      if(n === "AUDITORIO C" || n === "AUDITÓRIO C") return "#ffff00"; 
+      if(n === "AUDITORIO D" || n === "AUDITÓRIO D") return "#008000"; 
+      if(n === "AUDITORIO E" || n === "AUDITÓRIO E") return "#4682B4"; 
+      
+      return "#cbd5e1"; 
+    }
+
+    function popularSeletorDias() {
+      const seletor = document.getElementById('seletor-data');
+      const agora = new Date();
+      const ano = agora.getFullYear();
+      const mes = agora.getMonth();
+      const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+      
+      const diaHojeFormatoStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+
+      for (let i = 1; i <= diasNoMes; i++) {
+        const dataLoop = new Date(ano, mes, i);
+        const isoValue = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        
+        const diaSemanaTexto = dataLoop.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+        const textoVisivel = `${String(i).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')} - ${diaSemanaTexto}`;
+        
+        const opt = document.createElement('option');
+        opt.value = isoValue;
+        opt.innerText = textoVisivel;
+        
+        if (isoValue === diaHojeFormatoStr) {
+          opt.selected = true;
+          opt.innerText += " (Hoje)";
+        }
+        seletor.appendChild(opt);
+      }
+
+      seletor.addEventListener('change', () => processarEPainelar(cacheEventosGlobais));
+      document.getElementById('seletor-auditorio').addEventListener('change', () => processarEPainelar(cacheEventosGlobais));
+    }
+
+    function atualizarRelogio() {
+      const agora = new Date();
+      const h = String(agora.getHours()).padStart(2, '0');
+      const m = String(agora.getMinutes()).padStart(2, '0');
+      const s = String(agora.getSeconds()).padStart(2, '0');
+      document.getElementById('relogio').innerText = `${h}:${m}:${s}`;
+      
+      const opcoesData = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      let dataStringBruta = agora.toLocaleDateString('pt-BR', opcoesData);
+      
+      dataStringBruta = dataStringBruta.replace(/ De /gi, ' de ');
+      document.getElementById('data-atual').innerText = dataStringBruta;
+    }
+    
+    popularSeletorDias();
+    setInterval(atualizarRelogio, 1000);
+    atualizarRelogio();
+
+    async function buscarEventos() {
+      try {
+        const resposta = await fetch(API_URL);
+        if (!resposta.ok) throw new Error("Erro na comunicação com a API");
+        
+        cacheEventosGlobais = await resposta.json();
+        processarEPainelar(cacheEventosGlobais);
+      } catch (error) {
+        console.warn("API Offline. Ativando mock estrutural de contingência.");
+        cacheEventosGlobais = gerarContingenciaMock();
+        processarEPainelar(cacheEventosGlobais);
+      }
+    }
+
+    function processarEPainelar(eventos) {
+      if(!eventos || eventos.length === 0) return;
+
+      const agora = new Date();
+      const dataSelecionadaIso = document.getElementById('seletor-data').value; 
+      const auditorioSelecionado = document.getElementById('seletor-auditorio').value;
+
+      const isHoje = dataSelecionadaIso === `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+      document.getElementById('titulo-iniciar').innerText = isHoje ? "A Iniciar hoje" : "A Iniciar (Agendados)";
+
+      const containers = {
+        preparacao: document.getElementById('lista-preparacao'),
+        andamento: document.getElementById('lista-andamento'),
+        encerrado: document.getElementById('lista-encerrado')
+      };
+      
+      Object.values(containers).forEach(c => c.innerHTML = '');
+      let contadores = { preparacao: 0, andamento: 0, encerrado: 0 };
+
+      // --- CAMADA 1: FILTRAGEM RIGIDA (DATA, SELEÇÃO E EXCLUSÃO DE FERIADOS) ---
+      let filtrados = eventos.filter(ev => {
+        // Validação de integridade do payload
+        if (!ev.Início || !ev.Fim) return false;
+
+        // Filtro de Data selecionada no Dropdown
+        const dataEvStr = ev.Início.substring(0, 10);
+        if (dataEvStr !== dataSelecionadaIso) return false;
+
+        // Filtro de Auditório selecionado no Dropdown
+        if (auditorioSelecionado !== "TODOS") {
+          let audNorm = (ev.Auditório || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+          let filtroNorm = auditorioSelecionado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+          if (audNorm !== filtroNorm) return false;
+        }
+
+        // BLOQUEIO SEGURO OBRIGATÓRIO: Não exibe Feriados ou Ponto Facultativo
+        let audUpper = (ev.Auditório || "").toUpperCase();
+        let ativUpper = (ev.Atividade || "").toUpperCase();
+        if (audUpper.includes("FERIADO") || ativUpper.includes("FERIADO") || audUpper.includes("FACULTATIVO") || ativUpper.includes("FACULTATIVO")) {
+          return false;
+        }
+
+        return true;
+      });
+
+      // --- CAMADA 2: ALGORITMO DE ORDENAÇÃO POR GRUPO (AUDITÓRIO A->E + MANUTENÇÃO NO FINAL) ---
+      filtrados.sort((a, b) => {
+        let audA = (a.Auditório || "").toUpperCase();
+        let audB = (b.Auditório || "").toUpperCase();
+
+        // Ordenação alfabética dos auditórios
+        if (audA < audB) return -1;
+        if (audA > audB) return 1;
+
+        // Se for o mesmo auditório, agrupa a "Manutenção" obrigatoriamente no final da fila dele
+        let ativA = (a.Atividade || "").toUpperCase();
+        let ativB = (b.Atividade || "").toUpperCase();
+        let isManutA = (ativA.includes("MANUTENÇÃO") || ativA.includes("MANUTENCAO") || audA.includes("MANUTENÇÃO") || audA.includes("MANUTENCAO")) ? 1 : 0;
+        let isManutB = (ativB.includes("MANUTENÇÃO") || ativB.includes("MANUTENCAO") || audB.includes("MANUTENÇÃO") || audB.includes("MANUTENCAO")) ? 1 : 0;
+
+        if (isManutA !== isManutB) {
+          return isManutA - isManutB; // Atividades normais (0) sobem, Manutenção (1) desce
+        }
+
+        // Critério de desempate interno por horário cronológico de início
+        return new Date(a.Início) - new Date(b.Início);
+      });
+
+      // --- CAMADA 3: DISTRIBUIÇÃO E IMPRESSÃO DOS CARDS KANBAN ---
+      filtrados.forEach(ev => {
+        const objetoInicio = new Date(ev.Início);
+        const objetoFim = new Date(ev.Fim);
+
+        const hIniExibicao = ev.Início.substring(11, 16);
+        const hFimExibicao = ev.Fim.substring(11, 16);
+        const corDoAuditorio = obterCorAuditorio(ev.Auditório, ev.Atividade);
+
+        if (agora < objetoInicio) {
+          contadores.preparacao++;
+          containers.preparacao.innerHTML += `
+            <div class="card-atividade" style="border-left-color: ${corDoAuditorio}; border-right-color: ${corDoAuditorio}">
+              <div class="card-auditorio">📍 ${ev.Auditório}</div>
+              <h3 class="card-nome-atividade">${ev.Atividade}</h3>
+              <div class="card-meta">
+                <span>Setor: <b>${ev.Departamento || '-'}</b></span>
+                <span class="card-horario">${hIniExibicao} às ${hFimExibicao}</span>
+              </div>
+            </div>`;
+        } 
+        else if (agora >= objetoInicio && agora <= objetoFim) {
+          contadores.andamento++;
+          
+          const tempoTotal = objetoFim - objetoInicio;
+          const tempoDecorrido = agora - objetoInicio;
+          const porcentagemProgresso = Math.max(0, Math.min(100, (tempoDecorrido / tempoTotal) * 100));
+
+          containers.andamento.innerHTML += `
+            <div class="card-atividade" style="border-left-color: ${corDoAuditorio}; border-right-color: ${corDoAuditorio}">
+              <div class="card-auditorio">📍 ${ev.Auditório}</div>
+              <h3 class="card-nome-atividade">${ev.Atividade}</h3>
+              <div class="card-meta">
+                <span>Solicitante: <b>${ev.Solicitante || '-'}</b></span>
+                <span class="card-horario" style="background-color:#10b981;">${hIniExibicao} às ${hFimExibicao}</span>
+              </div>
+              <div class="timeline-container">
+                <div class="timeline-barra" style="width: ${porcentagemProgresso}%"></div>
+              </div>
+            </div>`;
+        } 
+        else {
+          contadores.encerrado++;
+          containers.encerrado.innerHTML += `
+            <div class="card-atividade" style="border-left-color: ${corDoAuditorio}; border-right-color: ${corDoAuditorio}">
+              <div class="card-auditorio">📍 ${ev.Auditório}</div>
+              <h3 class="card-nome-atividade">${ev.Atividade}</h3>
+              <div class="card-meta">
+                <span>Status: <b>Concluído</b></span>
+                <span class="card-horario" style="background-color:#4b5563;">${hIniExibicao} às ${hFimExibicao}</span>
+              </div>
+            </div>`;
+        }
+      });
+
+      document.getElementById('count-preparacao').innerText = contadores.preparacao;
+      document.getElementById('count-andamento').innerText = contadores.andamento;
+      document.getElementById('count-encerrado').innerText = contadores.encerrado;
+
+      Object.keys(containers).forEach(key => {
+        if (contadores[key] === 0) {
+          containers[key].innerHTML = `<div class="sem-atividades">Nenhuma atividade para esta coluna no dia/local selecionado.</div>`;
+        }
+      });
+    }
+
+    // --- MOCK DE CONTINGÊNCIA ATUALIZADO (Inclui Manutenção fora de ordem para testar o agrupamento) ---
+    function gerarContingenciaMock() {
+      const dataSelecionadaIso = document.getElementById('seletor-data').value;
+      const agora = new Date();
+      
+      const formatarHora = (offsetHoras) => {
+        const d = new Date(agora.getTime() + (offsetHoras * 60 * 60 * 1000));
+        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      };
+
+      return [
+        {
+          Auditório: "Auditório B",
+          Atividade: "Banca de Defesa de Doutorado PPgL",
+          Início: `${dataSelecionadaIso}T${formatarHora(-1)}:00`,
+          Fim: `${dataSelecionadaIso}T${formatarHora(2)}:00`,
+          Solicitante: "Doutoranda Ana Souza",
+          Departamento: "PPgL - Linguística"
+        },
+        {
+          Auditório: "Auditório A",
+          Atividade: "Manutenção Corretiva de Ar Condicionado",
+          Início: `${dataSelecionadaIso}T${formatarHora(1)}:00`,
+          Fim: `${dataSelecionadaIso}T${formatarHora(3)}:00`,
+          Solicitante: "Técnico Especializado",
+          Departamento: "Gerência de Engenharia"
+        },
+        {
+          Auditório: "Auditório A",
+          Atividade: "Reunião de Colegiado Acadêmico",
+          Início: `${dataSelecionadaIso}T${formatarHora(-2)}:00`,
+          Fim: `${dataSelecionadaIso}T${formatarHora(-0.5)}:00`,
+          Solicitante: "Prof. Dr. Amílcar",
+          Departamento: "Departamento de Letras"
+        },
+        {
+          Auditório: "Auditório C",
+          Atividade: "Palestra: Inteligência Artificial na Educação",
+          Início: `${dataSelecionadaIso}T${formatarHora(1.5)}:00`,
+          Fim: `${dataSelecionadaIso}T${formatarHora(4)}:00`,
+          Solicitante: "Coordenação Acadêmica",
+          Departamento: "Direção do Centro"
+        },
+        {
+          Auditório: "Auditório B",
+          Atividade: "Feriado Estadual",
+          Início: `${dataSelecionadaIso}T06:00:00`,
+          Fim: `${dataSelecionadaIso}T22:00:00`,
+          Solicitante: "Governo RN",
+          Departamento: "Institucional"
+        }
+      ];
+    }
+
+    let ultimoDiaVerificado = new Date().getDate();
+
+    function verificarMudancaDeDia() {
+      const hoje = new Date().getDate();
+      if (hoje !== ultimoDiaVerificado) {
+        ultimoDiaVerificado = hoje;
+        const seletor = document.getElementById('seletor-data');
+        seletor.innerHTML = '';
+        popularSeletorDias();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      buscarEventos();
+      setInterval(() => {
+        verificarMudancaDeDia();
+        buscarEventos();
+      }, 30000); 
+    });
+  </script>
+</body>
+</html>

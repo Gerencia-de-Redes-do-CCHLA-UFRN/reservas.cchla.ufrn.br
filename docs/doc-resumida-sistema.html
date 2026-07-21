@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Técnica - Sistema CCHLA</title>
+    <style>
+        :root {
+            --azul-principal: #1653A1;
+            --texto-escuro: #334155;
+            --texto-claro: #64748b;
+            --borda: #cbd5e1;
+            --fundo-tabela: #f1f5f9;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--texto-escuro);
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: var(--azul-principal);
+            font-size: 28px;
+            border-bottom: 3px solid var(--azul-principal);
+            padding-bottom: 10px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: var(--azul-principal);
+            font-size: 22px;
+            border-bottom: 1px solid var(--borda);
+            padding-bottom: 8px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #0f172a;
+            font-size: 18px;
+            margin-top: 25px;
+        }
+        p, li {
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid var(--borda);
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: var(--fundo-tabela);
+            font-weight: 700;
+            color: var(--azul-principal);
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #f8fafc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            border: 1px solid #e2e8f0;
+        }
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid var(--borda);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13.5px;
+        }
+        .highlight {
+            font-weight: 600;
+            color: var(--azul-principal);
+        }
+        /* Configurações específicas para exportação em PDF */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+                font-size: 12pt;
+            }
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+            table, tr, td, th, pre {
+                page-break-inside: avoid;
+            }
+            h1 {
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>DOCUMENTAÇÃO TÉCNICA UNIFICADA: SISTEMA DE GESTÃO DE RESERVAS CCHLA</h1>
+
+    <h2>1. Engenharia de Software e Análise de Requisitos</h2>
+
+    <h3>1.1. Visão Geral e Processos de Negócio</h3>
+    <p>O Sistema de Gestão de Reservas CCHLA foi projetado para modernizar, auditar e proteger o agendamento de espaços físicos. O processo de negócio central consiste em receber solicitações da comunidade acadêmica, cruzar essas solicitações com bloqueios institucionais (manutenções e feriados) e fornecer à secretaria uma interface administrativa de aprovação, blindada por uma arquitetura Zero-Trust (Serverless).</p>
+
+    <h3>1.2. Atores do Sistema</h3>
+    <ul>
+        <li><span class="highlight">Solicitante (Público):</span> Membro da comunidade (aluno, professor, técnico). Não possui credenciais de login. Interage com o sistema exclusivamente para enviar pedidos, consultar o calendário visual e rastrear seu Ticket.</li>
+        <li><span class="highlight">Secretaria (Administrador):</span> Operador do sistema. Possui login protegido por JWT. Tem privilégios para aprovar, reprovar, criar e excluir reservas, além de gerenciar bloqueios e manutenções.</li>
+        <li><span class="highlight">Sistema (Backend):</span> Ator invisível responsável por validar cruzamentos de horários, assinar ações de auditoria e barrar requisições não autorizadas.</li>
+    </ul>
+
+    <h3>1.3. Requisitos Funcionais (RF)</h3>
+    <ul>
+        <li><b>RF01:</b> O sistema deve permitir que solicitantes enviem pedidos de reserva únicos, semanais ou personalizados.</li>
+        <li><b>RF02:</b> O sistema deve gerar um Ticket único (padrão Mercosul) para agrupar múltiplas reservas da mesma solicitação.</li>
+        <li><b>RF03:</b> A secretaria deve ter um painel para visualizar, aprovar ou reprovar reservas em lote ou individualmente.</li>
+        <li><b>RF04:</b> O sistema deve alertar a secretaria caso uma nova aprovação entre em conflito de horário com uma reserva previamente aprovada ou feriado.</li>
+        <li><b>RF05:</b> O sistema deve fornecer uma rota pública para acompanhamento de status via Ticket.</li>
+        <li><b>RF06:</b> O sistema deve desconectar automaticamente usuários ociosos após 30 minutos.</li>
+        <li><b>RF07:</b> O sistema deve restringir as reservas de auditórios ao intervalo estrito das 06:00 às 23:00.</li>
+        <li><b>RF08:</b> O backend deve agrupar novas solicitações sob um mesmo Ticket caso pertençam ao mesmo solicitante (Matrícula + E-mail ou Telefone).</li>
+        <li><b>RF09:</b> O frontend deve exibir dinamicamente os blocos de horários livres residuais do dia selecionado em caso de colisão temporal.</li>
+        <li><b>RF10:</b> O sistema deve barrar de forma intransponível qualquer tentativa de reserva que colida com bloqueios de manutenção ativa.</li>
+    </ul>
+
+    <h3>1.4. Requisitos Não Funcionais (RNF)</h3>
+    <ul>
+        <li><b>RNF01:</b> A arquitetura deve ser Serverless (Google Cloud Functions / Firebase).</li>
+        <li><b>RNF02:</b> A segurança de rotas administrativas deve utilizar autenticação via JWT (JSON Web Token), sem exposição de SDK no frontend.</li>
+        <li><b>RNF03:</b> O frontend deve ser distribuído em múltiplos sites (Multisite Hosting) para isolamento de aplicações.</li>
+        <li><b>RNF04:</b> O banco de dados deve ser NoSQL orientado a documentos (Firestore).</li>
+        <li><b>RNF05:</b> Credenciais e chaves de API não devem ser trafegadas ou expostas no código cliente (Frontend).</li>
+    </ul>
+
+    <h3>1.5. Fluxo do Sistema (User Flow)</h3>
+    <ul>
+        <li><b>Fluxo de Solicitação:</b> Usuário acessa formulário &rarr; Preenche dados &rarr; Adiciona locais e horários ao "carrinho" &rarr; Resolve conflitos apontados pelo sistema &rarr; Submete &rarr; Recebe Ticket e link de WhatsApp.</li>
+        <li><b>Fluxo de Avaliação:</b> Secretaria faz login &rarr; Backend valida JWT &rarr; Painel carrega dados &rarr; Secretaria visualiza alertas de colisão &rarr; Secretaria marca como Aprovado/Reprovado (com motivo) &rarr; Backend assina a ação (IP/Email) e grava no banco.</li>
+        <li><b>Fluxo de Acompanhamento:</b> Usuário acessa tela de acompanhamento &rarr; Digita o Ticket &rarr; Backend público filtra e devolve dados essenciais &rarr; Usuário visualiza o status.</li>
+    </ul>
+
+    <h2>2. Banco de Dados (Firestore NoSQL)</h2>
+
+    <h3>2.1. Características Gerais</h3>
+    <p>O banco de dados opera em ambiente Serverless no Google Cloud (Firestore). A estrutura é não-relacional, otimizada para alta velocidade de leitura (Read-Heavy). O design utiliza uma única coleção "flat" (plana), eliminando a necessidade de "Joins" complexos e reduzindo custos operacionais.</p>
+
+    <h3>2.2. Estrutura da Coleção: <code>reservas</code></h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Campo</th>
+                <th>Tipo de Dado</th>
+                <th>Descrição e Comportamento Esperado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id_documento</code></td>
+                <td>String</td>
+                <td>Identificador alfanumérico único gerado pelo Firestore (Chave Primária).</td>
+            </tr>
+            <tr>
+                <td><code>Ticket</code></td>
+                <td>String</td>
+                <td>Código agrupador da solicitação (ex: ABC1D23) ou padrão "SYS-1234".</td>
+            </tr>
+            <tr>
+                <td><code>Auditório</code></td>
+                <td>String</td>
+                <td>Nome do local ou flag "FERIADO".</td>
+            </tr>
+            <tr>
+                <td><code>Atividade</code></td>
+                <td>String</td>
+                <td>Título ou natureza do evento / manutenção acadêmica.</td>
+            </tr>
+            <tr>
+                <td><code>Solicitante</code></td>
+                <td>String</td>
+                <td>Nome completo do responsável. "Sistema / Gestão CCHLA" em bloqueios.</td>
+            </tr>
+            <tr>
+                <td><code>Matrícula</code></td>
+                <td>String</td>
+                <td>Vínculo institucional do solicitante para fins de agrupamento inteligente.</td>
+            </tr>
+            <tr>
+                <td><code>Email</code></td>
+                <td>String</td>
+                <td>Contato eletrônico institucional.</td>
+            </tr>
+            <tr>
+                <td><code>Telefone</code></td>
+                <td>String</td>
+                <td>Contato telefônico formatado no padrão (84) 99999-9999.</td>
+            </tr>
+            <tr>
+                <td><code>Departamento</code></td>
+                <td>String</td>
+                <td>Setor ou centro de lotação de origem do pedido.</td>
+            </tr>
+            <tr>
+                <td><code>Início</code></td>
+                <td>String (ISO)</td>
+                <td>Data e hora de início no formato estrito YYYY-MM-DDTHH:mm.</td>
+            </tr>
+            <tr>
+                <td><code>Fim</code></td>
+                <td>String (ISO)</td>
+                <td>Data e hora de término no formato estrito YYYY-MM-DDTHH:mm.</td>
+            </tr>
+            <tr>
+                <td><code>Status</code></td>
+                <td>String</td>
+                <td>Estado atual: Pendente, Aprovado, Reprovado ou Cancelado.</td>
+            </tr>
+            <tr>
+                <td><code>Motivo_Reprovacao</code></td>
+                <td>String</td>
+                <td>Justificativa obrigatória preenchida em caso de indeferimento.</td>
+            </tr>
+            <tr>
+                <td><code>Data_Solicitacao</code></td>
+                <td>String</td>
+                <td>Data legível de criação gerada no momento da submissão.</td>
+            </tr>
+            <tr>
+                <td><code>timestamp_criacao</code></td>
+                <td>Timestamp</td>
+                <td>Carimbo de tempo Unix gerado pelo servidor para ordenação cronológica.</td>
+            </tr>
+            <tr>
+                <td><code>Status_Alterado_Por</code></td>
+                <td>String</td>
+                <td>Trilha de Auditoria: Email do administrador logado autor da ação.</td>
+            </tr>
+            <tr>
+                <td><code>Status_Alterado_IP</code></td>
+                <td>String</td>
+                <td>Trilha de Auditoria: Endereço IP público do administrador.</td>
+            </tr>
+            <tr>
+                <td><code>Status_Alterado_Data</code></td>
+                <td>String (ISO)</td>
+                <td>Trilha de Auditoria: Momento exato da modificação de status.</td>
+            </tr>
+            <tr>
+                <td><code>TipoBloqueio</code></td>
+                <td>String</td>
+                <td>Classificação de bloqueios de secretaria (Feriado, Manutenção).</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Backend (Cloud Functions / Node.js)</h2>
+
+    <h3>3.1. Visão Geral</h3>
+    <p>O backend atua como uma API RESTful <i>Serverless</i>. Ele intercepta todas as requisições HTTP do frontend, resolve as políticas de CORS (Cross-Origin Resource Sharing) e aplica regras rigorosas de segurança através do <code>firebase-admin</code> antes de permitir operações no Firestore.</p>
+
+    <h3>3.2. Detalhamento de Funções e Métodos</h3>
+    <ul>
+        <li><code>validarTokenAdmin(req)</code> <b>[Middleware Interno]</b>: Extrai o cabeçalho HTTP <code>Authorization: Bearer</code>. Utiliza o Firebase Admin SDK para descriptografar e validar o JWT. Rejeita sem token com 401.</li>
+        <li><code>fazerLogin</code> <b>[POST]</b>: Rota pública de autenticação. Comunica-se Server-to-Server com a API do Identity Toolkit do Google usando a chave <code>IDENTITY_API_KEY</code>.</li>
+        <li><code>checarDisponibilidade</code> <b>[POST]</b>: Devolve os arrays <code>conflitos</code> e <code>agendaCompleta</code>, permitindo ao cliente mapear lacunas livres residuais.</li>
+        <li><code>enviarSolicitacao</code> <b>[POST]</b>: Valida o reCAPTCHA. Varre o banco buscando correspondência de Matrícula + Email para reaproveitar Tickets. Executa gravações atômicas em lote (<code>db.batch()</code>).</li>
+        <li><code>obterEventosCalendario</code> <b>[GET]</b>: Rota pública otimizada que recupera exclusivamente documentos com <code>Status</code> Aprovado, omitindo dados confidenciais.</li>
+        <li><code>adminObterReservas</code> <b>[GET]</b>: Rota protegida. Lê todo o banco de dados. A ordenação cronológica foi programada na memória RAM do Node.js para garantir que dados legados sem timestamp não sejam omitidos.</li>
+        <li><code>adminAtualizarDocumento</code> <b>[POST]</b>: Rota protegida. Injeta automaticamente, pelo lado do servidor, o email do usuário logado no campo <code>Status_Alterado_Por</code>.</li>
+        <li><code>adminCadastrarDocumento</code> <b>[POST]</b>: Rota protegida. Insere carimbos de tempo (<code>serverTimestamp</code>) e a assinatura da secretaria em bloqueios de feriados e manutenções diretas.</li>
+        <li><code>adminExcluirDocumento</code> <b>[POST]</b>: Rota protegida. Contém uma trava rígida (*Hardcoded Privilege*): rejeita a operação com status 403 se o e-mail do token for diferente da credencial de root configurada.</li>
+        <li><code>consultarTicket</code> <b>[POST]</b>: Rota pública. Executa Query exata filtrando pelo Ticket recebido em maiúsculas e devolve apenas os campos essenciais de acompanhamento.</li>
+    </ul>
+
+    <h2>4. Frontend (Aplicações Multisite)</h2>
+
+    <h3>4.1. Visão Geral</h3>
+    <p>Composto por microsserviços estruturados em diretórios modulares independentes rodando Vanilla JavaScript (ES6+). O ecossistema é agnóstico ao banco de dados e não possui SDK do Firebase configurado no lado do cliente, operando via <code>fetch</code>.</p>
+
+    <h3>4.2. Especificidades das Aplicações</h3>
+    <ul>
+        <li><b>Formulário Público:</b> Controla intenções em memória RAM via <code>listaDeReservasGeral</code>. Consome <code>checarDisponibilidade</code> em tempo real. Implementa travas lógicas e união de intervalos para calcular sugestões de horários livres.</li>
+        <li><b>Painel Administrativo:</b> Exige token no <code>sessionStorage</code>. Implementa renderização adaptativa em lote (Batch Rendering), agrupando registros pendentes do mesmo solicitante. Inclui Error Logger que renderiza diagnósticos na interface em caso de falhas críticas.</li>
+        <li><b>Calendário:</b> Inicializa o FullCalendar. A função <code>formatarDataCustom</code> mitiga erros de fuso horário (Timezone Shift), processando as strings ISO textualmente para exibir Feriados na data exata, além de separar blocos <code>allDay</code> da grade horária.</li>
+        <li><b>Acompanhamento:</b> Consome a rota pública <code>consultarTicket</code>. Lê Query Parameters (<code>?ticket=ABC1D23</code>) para abertura direta. Suporta tooltips flutuantes para exibir motivos de reprovação ao hover.</li>
+        <li><b>Funções Globais:</b> <code>iniciarRastreamentoInatividade()</code> reinicia o timer de 30 minutos a cada input e desloga usuários ociosos. <code>formatarDataHoraCompleta()</code> padroniza as respostas de data vindas do NoSQL.</li>
+    </ul>
+
+    <h2>5. Infraestrutura e Sustentação</h2>
+
+    <h3>5.1. Roteiro Histórico de Desafios e Sucessos</h3>
+    <ol>
+        <li><b>Fase 1: Auditoria e Quebra de Client-Side SDK</b><br>
+        <i>Problema:</i> Chaves expostas no HTML permitiam manipulação do banco via console.<br>
+        <i>Sucesso:</i> Transferência de todo o pipeline de negócios para as Cloud Functions. O frontend passou a atuar como um cliente REST cego.</li>
+        <li><b>Fase 2: Implantação de Login API</b><br>
+        <i>Problema:</i> Rejeição de inicialização por uso de prefixos reservados pelo Google (FIREBASE_API_KEY).<br>
+        <i>Sucesso:</i> Isolamento das chaves sob <code>IDENTITY_API_KEY</code> no arquivo <code>.env</code>.</li>
+        <li><b>Fase 3: Estabilização do Painel (CORS e Limitações NoSQL)</b><br>
+        <i>Problema:</i> Bloqueio 401/403 (Preflight OPTIONS). O filtro <code>orderBy</code> do banco omitia dados legados. A injeção de HTML travava a inicialização.<br>
+        <i>Sucesso:</i> Diretiva <code>allUsers</code> e resposta 204 ao OPTIONS. Ordenação cronológica realocada para a memória do Node.js. Listeners injetados em <code>DOMContentLoaded</code>.</li>
+        <li><b>Fase 4: Conserto Visual do Calendário (Timezone Shift)</b><br>
+        <i>Problema:</i> Feriados retrocediam 3h (GMT-3) do <code>new Date()</code>.<br>
+        <i>Sucesso:</i> Reescrita do pipeline de leitura, isolando o parseamento das strings via <code>split('T')</code> ignorando o client timezone.</li>
+    </ol>
+
+    <h2>6. Manual de Deploy Geral do Sistema</h2>
+
+    <h3>6.1. Estrutura de Diretórios Exigida</h3>
+    <p>A topologia modular exige que o repositório local mantenha a seguinte árvore para não quebrar referências relativas:</p>
+<pre>
+📦 Raiz do Projeto
+ ┣ 📂 app-acompanhamento
+ ┣ 📂 app-calendario
+ ┣ 📂 app-formulario
+ ┣ 📂 app-manutencao
+ ┣ 📂 app-painel
+ ┣ 📂 functions
+ ┃ ┣ 📜 index.js
+ ┃ ┗ 📜 .env
+ ┣ 📜 .firebaserc
+ ┗ 📜 firebase.json
+</pre>
+
+    <h3>6.2. Comandos de Implantação</h3>
+    <p>Para implantar, utilize a Interface de Linha de Comando do Firebase (<code>firebase-tools</code>):</p>
+    <ul>
+        <li><b>Deploy Global (Backend e todos os Frontends):</b><br> <code>firebase deploy</code></li>
+        <li><b>Deploy Exclusivo de Frontend (Multisite):</b><br> <code>firebase deploy --only hosting</code></li>
+        <li><b>Deploy Granular por Aplicação:</b><br> 
+            <code>firebase deploy --only hosting:painel</code><br>
+            <code>firebase deploy --only hosting:formulario-reservas</code><br>
+            <code>firebase deploy --only hosting:calendario</code><br>
+            <code>firebase deploy --only hosting:acompanhamento</code>
+        </li>
+        <li><b>Deploy Exclusivo de Regras de Negócio (Backend):</b><br> <code>firebase deploy --only functions</code></li>
+    </ul>
+
+</body>
+</html>

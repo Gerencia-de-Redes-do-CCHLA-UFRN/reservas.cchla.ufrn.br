@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCHLAfense - Módulo de Segurança</title>
+    <!-- Chart.js para os gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --wordfence-blue: #223f82;
+            --wordfence-bg: #f5f5f5;
+            --azul-royal: #1653A1;
+            --borda-suave: #cbd5e1;
+            --texto-escuro: #334155;
+            --tabela-bg: #222222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--wordfence-bg);
+            margin: 0;
+            padding: 20px;
+            color: var(--texto-escuro);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--borda-suave);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--wordfence-blue);
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header-logo {
+            font-weight: bold;
+            font-size: 28px;
+            color: var(--wordfence-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .voltar-btn {
+            padding: 8px 15px;
+            background-color: #e2e8f0;
+            color: var(--texto-escuro);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .voltar-btn:hover {
+            background-color: #cbd5e1;
+        }
+
+        /* Tabelas estilo Wordfence */
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th {
+            background-color: var(--tabela-bg);
+            color: white;
+            text-align: left;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .btn-update {
+            background-color: var(--wordfence-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-update:hover {
+            background-color: #1a3066;
+        }
+
+        /* Limit Login Attempts visual */
+        .limit-login-box {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .circle-stat {
+            width: 150px;
+            height: 150px;
+            border: 10px solid #8ef2b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            margin: 20px auto;
+            color: #333;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Configuração (Checkboxes) */
+        .config-box {
+            background: #fdfdfd;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 30px;
+        }
+
+        .config-box label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .config-box input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .status {
+            color: #008000;
+            font-size: 14px;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="header-logo">🛡️ CCHLAfense</div>
+        <a href="painel.html" class="voltar-btn">Voltar ao Painel</a>
+    </div>
+
+    <!-- Limite Login Attempts Style Box -->
+    <div class="limit-login-box">
+        <div style="text-align: right; font-size: 13px; color: #66cc99;">✔ Cloud protection enabled</div>
+        <div class="circle-stat" id="totalFailuresToday">0</div>
+        <h3>Tentativas de acesso que falharam hoje</h3>
+        
+        <div class="chart-container">
+            <canvas id="failuresChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Wordfence Style Tables -->
+    <h2 class="section-title">Os 5 IPs mais bloqueados (com mais falhas)</h2>
+    <table id="tableIps">
+        <thead>
+            <tr>
+                <th>IP</th>
+                <th>País</th>
+                <th>Contagem de bloqueios/falhas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="3" style="text-align:center;">Carregando...</td></tr>
+        </tbody>
+    </table>
+    <button class="btn-update" onclick="carregarStats()">Atualizar IPs bloqueados</button>
+
+    <h2 class="section-title">Os 5 acessos com mais falhas</h2>
+    <table id="tableUsers">
+        <thead>
+            <tr>
+                <th>Nome de usuário</th>
+                <th>Tentativas de acesso (falhas)</th>
+                <th>Usuário existente</th>
+                <th>Última tentativa</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="4" style="text-align:center;">Carregando...</td></tr>
+        </tbody>
+    </table>
+    <button class="btn-update" onclick="carregarStats()">Atualizar opções de segurança</button>
+
+    <!-- Configurações Granulares -->
+    <h2 class="section-title">Configuração de Monitoramento Global</h2>
+    <div class="config-box">
+        <label>
+            <input type="checkbox" id="chkTodoProjeto" onchange="toggleCheckboxes()"> Monitorar TODO O PROJETO (Extensivo)
+        </label>
+        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+        <div id="subCheckboxes">
+            <label><input type="checkbox" id="chkCalendario"> Calendário Público</label>
+            <label><input type="checkbox" id="chkFormularioPublico"> Formulário Público</label>
+            <label><input type="checkbox" id="chkAcompanhamento"> Acompanhamento Público</label>
+            <label><input type="checkbox" id="chkPainel"> Painel Admin</label>
+            <label><input type="checkbox" id="chkFeriados"> Feriados</label>
+            <label><input type="checkbox" id="chkFormularioPainel"> Formulário dentro do Painel</label>
+        </div>
+        <button class="btn-update" style="margin-top:15px;" onclick="salvarConfig()">Salvar Configurações</button>
+        <span id="saveStatus" style="color: green; margin-left: 15px; display: none;">Salvo com sucesso!</span>
+    </div>
+
+</div>
+
+<script>
+    const token = sessionStorage.getItem('cchla_admin_token');
+    if (!token) {
+        window.location.href = 'index.html';
+    }
+
+    let chartInstance = null;
+
+    async function carregarStats() {
+        try {
+            const res = await fetch('/api/security/stats', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            
+            if (data.sucesso) {
+                // Preencher tabela de IPs
+                const tbodyIps = document.querySelector('#tableIps tbody');
+                tbodyIps.innerHTML = '';
+                if (data.topIps.length === 0) {
+                    tbodyIps.innerHTML = '<tr><td colspan="3">Não há registros.</td></tr>';
+                } else {
+                    data.topIps.forEach(ip => {
+                        tbodyIps.innerHTML += `<tr><td>${ip.ip}</td><td>${ip.country || 'Desconhecido'}</td><td>${ip.count}</td></tr>`;
+                    });
+                }
+
+                // Preencher tabela de usuários
+                const tbodyUsers = document.querySelector('#tableUsers tbody');
+                tbodyUsers.innerHTML = '';
+                if (data.topUsers.length === 0) {
+                    tbodyUsers.innerHTML = '<tr><td colspan="4">Não há registros.</td></tr>';
+                } else {
+                    data.topUsers.forEach(u => {
+                        const dataFormatada = new Date(u.lastAttempt).toLocaleString('pt-BR');
+                        tbodyUsers.innerHTML += `<tr><td>${u.username}</td><td>${u.count}</td><td>${u.userExists ? 'Sim' : 'Não'}</td><td>${dataFormatada}</td></tr>`;
+                    });
+                }
+
+                // Atualizar gráfico
+                atualizarGrafico(data.dailyFailures);
+            } else {
+                if (data.mensagem.includes("Acesso negado")) {
+                    alert("Acesso negado. Apenas o administrador root pode visualizar esta página.");
+                    window.location.href = 'painel.html';
+                }
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function atualizarGrafico(dailyFailures) {
+        // Se não tiver dados, cria array vazio para o gráfico não quebrar
+        const labels = dailyFailures.map(d => d.date);
+        const data = dailyFailures.map(d => d.count);
+        
+        // Pega as falhas de hoje para o contador circular
+        const hoje = new Date().toISOString().split('T')[0];
+        const falhasHoje = dailyFailures.find(d => d.date === hoje)?.count || 0;
+        document.getElementById('totalFailuresToday').innerText = falhasHoje;
+
+        if (chartInstance) chartInstance.destroy();
+
+        const ctx = document.getElementById('failuresChart').getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels.length > 0 ? labels : [hoje],
+                datasets: [{
+                    label: 'Tentativas de acesso que falharam',
+                    data: data.length > 0 ? data : [0],
+                    borderColor: '#36A2EB',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, suggestedMax: 5 }
+                }
+            }
+        });
+    }
+
+    async function carregarConfig() {
+        try {
+            const res = await fetch('/api/security/config', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            
+            if (data.sucesso && data.config) {
+                document.getElementById('chkTodoProjeto').checked = data.config.monitorarTodoProjeto;
+                document.getElementById('chkCalendario').checked = data.config.monitorarCalendarioPublico;
+                document.getElementById('chkFormularioPublico').checked = data.config.monitorarFormularioPublico;
+                document.getElementById('chkAcompanhamento').checked = data.config.monitorarAcompanhamentoPublico;
+                document.getElementById('chkPainel').checked = data.config.monitorarPainel;
+                document.getElementById('chkFeriados').checked = data.config.monitorarFeriados;
+                document.getElementById('chkFormularioPainel').checked = data.config.monitorarFormularioPainel;
+                
+                toggleCheckboxes();
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function toggleCheckboxes() {
+        const isGlobal = document.getElementById('chkTodoProjeto').checked;
+        const subChecks = document.querySelectorAll('#subCheckboxes input[type="checkbox"]');
+        subChecks.forEach(chk => {
+            chk.disabled = isGlobal;
+            if (isGlobal) chk.checked = true;
+        });
+    }
+
+    async function salvarConfig() {
+        const payload = {
+            monitorarTodoProjeto: document.getElementById('chkTodoProjeto').checked,
+            monitorarCalendarioPublico: document.getElementById('chkCalendario').checked,
+            monitorarFormularioPublico: document.getElementById('chkFormularioPublico').checked,
+            monitorarAcompanhamentoPublico: document.getElementById('chkAcompanhamento').checked,
+            monitorarPainel: document.getElementById('chkPainel').checked,
+            monitorarFeriados: document.getElementById('chkFeriados').checked,
+            monitorarFormularioPainel: document.getElementById('chkFormularioPainel').checked
+        };
+
+        try {
+            const res = await fetch('/api/security/config', {
+                method: 'POST',
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.sucesso) {
+                const s = document.getElementById('saveStatus');
+                s.style.display = 'inline';
+                setTimeout(() => s.style.display = 'none', 3000);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao salvar.');
+        }
+    }
+
+    // Inicialização
+    carregarStats();
+    carregarConfig();
+
+</script>
+</body>
+</html>
