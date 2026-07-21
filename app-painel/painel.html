@@ -875,19 +875,7 @@
             if (!gruposPorEmail[email]) {
               gruposPorEmail[email] = { email, solicitante: doc.Solicitante || '', itens: [] };
             }
-            const rawInicio = doc.Início || doc.data_inicio || '';
-            const rawFim = doc.Fim || doc.data_fim || '';
-            let periodo = '';
-            if (rawInicio && rawFim) {
-              const dI = rawInicio.substring(0, 10);
-              const dF = rawFim.substring(0, 10);
-              if (dI === dF) {
-                const dataBr = dI.split('-').reverse().join('/');
-                periodo = `${dataBr} das ${rawInicio.substring(11, 16)} às ${rawFim.substring(11, 16)}`;
-              } else {
-                periodo = `${formatarDataGMT3(rawInicio)} — ${formatarDataGMT3(rawFim)}`;
-              }
-            }
+            const periodo = formatarPeriodo(doc);
             gruposPorEmail[email].itens.push({
               ticket: doc.Ticket || '',
               auditorio: doc.Auditório || '',
@@ -1072,10 +1060,25 @@
       }
     };
 
+    function formatarPeriodo(doc) {
+      const rawInicio = doc.Início || doc.data_inicio || '';
+      const rawFim = doc.Fim || doc.data_fim || '';
+      if (!rawInicio || !rawFim) return '';
+      const sI = String(rawInicio);
+      const sF = String(rawFim);
+      const dI = sI.includes('T') ? sI.split('T')[0] : sI.substring(0, 10);
+      const dF = sF.includes('T') ? sF.split('T')[0] : sF.substring(0, 10);
+      if (dI === dF) {
+        const dataBr = dI.split('-').reverse().join('/');
+        const hI = sI.includes('T') ? sI.split('T')[1].substring(0,5) : (sI.includes(' ') ? sI.split(' ')[1].substring(0,5) : '');
+        const hF = sF.includes('T') ? sF.split('T')[1].substring(0,5) : (sF.includes(' ') ? sF.split(' ')[1].substring(0,5) : '');
+        return `${dataBr} das ${hI} às ${hF}`;
+      }
+      return `${formatarDataGMT3(sI)} — ${formatarDataGMT3(sF)}`;
+    }
+
     async function enviarNotificacaoStatus(doc) {
-      const dataInicio = formatarDataGMT3(doc.Início || doc.data_inicio || '');
-      const dataFim = formatarDataGMT3(doc.Fim || doc.data_fim || '');
-      const periodo = dataInicio !== '-' ? `${dataInicio} — ${dataFim}` : '';
+      const periodo = formatarPeriodo(doc);
       try {
         await fetch('/api/notificar', {
           method: 'POST',
