@@ -180,6 +180,60 @@ function statusHtml(data) {
 </html>`;
 }
 
+function statusGrupoHtml(data) {
+  const { solicitante, itens } = data;
+
+  const statusCount = {};
+  itens.forEach(i => { statusCount[i.status] = (statusCount[i.status] || 0) + 1; });
+  const resumo = Object.entries(statusCount)
+    .map(([s, c]) => `${c} ${s === 'Aprovado' ? 'aprovada(s)' : s === 'Reprovado' ? 'reprovada(s)' : 'pendente(s)'}`)
+    .join(', ');
+
+  const linhas = itens.map(item => {
+    const cor = item.status === 'Aprovado' ? '#16a34a' : item.status === 'Reprovado' ? '#dc2626' : '#ca8a04';
+    const motivoExtra = item.status === 'Reprovado' && item.motivo ? `<br><small style="color:#991b1b;">Motivo: ${item.motivo}</small>` : '';
+    return `<tr>
+      <td style="padding:10px;border:1px solid #e5e7eb;font-weight:600;">${item.ticket}</td>
+      <td style="padding:10px;border:1px solid #e5e7eb;">${item.auditorio}</td>
+      <td style="padding:10px;border:1px solid #e5e7eb;">${item.atividade}</td>
+      <td style="padding:10px;border:1px solid #e5e7eb;white-space:nowrap;">${item.data_inicio}</td>
+      <td style="padding:10px;border:1px solid #e5e7eb;font-weight:700;color:${cor};">${item.status}${motivoExtra}</td>
+    </tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><style>${style}</style></head>
+<body>
+  <div class="card">
+    <h1>Atualização em Lote das Solicitações</h1>
+    <p>Olá, <strong>${solicitante}</strong>.</p>
+    <p>A secretaria processou suas solicitações de reserva. Confira o resultado de cada uma:</p>
+    <p style="font-size:15px;font-weight:600;color:#12519e;">${resumo}</p>
+    <div class="details-box" style="padding:0;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead>
+          <tr style="background:#f1f5f9;text-align:left;">
+            <th style="padding:10px;border:1px solid #e5e7eb;">Ticket</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;">Local</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;">Atividade</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;">Período</th>
+            <th style="padding:10px;border:1px solid #e5e7eb;">Status</th>
+          </tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>
+    <div class="btn-container">
+      <a href="https://reservas.cchla.ufrn.br/acompanhamento?ticket=${itens[0].ticket}" class="btn">Acompanhar no Site</a>
+    </div>
+    <hr>
+    <div class="footer">Secretaria do Centro de Ciências Humanas, Letras e Artes (CCHLA) — UFRN</div>
+  </div>
+</body>
+</html>`;
+}
+
 exports.enviarConfirmacao = async (data) => {
   await transporter.sendMail({
     from: '"Secretaria CCHLA - Reservas" <mensageiro@cchla.ufrn.br>',
@@ -197,5 +251,20 @@ exports.enviarStatusUpdate = async (data) => {
     cc: 'reservascchlaufrn@gmail.com, mensageiro@cchla.ufrn.br',
     subject: `Status da Solicitação - Ticket: ${data.ticket}`,
     html: statusHtml(data)
+  });
+};
+
+exports.enviarStatusUpdateGrupo = async (data) => {
+  const tickets = [...new Set(data.itens.map(i => i.ticket))];
+  const subject = tickets.length === 1
+    ? `Status da Solicitação - Ticket: ${tickets[0]}`
+    : `Atualização em Lote das suas Solicitações (${tickets.length} registros)`;
+
+  await transporter.sendMail({
+    from: '"Secretaria CCHLA - Reservas" <mensageiro@cchla.ufrn.br>',
+    to: data.email,
+    cc: 'reservascchlaufrn@gmail.com, mensageiro@cchla.ufrn.br',
+    subject,
+    html: statusGrupoHtml(data)
   });
 };

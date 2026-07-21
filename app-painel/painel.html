@@ -864,10 +864,44 @@
           });
 
           await Promise.all(promises);
+
+          const gruposPorEmail = {};
           updates.forEach(upd => {
             const idx = dadosBrutos.findIndex(d => d.id_documento === upd.idDoc);
-            if (idx !== -1) enviarNotificacaoStatus(dadosBrutos[idx]);
+            if (idx === -1) return;
+            const doc = dadosBrutos[idx];
+            const email = doc.Email || '';
+            if (!email) return;
+            if (!gruposPorEmail[email]) {
+              gruposPorEmail[email] = { email, solicitante: doc.Solicitante || '', itens: [] };
+            }
+            const dataInicio = formatarDataGMT3(doc.Início || doc.data_inicio || '');
+            const dataFim = formatarDataGMT3(doc.Fim || doc.data_fim || '');
+            const periodo = dataInicio !== '-' ? `${dataInicio} — ${dataFim}` : '';
+            gruposPorEmail[email].itens.push({
+              ticket: doc.Ticket || '',
+              auditorio: doc.Auditório || '',
+              atividade: doc.Atividade || '',
+              data_inicio: periodo,
+              status: doc.Status || '',
+              motivo: doc.Motivo_Reprovacao || ''
+            });
           });
+
+          const grupoPromises = Object.values(gruposPorEmail).map(grupo => {
+            return fetch('/api/notificar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenSessao },
+              body: JSON.stringify({
+                tipo: 'status_update_grouped',
+                email: grupo.email,
+                solicitante: grupo.solicitante,
+                itens: grupo.itens
+              })
+            }).catch(() => {});
+          });
+          Promise.all(grupoPromises).catch(() => {});
+
           atualizarListaMotivosAnteriores();
           window.aplicarFiltros(true); 
 

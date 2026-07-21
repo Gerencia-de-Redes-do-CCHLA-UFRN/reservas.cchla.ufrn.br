@@ -282,7 +282,9 @@ exports.adminCadastrarDocumento = async (req, res) => {
 exports.notificar = async (req, res) => {
     try {
         const data = req.body;
-        if (data.tipo === 'status_update') {
+        if (data.tipo === 'status_update_grouped') {
+            await emailService.enviarStatusUpdateGrupo(data);
+        } else if (data.tipo === 'status_update') {
             await emailService.enviarStatusUpdate(data);
         } else {
             await emailService.enviarConfirmacao(data);
